@@ -268,8 +268,16 @@ function rest(){
 }
 
 function passOut(){
+    let stolenGoldAmount = Math.floor(Math.random() * (20-1) +1);
     passedOut = true;
-    adventureInfo = 'A stranger found you passed out in the dirt and helped you back to your campsite..'
+    if(playerGold > stolenGoldAmount){
+        adventureInfo = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to ' + stolenGoldAmount + ' gold from your gold pouch..'
+        playerGold -= stolenGoldAmount;
+    }else if(playerGold <= stolenGoldAmount){
+        adventureInfo = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!'
+        playerGold = 0;
+    }
+    
     updateView();
 }
 
@@ -286,7 +294,8 @@ function enterCombat() {
     else if(inCave){
         battleBackground = `style="background-image: url(imgs/Arenas/caveArena.png"`;
     }
-    enemyHealth = 100;
+    enemyGold = Math.floor(Math.random() * (20-1) +1);
+    enemyHealth = 150;
     inBattle = true;
     adventureInfo = enemyName ?? "Some dude" + " wants to fight!";
     updateView();
@@ -294,22 +303,50 @@ function enterCombat() {
 
 function attack(){
     if(playerClass == "Adventurer"){
-        enemyHealth -= 30;
+        enemyHealth -= 25;
     }
     else if(playerClass == "Warrior"){
         enemyHealth -= 30;
     }
     if(playerClass == "Rogue"){
-        enemyHealth -= 30;
+        enemyHealth -= 40;
     }
     if(playerClass == "Mage"){
-        enemyHealth -= 30;
+        enemyHealth -= 60;
     }
     updateView();
     if (enemyHealth <= 0){
-        flee();
+        winBattle();
     }
 }
+
+function items(){
+    updateView();
+}
+
+function winBattle(){
+    worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
+    inBattle = false;
+    adventureInfo = "You emerge victorious and looted " + enemyGold + " gold from dead bodies... ";
+    playerGold += enemyGold;
+    updateView();
+}
+
+function flee(){
+    worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
+    inBattle = false;
+    adventureInfo = "You escaped!";
+    updateView();
+}
+
+function takeDamage(){
+
+}
+
+function die(){
+
+}
+
 function showMenuTooltip(button){
 
     if(button == 'adventurer' && adventureInfo != "The adventurer is a balanced class."){
@@ -352,16 +389,6 @@ function showMenuTooltip(button){
     }
 }
 
-function items(){
-    updateView();
-}
-
-function flee(){
-    worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
-    inBattle = false;
-    adventureInfo = "You escaped!";
-    updateView();
-}
 
 function playerStates(){
     if(goingLeft == true){
