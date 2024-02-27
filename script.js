@@ -24,6 +24,7 @@ let enemyGold = 0;
 
 //inventory
 let playerGold = 0;
+let stolenGoldAmount;
 let hasDesertRose = false;
 let hasMountainKey = false;
 let adventureInfo = "You wake up in your tent and a new adventure begins!"
@@ -268,7 +269,7 @@ function rest(){
 }
 
 function passOut(){
-    let stolenGoldAmount = Math.floor(Math.random() * (20-1) +1);
+    stolenGoldAmount = Math.floor(playerGold * 0.25);
     passedOut = true;
     if(playerGold > stolenGoldAmount){
         adventureInfo = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to ' + stolenGoldAmount + ' gold from your gold pouch..'
@@ -282,6 +283,9 @@ function passOut(){
 }
 
 function enterCombat() {
+
+    setUpEnemy();
+
     if(inGrasslands){
         battleBackground = `style="background-image: url(imgs/Arenas/grasslandsArena.png)"`;
     }
@@ -294,11 +298,18 @@ function enterCombat() {
     else if(inCave){
         battleBackground = `style="background-image: url(imgs/Arenas/caveArena.png"`;
     }
+
+    inBattle = true;
+    updateView();
+}
+
+function setUpEnemy(){
+
+    enemyName = "Not " + playerName;
+
+    adventureInfo = enemyName + " wants to fight!";
     enemyGold = Math.floor(Math.random() * (20-1) +1);
     enemyHealth = 150;
-    inBattle = true;
-    adventureInfo = enemyName ?? "Some dude" + " wants to fight!";
-    updateView();
 }
 
 function attack(){
@@ -385,6 +396,13 @@ function showMenuTooltip(button){
 
     if(button == 'clear' && adventureInfo != ""){
         adventureInfo = "";
+        updateView();
+    }
+    if(button == 'clear' && passedOut && playerGold > stolenGoldAmount){
+        adventureInfo = "A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to " + stolenGoldAmount + " gold from your gold pouch.."
+        updateView();
+    }else if (button == 'clear' && passedOut && playerGold <= 0){
+        adventureInfo = "A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!"
         updateView();
     }
 }
