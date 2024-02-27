@@ -41,6 +41,7 @@ let canGoDown;
 
 // Player states
 let goingLeft = false;
+let passedOut = false;
 
 let lostInDesertNorth = false;
 let lostInDesertSouth = false;
@@ -107,7 +108,7 @@ function updateView() {
         </div>
         <div class="LeftRightDiv">
             <button class="leftButton" ${canGoLeft ? 'onclick="moveCharacter(\'west\')"' : 'disabled'} style="${canGoLeft ? '' : 'pointer-events: none; opacity: 0;'}">🡸</button>
-            <img class="player" src=${goingLeft ? "imgs/Character_L.png" : "imgs/Character_R.png"}>
+            <img class="player" src="${ passedOut ? "imgs/Character_Sleep.png" : playerStates()}">
             <button class="rightButton" ${canGoRight ? 'onclick="moveCharacter(\'east\')"' : 'disabled'} style="${canGoRight ? '' : 'pointer-events: none; opacity: 0;'}">🡺</button>
         </div>
         <div class="DownDiv">
@@ -248,6 +249,7 @@ function rest(){
         adventureInfo = 'You recover and feel rested...';
         mapLocationY = 5;
         mapLocationX = 5;
+        passedOut = false;
         changeLocation();
     }
     else{
@@ -259,6 +261,7 @@ function rest(){
 }
 
 function passOut(){
+    passedOut = true;
     adventureInfo = 'A stranger found you passed out in the dirt and helped you back to your campsite..'
     updateView();
 }
@@ -324,6 +327,12 @@ function flee(){
     inBattle = false;
     adventureInfo = "You escaped!";
     updateView();
+}
+
+function playerStates(){
+    if(goingLeft == true){
+        return "imgs/Character_L.png"
+    }else{return "imgs/Character_R.png"}
 }
 
 function moveCharacter(direction) {
