@@ -34,6 +34,14 @@ let inBattle = false;
 let mapLocationY;
 let mapLocationX;
 
+let inGrasslands = false;
+let inForest = false;
+let inDesert = false;
+let inCave = false;
+
+let areaHasRandomEncounters = false;
+let encounterChance;
+
 let canGoUp;
 let canGoLeft;
 let canGoRight;
@@ -82,7 +90,7 @@ function updateView() {
                 onmouseenter="showMenuTooltip('attack')"
                 onmouseleave="showMenuTooltip('clear')" 
                 ${inBattle ? 'onclick="attack()"' : 'disabled, style="opacity: 0"'}>Attack</button>
-                <button class="itemsButton" 
+                <button class="itemsButton"
                 onmouseenter="showMenuTooltip('items')"
                 onmouseleave="showMenuTooltip('clear')"
                 ${inBattle ? 'onclick="items()"' : 'disabled, style="opacity: 0"'}>Items</button>
@@ -231,7 +239,6 @@ function setClass(selectedClass){
     }
     
     updateView();
-
 }
 
 
@@ -267,14 +274,41 @@ function passOut(){
 }
 
 function enterCombat() {
-    battleBackground = `style="background-image: url(imgs/TB_Map/6-7.png)"`;
+    if(inGrasslands){
+        battleBackground = `style="background-image: url(imgs/Arenas/grasslandsArena.png)"`;
+    }
+    else if(inForest){
+        battleBackground = `style="background-image: url(imgs/Arenas/forestArena.png)"`;
+    }
+    else if(inDesert){
+        battleBackground = `style="background-image: url(imgs/Arenas/desertArena.png)"`;
+    }
+    else if(inCave){
+        battleBackground = `style="background-image: url(imgs/Arenas/caveArena.png"`;
+    }
+    enemyHealth = 100;
     inBattle = true;
     adventureInfo = enemyName ?? "Some dude" + " wants to fight!";
     updateView();
 }
 
 function attack(){
+    if(playerClass == "Adventurer"){
+        enemyHealth -= 30;
+    }
+    else if(playerClass == "Warrior"){
+        enemyHealth -= 30;
+    }
+    if(playerClass == "Rogue"){
+        enemyHealth -= 30;
+    }
+    if(playerClass == "Mage"){
+        enemyHealth -= 30;
+    }
     updateView();
+    if (enemyHealth <= 0){
+        flee();
+    }
 }
 function showMenuTooltip(button){
 
@@ -331,8 +365,15 @@ function flee(){
 
 function playerStates(){
     if(goingLeft == true){
+
         return "imgs/Character_L.png"
-    }else{return "imgs/Character_R.png"}
+
+    }
+    else{
+
+        return "imgs/Character_R.png"
+
+    }
 }
 
 function moveCharacter(direction) {
@@ -598,6 +639,9 @@ function changeLocation() {
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        inGrasslands = true;
+        inCave = false;
     }
     if (mapLocationY == 1 && mapLocationX == 10) {
         canGoUp = true;
@@ -641,6 +685,9 @@ function changeLocation() {
         canGoLeft = true;
         canGoRight = true;
 
+        inGrasslands = false;
+        inDesert = true;
+
         lostInDesertNorth = false;
         lostInDesertSouth = false;
         lostInDesertEast = false;
@@ -651,6 +698,9 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = true;
         canGoRight = false;
+
+        inGrasslands = true;
+        inDesert = false;
     }
     if (mapLocationY == 2 && mapLocationX == 5) {
         canGoUp = true;
@@ -681,6 +731,9 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = true;
         canGoRight = false;
+
+        inGrasslands = false;
+        inCave = true;
     }
     if (mapLocationY == 2 && mapLocationX == 10) {
         canGoUp = false;
@@ -819,12 +872,16 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        areaHasRandomEncounters = true;
     }
     if (mapLocationY == 4 && mapLocationX == 8) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = false;
+
+        areaHasRandomEncounters = false;
     }
     if (mapLocationY == 4 && mapLocationX == 9) {
         canGoUp = true;
@@ -864,6 +921,8 @@ function changeLocation() {
         canGoLeft = false;
         canGoRight = true;
 
+        areaHasRandomEncounters = true;
+        inGrasslands = true;
         inCampsite = false;
     }
     if (mapLocationY == 5 && mapLocationX == 5) {
@@ -873,6 +932,7 @@ function changeLocation() {
         canGoRight = true;
 
         inCampsite = true;
+        areaHasRandomEncounters = false;
         lostInDesertNorth = false;
         lostInDesertSouth = false;
         lostInDesertEast = false;
@@ -885,6 +945,7 @@ function changeLocation() {
         canGoLeft = true;
         canGoRight = true;
         
+        areaHasRandomEncounters = true;
         inCampsite = false;
     }
     if (mapLocationY == 5 && mapLocationX == 7) {
@@ -930,18 +991,24 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        areaHasRandomEncounters = true;
     }
     if (mapLocationY == 6 && mapLocationX == 3) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        areaHasRandomEncounters = false;
     }
     if (mapLocationY == 6 && mapLocationX == 4) {
         canGoUp = true;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        areaHasRandomEncounters = true;
     }
     if (mapLocationY == 6 && mapLocationX == 5) {
         canGoUp = true;
@@ -949,6 +1016,8 @@ function changeLocation() {
         canGoLeft = true;
         canGoRight = false;
 
+        inGrasslands = true;
+        areaHasRandomEncounters = true;
         inCampsite = false;
     }
     if (mapLocationY == 6 && mapLocationX == 6) {
@@ -1012,12 +1081,18 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = true;
+
+        inGrasslands = true;
+        inForest = false;
     }
     if (mapLocationY == 7 && mapLocationX == 6) {
         canGoUp = false;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        inGrasslands = false;
+        inForest = true;
     }
     if (mapLocationY == 7 && mapLocationX == 7) {
         canGoUp = true;
@@ -1068,6 +1143,9 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        inGrasslands = true;
+        inForest = false;
     }
     if (mapLocationY == 8 && mapLocationX == 5) {
         canGoUp = false;
@@ -1128,12 +1206,18 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        inGrasslands = true;
+        inForest = false;
     }
     if (mapLocationY == 9 && mapLocationX == 4) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        inGrasslands = false;
+        inForest = true;
     }
     if (mapLocationY == 9 && mapLocationX == 5) {
         canGoUp = false;
@@ -1181,6 +1265,8 @@ function changeLocation() {
         canGoLeft = true;
         canGoRight = true;
 
+        areaHasRandomEncounters = false;
+
         adventureInfo = "You have found a hidden oasis!"
 
         lostInDesertNorth = false;
@@ -1207,6 +1293,7 @@ function changeLocation() {
         canGoLeft = false;
         canGoRight = false;
         
+        areaHasRandomEncounters = false;
         inCampsite = true;
     }
     // if(mapLocationY == 10 && mapLocationX == 6){
@@ -1232,4 +1319,12 @@ function changeLocation() {
     }
     
     worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
+
+    if(areaHasRandomEncounters){
+        encounterChance = Math.floor(Math.random() * (10-1) +1);
+        if(encounterChance == 5){
+            enterCombat();
+        }
+    }
+
 }

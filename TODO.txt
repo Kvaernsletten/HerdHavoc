@@ -1,0 +1,1 @@
+Define rules for if area has random encounters
