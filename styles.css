@@ -1,0 +1,189 @@
+html{
+    display: flex;
+    justify-content: center;
+    background-color: rgb(52, 37, 58);
+    user-select: none;
+}
+.img{
+    image-rendering: pixelated;
+}
+.player{
+    width: 768px;
+    height: 467px;
+    image-rendering: pixelated;
+}
+.characterSelect{
+    margin-top: 400px;
+    width: 768px;
+    height: 467px;
+    image-rendering: pixelated;
+}
+.enemy{
+    width: 768px;
+    height: 467px;
+    image-rendering: pixelated;
+}
+.inputDiv{
+    display: flex;
+    justify-content: center;
+}
+.nameInput{
+    width: 250px;
+    height: 50px;
+    font-size: 150%;
+    border: 5px solid rgb(30, 20, 34);
+    background-color: rgb(106, 81, 117);
+    color: rgb(211, 134, 45);
+}
+.gameScreen{
+    width: 1024px;
+    height: 640px;
+    border: 5px solid rgb(211, 134, 45);
+    display: flex;
+    flex-direction: column;
+    background-size: cover;
+    image-rendering: pixelated;
+}
+.battleScreen{
+    display: flex;
+    justify-content: center;
+    height: 100%;
+}
+.battleInfo_container{
+    width: 1024px;
+    height: 160px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 5px solid rgb(211, 134, 45);
+    color: rgb(233, 155, 66);
+    background-color: rgb(75, 51, 85);
+    font-weight: 600;
+    border-top: none;
+}
+.playerInfo{
+    padding: 5%;
+    width: 25%;
+    pointer-events: none;
+}
+.enemyInfo{
+    padding: 5%;
+    width: 25%;
+    pointer-events: none;
+}
+.PLACEHOLDER{
+    padding: 5%;
+    width: 25%;
+    opacity: 0;         /*    remove this?  */
+}
+.worldActions{
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+}
+.worldActions > button{
+    width: 60%;
+    height: 120%;
+    padding: 5%;
+    font-weight: 600;
+    border: 5px solid rgb(30, 20, 34);
+    background-color: rgb(106, 81, 117);
+    color: rgb(211, 134, 45);
+}
+.worldActions > button:focus{
+    width: 60%;
+    height: 120%;
+    padding: 5%;
+    font-weight: 600;
+    border: 5px solid rgb(30, 20, 34);
+    background-color: rgb(227, 216, 231);
+    color: rgb(211, 134, 45);
+}
+.adventureInfo{
+    width: 25%;
+    padding: 5%;
+    pointer-events: none;
+}
+.worldInfo_container{
+    width: 1024px;
+    height: 160px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 5px solid rgb(211, 134, 45);
+    color: rgb(233, 155, 66);
+    background-color: rgb(75, 51, 85);
+    font-weight: 600;
+    border-top: none;
+}
+
+.UpDiv{
+    display: flex;
+    justify-content: center;
+    height: 33.3%;
+}
+.LeftRightDiv{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 33.3%;
+}
+.DownDiv{
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    height: 33.3%;
+}
+button{
+    cursor: pointer;
+}
+.classButtons{
+    height: 30%;
+    width: 10%;
+    font-weight: 900;
+}
+.upButton, .downButton{
+    height: 30%;
+    width: 10%;
+    opacity: 70%;
+
+}
+.leftButton, .rightButton{
+    height: 50%;
+    width: 6%;
+    opacity: 70%;
+}
+.upButton, .downButton, .leftButton, .rightButton, .nameButton, .classButtons{
+    border: 5px solid rgb(30, 20, 34);
+    background-color: rgb(106, 81, 117);
+    color: rgb(211, 134, 45);
+}
+.upButton:focus, .downButton:focus, .leftButton:focus, .rightButton:focus, .classButtons:focus{
+    border: 5px solid rgb(30, 20, 34);
+    background-color: rgb(227, 216, 231);
+    color: rgb(211, 134, 45);
+}
+button:hover{
+    border: 5px solid orange;
+}
+
+.topBattleDiv{
+    display: flex;
+    justify-content: center;
+    height: 33.3%;
+}
+.middleBattleDiv{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 33.3%;
+}
+.bottomBattleDiv{
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    height: 33.3%;
+}
+
+
+
