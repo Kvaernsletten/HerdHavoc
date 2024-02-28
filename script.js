@@ -6,6 +6,9 @@ let gameScreen = document.getElementById('gameScreen');
 let worldBackground;
 let battleBackground;
 
+let adventureInfo = "You wake up in your tent and a new adventure begins!"
+let battleInfo = "Battle begins!"
+
 //Player stats
 let playerClass;
 let playerName;
@@ -14,20 +17,30 @@ let playerHealth = 100;
 let playerMaxHealth = 100;
 let playerEnergy = 100;
 let playerMaxEnergy = 100;
+let playerDamage;
 
 //Enemy stats
 let enemyName;
 let enemyLevel = 1;
-let enemyHealth = 100;
-let enemyEnergy = 100;
+let enemyHealth;
+let enemyEnergy;
+let enemyDamage;
 let enemyGold = 0;
 
 //inventory
 let playerGold = 0;
 let stolenGoldAmount;
+
+
+let hasApple1 = false;
+let hasApple2 = false;
+let hasApple3 = false;
+let hasPotion = false;
+let hasFishingrod = false;
 let hasDesertRose = false;
+let hasCaveKey= false;
 let hasMountainKey = false;
-let adventureInfo = "You wake up in your tent and a new adventure begins!"
+let hasGoat = false;
 
 // Game states
 let isGameRunning = false;
@@ -48,6 +61,9 @@ let canGoLeft;
 let canGoRight;
 let canGoDown;
 
+// Combat states
+let attackCooldown = false;
+
 // Player states
 let goingLeft = false;
 let passedOut = false;
@@ -57,11 +73,14 @@ let lostInDesertSouth = false;
 let lostInDesertEast = false;
 let lostInDesertWest = false;
 
+let inShopWest = false;
+let inShopEast = false;
 let inOasis = false;
 let inCampsite = false;
 
 //UI
 let buttonDisabled = false;
+let onMouseEnterCooldown = false;
 
 changeLocation();
 updateView();
@@ -78,27 +97,29 @@ function updateView() {
             <img class="enemy" src="imgs/Character_L.png">
         </div>
         <div class="bottomBattleDiv">
+        <div class="battleInfo">${battleInfo}</div>
         </div> 
     </div>
         <div class="battleInfo_container">
-            <div class="playerInfo">${playerName ?? "Player"}
+            <div class="playerInfo">${playerName ?? "Dio"}
                 <div>${playerClass ?? "Adventurer"} Lv. ${playerLevel}</div>
                     <div>Health: ${playerHealth + " / " + playerMaxHealth}</div>
                     <div>Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
             </div>            
             <div class="worldActions">
-                <button class="attackButton" 
+                ${attackCooldown ? /*HTML*/ `` : /*HTML*/ `<button class="attackButton" 
                 onmouseenter="showMenuTooltip('attack')"
-                onmouseleave="showMenuTooltip('clear')" 
-                ${inBattle ? 'onclick="attack()"' : 'disabled, style="opacity: 0"'}>Attack</button>
+                onmouseleave="clearTooltip()" 
+                ${inBattle ? 'onclick="attack(), showMenuTooltip(\'enemyTurn\'), updateView()"' : 'disabled, style="opacity: 0"'}>Attack</button>
                 <button class="itemsButton"
                 onmouseenter="showMenuTooltip('items')"
-                onmouseleave="showMenuTooltip('clear')"
+                onmouseleave="clearTooltip()"
                 ${inBattle ? 'onclick="items()"' : 'disabled, style="opacity: 0"'}>Items</button>
                 <button class="fleeButton" 
                 onmouseenter="showMenuTooltip('flee')" 
-                onmouseleave="showMenuTooltip('clear')" 
+                onmouseleave="clearTooltip()" 
                 ${inBattle ? 'onclick="flee()"' : 'disabled, style="opacity: 0"'}>Flee</button>
+                `}
             </div>
         <div class="adventureInfo">${adventureInfo}</div>
 
@@ -125,27 +146,85 @@ function updateView() {
         </div> 
     </div>
     <div class="worldInfo_container">
-        <div class="playerInfo">${playerName ?? "Player"}
+        <div class="playerInfo">${playerName ?? "Dio"}
             <div>${playerClass ?? "Adventurer"} Lv. ${playerLevel}</div>
                     <div>Health: ${playerHealth + " / " + playerMaxHealth}</div>
                     <div>Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
-                <br>
-                <br>
-                <br>
-                <div>Gold: ${playerGold}</div>
         </div>   
-            <div class="worldActions">
-                <button class="restButton"
-                onmouseenter="showMenuTooltip('rest')"
-                onmouseleave="showMenuTooltip('clear')" 
-                ${inCampsite ? 'onclick="rest()"' : 'disabled'} style="${inCampsite ? '' : 'pointer-events: none; opacity: 0;'}">Rest</button>
+            <div class="worldActions">${inCampsite ? 
+                /*HTML*/`<button class="restButton"
+                ${inCampsite ? 'onclick="rest()"' : 'disabled="disabled"'}
+                style="${inCampsite ? '' : 'pointer-events: none; opacity: 0;'}"
+                onmouseenter="if(!onMouseEnterCooldown) { showMenuTooltip('rest') }"
+                onmouseleave="if(adventureInfo === 'Rest in your tent?') { clearTooltip() }">Rest</button> 
+                ` : 
+                    /*HTML*/`<button class="restButton"
+                ${inCampsite ? 'onclick="rest()"' : 'disabled="disabled"'}
+                style="${inCampsite ? '' : 'pointer-events: none; opacity: 0;'}"
+                onmouseenter="if(!onMouseEnterCooldown) { showMenuTooltip('rest') }"
+                onmouseleave="if(adventureInfo === 'Rest in your tent?') { clearTooltip() }">Rest</button> 
+                `}
+                
+                ${inShopWest ?
+                    /*HTML*/`<button class="restButton"
+                ${inShopWest ? 'onclick="buyApple()"' : 'disabled="disabled"'}
+                style="${inShopWest ? '' : 'pointer-events: none; opacity: 0;'}"
+                onmouseenter="if(!onMouseEnterCooldown) { showMenuTooltip('buyApple') }"
+                onmouseleave="if(adventureInfo === 'Rest in your tent?') { clearTooltip() }">Purchase apple</button> 
+                ` : 
+                    /*HTML*/`<button class="restButton"
+                ${inShopWest ? 'onclick="buyApple()"' : 'disabled="disabled"'}
+                style="${inShopWest ? '' : 'pointer-events: none; opacity: 0;'}"
+                onmouseenter="if(!onMouseEnterCooldown) { showMenuTooltip('buyApple') }"
+                onmouseleave="if(adventureInfo === 'Rest in your tent?') { clearTooltip() }">Purchase apple</button> 
+                `}
             </div>
+        
+
+
         <div class="adventureInfo">${adventureInfo}</div>
 
-        <div class="PLACEHOLDER">${enemyName ?? "???"}           /////// Opacity set in styles.css
-        <div>${playerClass ?? "Enemy"} Lv. ${playerLevel}</div>   /////    
-        <div>Health: ${enemyHealth ?? " "}</div>                    //////
-        <div>Energy: ${enemyEnergy ?? " "}</div>                    /////////
+        <div>Inventory: <br>
+        Gold: ${playerGold}
+        </div>
+        <div class="inventoryGrid">        
+        <div id="Inventory_Slot1" class="inventorySlots inventoryLeft inventoryTop"
+        onclick="if(hasApple1){useItem('apple')}"><img src=${hasApple1 ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Apple_Slot.png"}
+        onmouseenter="if(hasApple1 && onMouseEnterCooldown == false){showMenuTooltip('inventory_apple1')}"
+        onmouseleave="if(hasApple1 && adventureInfo == 'You see an apple.'){clearTooltip()}"></div>
+        <div id="Inventory_Slot2" class="inventorySlots inventoryTop" 
+        onclick="if(hasApple2){useItem('apple')}"><img src=${hasApple2 ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Apple_Slot.png"}
+        onmouseenter="if(hasApple2 && onMouseEnterCooldown == false){showMenuTooltip('inventory_apple2')}"
+        onmouseleave="if(hasApple2 && adventureInfo == 'You see an apple.'){clearTooltip()}"></div>
+        <div id="Inventory_Slot3" class="inventorySlots inventoryRight inventoryTop"
+        onclick="if(hasApple3){useItem('apple')}"><img src=${hasApple3 ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Apple_Slot.png"}
+        onmouseenter="if(hasApple3 && onMouseEnterCooldown == false){showMenuTooltip('inventory_apple3')}"
+        onmouseleave="if(hasApple3 && adventureInfo == 'You see an apple.'){clearTooltip()}"></div>
+        <div id="Inventory_Slot4" class="inventorySlots inventoryLeft"
+        onclick="useItem()"><img src=${hasPotion ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Empty_Slot.png"}
+        onmouseenter="showMenuTooltip('inventory_potion')"
+        onmouseleave="if(hasPotion){clearTooltip()}"></div>
+        <div id="Inventory_Slot5" class="inventorySlots"
+        onclick="useItem()"><img src=${hasFishingrod ? "imgs/InventoryItems/Fishingrod.png" : "imgs/InventoryItems/Empty_Slot.png"}
+        onmouseenter="showMenuTooltip('inventory_fishingRod')"
+        onmouseleave="if(hasFishingrod){clearTooltip()}"></div>
+        <div id="Inventory_Slot6" class="inventorySlots inventoryRight"
+        onclick="useItem()"><img src=${hasDesertRose ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Empty_Slot.png"}
+        onmouseenter="showMenuTooltip('inventory_desertRose')"
+        onmouseleave="if(hasDesertRose){clearTooltip()}"></div>
+        <div id="Inventory_Slot7" class="inventorySlots inventoryLeft inventoryBottom"
+        onclick="useItem()"><img src=${hasCaveKey ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Empty_Slot.png"}
+        onmouseenter="showMenuTooltip('inventory_caveKey')"
+        onmouseleave="if(hasCaveKey){clearTooltip()}"></div>
+        <div id="Inventory_Slot8" class="inventorySlots inventoryBottom"
+        onclick="useItem()"><img src=${hasMountainKey ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Empty_Slot.png"}
+        onmouseenter="showMenuTooltip('inventory_mountainKey')"
+        onmouseleave="if(hasMountainKey){clearTooltip()}"></div>
+        <div id="Inventory_Slot9" class="inventorySlots inventoryRight inventoryBottom"
+        onclick="useItem()"><img src=${hasGoat ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Empty_Slot.png"}
+        onmouseenter="showMenuTooltip('goat')"
+        onmouseleave="if(hasGoat){clearTooltip()}"></div>
+        </div>
     </div>
     `
     }
@@ -159,7 +238,7 @@ function updateView() {
             <button class="upButton" ${canGoUp ? 'onclick="moveCharacter(\'north\')"' : 'disabled, style="opacity: 0"'}>🡹</button>
             </div>
             <div class="inputDiv">
-            <input id="nameInput" type="text" class="nameInput">
+            <input id="nameInput" type="text" class="nameInput" placeholder="[Enter name]">
             <button class="nameButton" onclick="setName()">Set name</button>
             </div>
            
@@ -172,24 +251,24 @@ function updateView() {
             <button class="classButtons" 
             onclick="setClass('adventurer')"
             onmouseenter="showMenuTooltip('adventurer')"
-            onmouseleave="showMenuTooltip('clear')">Adventurer</button>
+            onmouseleave="clearTooltip()">Adventurer</button>
             <button class="classButtons" 
             onclick="setClass('warrior')"
             onmouseenter="showMenuTooltip('warrior')"
-            onmouseleave="showMenuTooltip('clear')">Warrior</button>
+            onmouseleave="clearTooltip()">Warrior</button>
             <button class="classButtons" 
             onclick="setClass('rogue')"
             onmouseenter="showMenuTooltip('rogue')"
-            onmouseleave="showMenuTooltip('clear')">Rogue</button>
+            onmouseleave="clearTooltip()">Rogue</button>
             <button class="classButtons" 
             onclick="setClass('mage')"
             onmouseenter="showMenuTooltip('mage')"
-            onmouseleave="showMenuTooltip('clear')">Mage</button>
+            onmouseleave="clearTooltip()">Mage</button>
             </div> 
     </div>
     </div>
     <div class="worldInfo_container">
-        <div class="playerInfo">Your name: ${playerName ?? "Player"}
+        <div class="playerInfo">Your name: ${playerName ?? "Dio"}
             <div>Your class: ${playerClass ?? "Adventurer"}</div>
                     <div>Health: ${playerHealth + " / " + playerMaxHealth}</div>
                     <div>Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
@@ -215,6 +294,7 @@ function setClass(selectedClass){
         playerMaxHealth = 100;
         playerEnergy = 100;
         playerMaxEnergy = 100;
+        playerDamage = 10;
         playerClass = "Adventurer"
     }
     else if(selectedClass == "warrior"){
@@ -222,6 +302,7 @@ function setClass(selectedClass){
         playerMaxHealth = 150;
         playerEnergy = 70;
         playerMaxEnergy = 70;
+        playerDamage = 20;
         playerClass = "Warrior"
     }
     else if(selectedClass == "rogue"){
@@ -229,6 +310,7 @@ function setClass(selectedClass){
         playerMaxHealth = 85;
         playerEnergy = 125;
         playerMaxEnergy = 125;
+        playerDamage = 30;
         playerClass = "Rogue"
     }
     else if(selectedClass == "mage"){
@@ -236,6 +318,7 @@ function setClass(selectedClass){
         playerMaxHealth = 70;
         playerEnergy = 150;
         playerMaxEnergy = 150;
+        playerDamage = 40;
         playerClass = "Mage"
     }
     
@@ -244,6 +327,17 @@ function setClass(selectedClass){
 
 
 function startGame(){
+    if(playerName == null){
+        playerName = "Dio"
+    }
+    if(playerClass == null){
+        playerHealth = 100;
+        playerMaxHealth = 100;
+        playerEnergy = 100;
+        playerMaxEnergy = 100;
+        playerDamage = 10;
+        playerClass = "Adventurer"
+    }
     mapLocationY = 5;
     mapLocationX = 5;
     isGameRunning = true;
@@ -261,8 +355,10 @@ function rest(){
         changeLocation();
     }
     else{
+        onMouseEnterCooldown = true;
+        setTimeout(mouseOverCooldown, 1000)
         playerEnergy = playerMaxEnergy;
-        adventureInfo = 'You take a moment to rest...';
+        adventureInfo = 'You take a moment to rest and recover your energy!';
     }
 
     updateView();
@@ -286,6 +382,8 @@ function enterCombat() {
 
     setUpEnemy();
 
+    battleInfo = "A " + enemyName + " ambushed you!"
+
     if(inGrasslands){
         battleBackground = `style="background-image: url(imgs/Arenas/grasslandsArena.png)"`;
     }
@@ -305,30 +403,33 @@ function enterCombat() {
 
 function setUpEnemy(){
 
-    enemyName = "Not " + playerName;
+    enemyName = "silly bandit"
 
-    adventureInfo = enemyName + " wants to fight!";
+    adventureInfo = "Choose an action";
     enemyGold = Math.floor(Math.random() * (20-1) +1);
     enemyHealth = 150;
+    enemyEnergy = 100;
+    enemyDamage = 5;
+
+    return enemyName;
 }
 
 function attack(){
-    if(playerClass == "Adventurer"){
-        enemyHealth -= 25;
-    }
-    else if(playerClass == "Warrior"){
-        enemyHealth -= 30;
-    }
-    if(playerClass == "Rogue"){
-        enemyHealth -= 40;
-    }
-    if(playerClass == "Mage"){
-        enemyHealth -= 60;
-    }
-    updateView();
+
+    attackCooldown = true;
+    enemyHealth -= playerDamage;
+    battleInfo = "You deal " + playerDamage + " damage!"
+
     if (enemyHealth <= 0){
-        winBattle();
+        enemyHealth = 0;
+        battleInfo = enemyName + " dies."
+        setTimeout(winBattle, 2000);
     }
+    else{
+        setTimeout(takeDamage, 1500);
+    }
+        updateView();
+
 }
 
 function items(){
@@ -338,6 +439,7 @@ function items(){
 function winBattle(){
     worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
     inBattle = false;
+    attackCooldown = false;
     adventureInfo = "You emerge victorious and looted " + enemyGold + " gold from dead bodies... ";
     playerGold += enemyGold;
     updateView();
@@ -346,20 +448,99 @@ function winBattle(){
 function flee(){
     worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
     inBattle = false;
+    attackCooldown = false;
     adventureInfo = "You escaped!";
     updateView();
 }
 
 function takeDamage(){
 
+    playerHealth -= enemyDamage;
+    battleInfo = "The " + enemyName + " attacks you for " + enemyDamage + " damage!";
+    attackCooldown = false;
+    if(playerHealth <= 0){
+
+        die();
+    }
+    updateView();
 }
 
 function die(){
+    location.reload(); // lol
+}
 
+function buyApple(){
+    if(playerGold >= 5){
+
+        if(!hasApple1 && !hasApple2 && !hasApple3){
+            hasApple1 = true;
+            adventureInfo = "You bought an apple."
+            playerGold -= 5;
+        }
+        else if(hasApple1 && !hasApple2 && !hasApple3){
+            hasApple2 = true;
+            adventureInfo = "You bought an apple."
+            playerGold -= 5;
+        }
+        else if(hasApple1 && hasApple2 && !hasApple3){
+            hasApple3 = true;
+            adventureInfo = "You bought an apple."
+            playerGold -= 5;
+        }
+    }else if(playerGold < 5){
+        onMouseEnterCooldown = true;
+        adventureInfo = "Not enough gold!"
+        setTimeout(mouseOverCooldown, 1000)
+    }
+    updateView();
+}
+
+function useItem(item){
+    if(item == 'apple'){
+        if(playerHealth < playerMaxHealth){
+            eatApple();
+        }else{
+        onMouseEnterCooldown = true;
+        adventureInfo = "You are full!"
+        setTimeout(mouseOverCooldown, 1000)
+        updateView();
+        }
+    }
+}
+
+function eatApple(){
+    if(hasApple1 && !hasApple2 && !hasApple3){
+        hasApple1 = false;
+        adventureInfo = "You eat an apple.. +25 health!"
+        heal(25);
+    }
+    if(hasApple1 && hasApple2 && !hasApple3){
+        hasApple2 = false;
+        adventureInfo = "You eat an apple.. +25 health!"
+        heal(25);
+    }
+    if(hasApple1 && hasApple2 && hasApple3){
+        hasApple3 = false;
+        adventureInfo = "You eat an apple.. +25 health!"
+        heal(25);
+    }
+    updateView();
+}
+
+function heal(healAmount){
+    playerHealth += healAmount;
+    if(playerHealth >= playerMaxHealth){
+        playerHealth = playerMaxHealth;
+    }
+}
+
+function mouseOverCooldown(){
+    onMouseEnterCooldown = false;
 }
 
 function showMenuTooltip(button){
 
+    //class selection
     if(button == 'adventurer' && adventureInfo != "The adventurer is a balanced class."){
         adventureInfo = "The adventurer is a balanced class.";
         updateView();
@@ -372,17 +553,18 @@ function showMenuTooltip(button){
         adventureInfo = "Rogue flavour-text idk lol"
         updateView();
     }
-    if(button == 'mage' && adventureInfo != "While fragile in combat, the mage is the most powerful class and light armor lets them move around with ease. (also currently the most OP class since combat is not implemented and the only relevant stat is energy...)"){
-        adventureInfo = "While fragile in combat, the mage is the most powerful class and light armor lets them move around with ease. (also currently the most OP class since combat is not implemented and the only relevant stat is energy...)";
+    if(button == 'mage' && adventureInfo != "While fragile in combat, the mage is the most powerful class and light armor lets them move around with ease."){
+        adventureInfo = "While fragile in combat, the mage is the most powerful class and light armor lets them move around with ease.";
         updateView();
     }
 
-    if(button == 'attack' && adventureInfo != "Attack an enemy"){
-        adventureInfo = "Attack an enemy";
+    //interact buttons
+    if(button == 'attack' && adventureInfo != "Attack your enemy!"){
+        adventureInfo = "Attack your enemy!";
         updateView();
     }
-    if(button == 'items' && adventureInfo != "Use an item"){
-        adventureInfo = "Use an item";
+    if(button == 'items' && adventureInfo != "Use an item (NOT IMPLEMENTED)"){
+        adventureInfo = "Use an item (NOT IMPLEMENTED)";
         updateView();
     }
     if(button == 'flee' && adventureInfo != "Attempt to run away!"){
@@ -393,10 +575,14 @@ function showMenuTooltip(button){
         adventureInfo = "Rest in your tent?";
         updateView();
     }
-
-    if(button == 'clear' && adventureInfo != ""){
-        adventureInfo = "";
+    if(button == 'buyApple' && adventureInfo != "Buy an apple? (50 gold)"){
+        adventureInfo = "Buy an apple? (50 gold)";
         updateView();
+    }
+
+    //clears
+    if(button == 'enemyTurn'){
+        adventureInfo = "The " + enemyName + " attacks"
     }
     if(button == 'clear' && passedOut && playerGold > stolenGoldAmount){
         adventureInfo = "A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to " + stolenGoldAmount + " gold from your gold pouch.."
@@ -405,6 +591,25 @@ function showMenuTooltip(button){
         adventureInfo = "A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!"
         updateView();
     }
+
+    //inventory items
+    if(button == 'inventory_apple1' && hasApple1 && adventureInfo != "You see an apple."){
+        adventureInfo = "You see an apple."
+        updateView();
+    }
+    if(button == 'inventory_apple2' && hasApple1 && adventureInfo != "You see an apple."){
+        adventureInfo = "You see an apple."
+        updateView();
+    }
+    if(button == 'inventory_apple3' && hasApple1 && adventureInfo != "You see an apple."){
+        adventureInfo = "You see an apple."
+        updateView();
+    }
+}
+
+function clearTooltip(){
+        adventureInfo = "";
+        updateView();
 }
 
 
@@ -926,6 +1131,7 @@ function changeLocation() {
         canGoLeft = true;
         canGoRight = false;
 
+        inShopEast = false;
         areaHasRandomEncounters = false;
     }
     if (mapLocationY == 4 && mapLocationX == 9) {
@@ -991,6 +1197,7 @@ function changeLocation() {
         canGoRight = true;
         
         areaHasRandomEncounters = true;
+        inGrasslands = true;
         inCampsite = false;
     }
     if (mapLocationY == 5 && mapLocationX == 7) {
@@ -1004,6 +1211,8 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = false;
+
+        inShopEast = true;
     }
     if (mapLocationY == 5 && mapLocationX == 9) {
         canGoUp = false;
@@ -1045,6 +1254,7 @@ function changeLocation() {
         canGoLeft = true;
         canGoRight = true;
 
+        inShopWest = false;
         areaHasRandomEncounters = false;
     }
     if (mapLocationY == 6 && mapLocationX == 4) {
@@ -1114,6 +1324,8 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = false;
+
+        inShopWest = true;
     }
     if (mapLocationY == 7 && mapLocationX == 4) {
         canGoUp = true;
@@ -1371,5 +1583,4 @@ function changeLocation() {
             enterCombat();
         }
     }
-
 }

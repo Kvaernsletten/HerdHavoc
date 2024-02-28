@@ -61,6 +61,18 @@ html{
     font-weight: 600;
     border-top: none;
 }
+.battleInfo{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 500px;
+    height: 50px;
+    border: 5px solid rgba(211, 133, 45, 0.644);
+    background-color: rgba(106, 81, 117, 0.918);
+    color: rgb(211, 134, 45);
+    font-weight: 500;
+    font-size: 100%;
+}
 .playerInfo{
     padding: 5%;
     width: 25%;
@@ -71,11 +83,36 @@ html{
     width: 25%;
     pointer-events: none;
 }
-.PLACEHOLDER{
-    padding: 5%;
+.inventoryGrid{
+    padding: 5px;
+    height: 100%;
     width: 25%;
-    opacity: 0;         /*    remove this?  */
+    display: grid;
+    grid-template-columns: auto auto auto;
 }
+.inventorySlots{
+    display: flex;
+    width: 50px;
+    height: 50px;
+    border: 1px solid black;
+}
+/* .inventoryTop{
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+}
+.inventoryLeft{
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+}
+.inventoryRight{
+    border-right: 2px solid black;
+    border-left: 2px solid black;
+}
+.inventoryBottom{
+    border-bottom: 2px solid black;
+    border-top: 2px solid black;
+} */
+
 .worldActions{
     width: 25%;
     display: flex;
@@ -102,6 +139,7 @@ html{
 .adventureInfo{
     width: 25%;
     padding: 5%;
+    font-size: 110%;
     pointer-events: none;
 }
 .worldInfo_container{
@@ -183,6 +221,7 @@ button:hover{
     justify-content: center;
     align-items: end;
     height: 33.3%;
+    color: white;
 }
 
 

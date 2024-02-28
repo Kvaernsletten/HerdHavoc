@@ -1,1 +1,7 @@
-Define rules for if area has random encounters
+Define rules for if area has random encounters**
+
+Regen health?
+
+add battleArena image to east from spawn camp
+
+change combat flow
