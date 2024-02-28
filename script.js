@@ -407,7 +407,7 @@ function setUpEnemy(){
 
     adventureInfo = "Choose an action";
     enemyGold = Math.floor(Math.random() * (20-1) +1);
-    enemyHealth = 150;
+    enemyHealth = 65;
     enemyEnergy = 100;
     enemyDamage = 5;
 
