@@ -1,7 +1,13 @@
 Define rules for if area has random encounters**
 
-Regen health?
-
-add battleArena image to east from spawn camp
-
 change combat flow
+
+separate adventureInfo and *new* onmouseoverInfo
+
+gender select?
+
+fix die()
+
+enemy variation > stronger enemies in certain areas
+
+level ups, more damage with levels & rework damage calculations for player and enemies
