@@ -181,8 +181,8 @@ function updateView() {
                     
                 ${inShopEast ?
                     /*HTML*/`<button class="restButton"
-                ${inShopEast ? 'onclick="buyItem(\'fishingRod\')"' : 'disabled="disabled"'}
-                style="${inShopEast ? '' : 'pointer-events: none; opacity: 0;'}"
+                ${inShopEast && !hasFishingRod ? 'onclick="buyItem(\'fishingRod\')"' : 'disabled="disabled"'}
+                style="${inShopEast && !hasFishingRod ? '' : 'pointer-events: none; opacity: 0;'}"
                 onmouseenter="if(!onMouseEnterCooldown) {showMenuTooltip('buyFishingRod')}"
                 onmouseleave="if(adventureInfo === 'Buy fishing rod? (150 gold)') {clearTooltip()}">Buy fishing rod</button> 
                 ` :
@@ -199,8 +199,8 @@ function updateView() {
 
                 ${inOasis ?
                         /*HTML*/`<button class="restButton"
-                ${inOasis && !hasDesertRose ? 'onclick="buyItem(\'desertRose\')"' : 'disabled="disabled"'}
-                style="${inOasis && !hasDesertRose ? '' : 'pointer-events: none; opacity: 0;'}"
+                ${inOasis && !hasDesertRose && !hasSilverKey ? 'onclick="buyItem(\'desertRose\')"' : 'disabled="disabled"'}
+                style="${inOasis && !hasDesertRose && !hasSilverKey ? '' : 'pointer-events: none; opacity: 0;'}"
                 onmouseenter="if(!onMouseEnterCooldown) {showMenuTooltip('pickUpDesertRose')}"
                 onmouseleave="if(adventureInfo === 'Pick up desert rose?') {clearTooltip()}">Pick up</button> 
                 ` :
@@ -394,6 +394,7 @@ function rest() {
 function passOut() {
     stolenGoldAmount = Math.floor(playerGold * 0.25);
     passedOut = true;
+    nextStepOasis = false;
     if (playerGold > stolenGoldAmount) {
         adventureInfo = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to ' + stolenGoldAmount + ' gold from your gold pouch..'
         playerGold -= stolenGoldAmount;
@@ -552,7 +553,7 @@ function buyItem(item) {
     }
 
     if (item == "desertRose"){
-        if (!hasDesertRose){
+        if (!hasDesertRose && !hasSilverKey){
             hasDesertRose = true;
             adventureInfo = "You carefully pluck the rare desert rose from the hidden oasis.."
         }
@@ -1594,7 +1595,7 @@ function changeLocation() {
 
         areaHasRandomEncounters = false;
 
-        adventureInfo = "You have found a hidden oasis" + (hasDesertRose ? "!" : "! There is a rare desert rose growing here!")
+        adventureInfo = "You have found a hidden oasis" + (hasDesertRose || hasSilverKey ? "!" : "! There is a rare desert rose growing here!")
 
         lostInDesertNorth = false;
         lostInDesertSouth = false;
