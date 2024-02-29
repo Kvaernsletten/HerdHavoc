@@ -6,8 +6,9 @@ let gameScreen = document.getElementById('gameScreen');
 let worldBackground;
 let battleBackground;
 
-let adventureInfo = "You wake up in your tent and a new adventure begins!"
-let battleInfo = "Battle begins!"
+//NEW
+let adventureText = "Enter a name and a class for your adventure!";
+let onHoverText;
 
 //Player stats
 let playerClass;
@@ -98,10 +99,10 @@ function updateView() {
             <img class="enemy" src="imgs/Character_L.png">
         </div>
         <div class="bottomBattleDiv">
-        <div class="battleInfo">${battleInfo}</div>
         </div> 
+        <div class="adventureText">${adventureText}</div>
     </div>
-        <div class="battleInfo_container">
+        <div class="worldInfo_container">
             <div class="playerInfo">${playerName ?? "Dio"}
                 <div>${playerClass ?? "Adventurer"} Lv. ${playerLevel}</div>
                     <div>Health: ${playerHealth + " / " + playerMaxHealth}</div>
@@ -109,20 +110,20 @@ function updateView() {
             </div>            
             <div class="worldActions">
                 ${attackCooldown ? /*HTML*/ `` : /*HTML*/ `<button class="attackButton" 
-                onmouseenter="showMenuTooltip('attack')"
+                onmouseenter="onHoverTooltip('attack')"
                 onmouseleave="clearTooltip()" 
-                ${inBattle ? 'onclick="attack(), showMenuTooltip(\'enemyTurn\'), updateView()"' : 'disabled, style="opacity: 0"'}>Attack</button>
+                ${inBattle ? 'onclick="attack(), onHoverTooltip(\'enemyTurn\'), updateView()"' : 'disabled, style="opacity: 0"'}>Attack</button>
                 <button class="itemsButton"
-                onmouseenter="showMenuTooltip('items')"
+                onmouseenter="onHoverTooltip('items')"
                 onmouseleave="clearTooltip()"
                 ${inBattle ? 'onclick="items()"' : 'disabled, style="opacity: 0"'}>Items</button>
                 <button class="fleeButton" 
-                onmouseenter="showMenuTooltip('flee')" 
+                onmouseenter="onHoverTooltip('flee')" 
                 onmouseleave="clearTooltip()" 
                 ${inBattle ? 'onclick="flee()"' : 'disabled, style="opacity: 0"'}>Flee</button>
                 `}
             </div>
-        <div class="adventureInfo">${adventureInfo}</div>
+        <div class="onHoverText">${onHoverText}</div>
 
         <div class="enemyInfo">${enemyName ?? "???"}
         <div>${playerClass ?? "Enemy"} Lv. ${playerLevel}</div>  
@@ -145,6 +146,7 @@ function updateView() {
         <div class="DownDiv">
             <button class="downButton" ${canGoDown ? 'onclick="moveCharacter(\'south\')"' : 'disabled'} style="${canGoDown ? '' : 'pointer-events: none; opacity: 0;'}">🡻</button>
         </div> 
+        <div class="adventureText">${adventureText}</div>
     </div>
     <div class="worldInfo_container">
         <div class="playerInfo">${playerName ?? "Dio"}
@@ -156,8 +158,8 @@ function updateView() {
                 /*HTML*/`<button class="restButton"
                 ${inCampsite ? 'onclick="rest()"' : 'disabled="disabled"'}
                 style="${inCampsite ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {showMenuTooltip('rest')}"
-                onmouseleave="if(adventureInfo === 'Rest in your tent?') {clearTooltip()}">Rest</button> 
+                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('rest')}"
+                onmouseleave="if(onHoverText == 'Rest in your tent?') {clearTooltip()}">Rest</button> 
                 ` :
                     /*HTML*/``}
                 
@@ -165,8 +167,8 @@ function updateView() {
                     /*HTML*/`<button class="restButton"
                 ${inShopWest ? 'onclick="buyItem(\'apple\')"' : 'disabled="disabled"'}
                 style="${inShopWest ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {showMenuTooltip('buyApple')}"
-                onmouseleave="if(adventureInfo === 'Buy apple? (12 gold)') {clearTooltip()}">Purchase apple</button> 
+                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('buyApple')}"
+                onmouseleave="if(onHoverText == 'Buy apple? (12 gold)') {clearTooltip()}">Purchase apple</button> 
                 ` :
                     /*HTML*/``}
 
@@ -174,8 +176,8 @@ function updateView() {
                     /*HTML*/`<button class="restButton"
                 ${inShopEast ? 'onclick="buyItem(\'apple\')"' : 'disabled="disabled"'}
                 style="${inShopEast ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {showMenuTooltip('buyApple')}"
-                onmouseleave="if(adventureInfo === 'Buy apple? (12 gold)') {clearTooltip()}">Buy apple</button> 
+                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('buyApple')}"
+                onmouseleave="if(onHoverText == 'Buy apple? (12 gold)') {clearTooltip()}">Buy apple</button> 
                 ` :
                     /*HTML*/``}
                     
@@ -183,8 +185,8 @@ function updateView() {
                     /*HTML*/`<button class="restButton"
                 ${inShopEast && !hasFishingRod ? 'onclick="buyItem(\'fishingRod\')"' : 'disabled="disabled"'}
                 style="${inShopEast && !hasFishingRod ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {showMenuTooltip('buyFishingRod')}"
-                onmouseleave="if(adventureInfo === 'Buy fishing rod? (150 gold)') {clearTooltip()}">Buy fishing rod</button> 
+                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('buyFishingRod')}"
+                onmouseleave="if(onHoverText == 'Buy fishing rod? (150 gold)') {clearTooltip()}">Buy fishing rod</button> 
                 ` :
                     /*HTML*/``}
 
@@ -192,8 +194,8 @@ function updateView() {
                     /*HTML*/`<button class="restButton"
                 ${hasDesertRose && inShopWest ? 'onclick="buyItem(\'silverKey\')"' : 'disabled="disabled"'}
                 style="${hasDesertRose && inShopWest ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {showMenuTooltip('tradeDesertRose')}"
-                onmouseleave="if(adventureInfo === 'Trade [desert rose] for [silver key] to the mountain?') {clearTooltip()}">Trade desert rose</button> 
+                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('tradeDesertRose')}"
+                onmouseleave="if(onHoverText == 'Trade [desert rose] for [silver key] to the mountain?') {clearTooltip()}">Trade desert rose</button> 
                 ` :
                     /*HTML*/``}
 
@@ -201,15 +203,15 @@ function updateView() {
                         /*HTML*/`<button class="restButton"
                 ${inOasis && !hasDesertRose && !hasSilverKey ? 'onclick="buyItem(\'desertRose\')"' : 'disabled="disabled"'}
                 style="${inOasis && !hasDesertRose && !hasSilverKey ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {showMenuTooltip('pickUpDesertRose')}"
-                onmouseleave="if(adventureInfo === 'Pick up desert rose?') {clearTooltip()}">Pick up</button> 
+                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('pickUpDesertRose')}"
+                onmouseleave="if(onHoverText == 'Pick up desert rose?') {clearTooltip()}">Pick up</button> 
                 ` :
                     /*HTML*/``}
             </div>
         
 
 
-        <div class="adventureInfo">${adventureInfo}</div>
+        <div class="onHoverText">${onHoverText}</div>
 
         <div>Inventory: <br>
         Gold: ${playerGold}
@@ -217,39 +219,39 @@ function updateView() {
         <div class="inventoryGrid">        
         <div id="Inventory_Slot1" class="inventorySlots inventoryLeft inventoryTop"
         onclick="if(hasApple1){useItem('apple')}"><img src=${hasApple1 ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Apple_Slot.png"}
-        onmouseenter="if(hasApple1 && onMouseEnterCooldown == false){showMenuTooltip('inventory_apple1')}"
-        onmouseleave="if(hasApple1 && adventureInfo == 'You see an apple.'){clearTooltip()}"></div>
+        onmouseenter="if(hasApple1 && onMouseEnterCooldown == false){onHoverTooltip('inventory_apple1')}"
+        onmouseleave="if(hasApple1 && onHoverText == 'You see an apple.'){clearTooltip()}"></div>
         <div id="Inventory_Slot2" class="inventorySlots inventoryTop" 
         onclick="if(hasApple2){useItem('apple')}"><img src=${hasApple2 ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Apple_Slot.png"}
-        onmouseenter="if(hasApple2 && onMouseEnterCooldown == false){showMenuTooltip('inventory_apple2')}"
-        onmouseleave="if(hasApple2 && adventureInfo == 'You see an apple.'){clearTooltip()}"></div>
+        onmouseenter="if(hasApple2 && onMouseEnterCooldown == false){onHoverTooltip('inventory_apple2')}"
+        onmouseleave="if(hasApple2 && onHoverText == 'You see an apple.'){clearTooltip()}"></div>
         <div id="Inventory_Slot3" class="inventorySlots inventoryRight inventoryTop"
         onclick="if(hasApple3){useItem('apple')}"><img src=${hasApple3 ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Apple_Slot.png"}
-        onmouseenter="if(hasApple3 && onMouseEnterCooldown == false){showMenuTooltip('inventory_apple3')}"
-        onmouseleave="if(hasApple3 && adventureInfo == 'You see an apple.'){clearTooltip()}"></div>
+        onmouseenter="if(hasApple3 && onMouseEnterCooldown == false){onHoverTooltip('inventory_apple3')}"
+        onmouseleave="if(hasApple3 && onHoverText == 'You see an apple.'){clearTooltip()}"></div>
         <div id="Inventory_Slot4" class="inventorySlots inventoryLeft"
         onclick="useItem()"><img src=${hasPotion ? "imgs/InventoryItems/Potion.png" : "imgs/InventoryItems/Empty_Slot.png"}
-        onmouseenter="showMenuTooltip('inventory_potion')"
+        onmouseenter="onHoverTooltip('inventory_potion')"
         onmouseleave="if(hasPotion){clearTooltip()}"></div>
         <div id="Inventory_Slot5" class="inventorySlots"
         onclick="useItem()"><img src=${hasFishingRod ? "imgs/InventoryItems/Fishingrod.png" : "imgs/InventoryItems/Empty_Slot.png"}
-        onmouseenter="showMenuTooltip('inventory_fishingRod')"
+        onmouseenter="onHoverTooltip('inventory_fishingRod')"
         onmouseleave="if(hasFishingRod){clearTooltip()}"></div>
         <div id="Inventory_Slot6" class="inventorySlots inventoryRight"
         onclick="useItem()"><img src=${hasDesertRose ? "imgs/InventoryItems/DesertRose.png" : (hasSilverKey ? "imgs/InventoryItems/DesertRose_Slot.png" : "imgs/InventoryItems/Empty_Slot.png")}                  
-        onmouseenter="showMenuTooltip('inventory_desertRose')"
+        onmouseenter="onHoverTooltip('inventory_desertRose')"
         onmouseleave="if(hasDesertRose){clearTooltip()}"></div>
         <div id="Inventory_Slot7" class="inventorySlots inventoryLeft inventoryBottom"
         onclick="useItem()"><img src=${hasCopperKey ? "imgs/InventoryItems/CopperKey.png" : "imgs/InventoryItems/Empty_Slot.png"}
-        onmouseenter="showMenuTooltip('inventory_caveKey')"
+        onmouseenter="onHoverTooltip('inventory_copperKey')"
         onmouseleave="if(hasCopperKey){clearTooltip()}"></div>
         <div id="Inventory_Slot8" class="inventorySlots inventoryBottom"
         onclick="useItem()"><img src=${hasSilverKey ? "imgs/InventoryItems/SilverKey.png" : "imgs/InventoryItems/Empty_Slot.png"}
-        onmouseenter="showMenuTooltip('inventory_mountainKey')"
+        onmouseenter="onHoverTooltip('inventory_SilverKey')"
         onmouseleave="if(hasSilverKey){clearTooltip()}"></div>
         <div id="Inventory_Slot9" class="inventorySlots inventoryRight inventoryBottom"
         onclick="useItem()"><img src=${hasGoat ? "imgs/InventoryItems/Goat.png" : "imgs/InventoryItems/Empty_Slot.png"}
-        onmouseenter="showMenuTooltip('goat')"
+        onmouseenter="onHoverTooltip('goat')"
         onmouseleave="if(hasGoat){clearTooltip()}"></div>
         </div>
     </div>
@@ -277,21 +279,22 @@ function updateView() {
         <div class="DownDiv">
             <button class="classButtons" 
             onclick="setClass('adventurer')"
-            onmouseenter="showMenuTooltip('adventurer')"
+            onmouseenter="onHoverTooltip('adventurer')"
             onmouseleave="clearTooltip()">Adventurer</button>
             <button class="classButtons" 
             onclick="setClass('warrior')"
-            onmouseenter="showMenuTooltip('warrior')"
+            onmouseenter="onHoverTooltip('warrior')"
             onmouseleave="clearTooltip()">Warrior</button>
             <button class="classButtons" 
             onclick="setClass('rogue')"
-            onmouseenter="showMenuTooltip('rogue')"
+            onmouseenter="onHoverTooltip('rogue')"
             onmouseleave="clearTooltip()">Rogue</button>
             <button class="classButtons" 
             onclick="setClass('mage')"
-            onmouseenter="showMenuTooltip('mage')"
+            onmouseenter="onHoverTooltip('mage')"
             onmouseleave="clearTooltip()">Mage</button>
             </div> 
+            <div class="adventureText">${adventureText}</div>
     </div>
     </div>
     <div class="worldInfo_container">
@@ -304,7 +307,8 @@ function updateView() {
                 <button class="restButton"
                 onclick="startGame()">Start game</button>
             </div>
-        <div class="adventureInfo">${adventureInfo}</div>
+            <div class="onHoverText">${onHoverText}</div>
+        <div class="inventoryGrid"></div>
 
     `
 }
@@ -348,6 +352,7 @@ function setClass(selectedClass) {
         playerDamage = 40;
         playerClass = "Mage"
     }
+    adventureText = "Start game as the " + playerClass + " class?"
 
     updateView();
 }
@@ -375,7 +380,7 @@ function startGame() {
 function rest() {
     if (mapLocationY == 10 && mapLocationX == 5) {
         playerEnergy = playerMaxEnergy;
-        adventureInfo = 'You recover and feel rested...';
+        adventureText = 'You recover and feel rested...';
         mapLocationY = 5;
         mapLocationX = 5;
         passedOut = false;
@@ -385,7 +390,7 @@ function rest() {
         onMouseEnterCooldown = true;
         setTimeout(mouseOverCooldown, 1000)
         playerEnergy = playerMaxEnergy;
-        adventureInfo = 'You take a moment to rest and recover your energy!';
+        adventureText = 'You take a moment to rest and recover your energy!';
     }
 
     updateView();
@@ -396,10 +401,10 @@ function passOut() {
     passedOut = true;
     nextStepOasis = false;
     if (playerGold > stolenGoldAmount) {
-        adventureInfo = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to ' + stolenGoldAmount + ' gold from your gold pouch..'
+        adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to ' + stolenGoldAmount + ' gold from your gold pouch..'
         playerGold -= stolenGoldAmount;
     } else if (playerGold <= stolenGoldAmount) {
-        adventureInfo = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!'
+        adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!'
         playerGold = 0;
     }
 
@@ -410,7 +415,7 @@ function enterCombat() {
 
     setUpEnemy();
 
-    battleInfo = "A " + enemyName + " ambushed you!"
+    adventureText = "A " + enemyName + " ambushed you!"
 
     if (inGrasslands) {
         battleBackground = `style="background-image: url(imgs/Arenas/grasslandsArena.png)"`;
@@ -433,7 +438,7 @@ function setUpEnemy() {
 
     enemyName = "silly bandit"
 
-    adventureInfo = "Choose an action";
+    onHoverText = "Choose an action";
     enemyGold = Math.floor(Math.random() * (20 - 1) + 1);
     enemyHealth = 65;
     enemyEnergy = 100;
@@ -446,11 +451,13 @@ function attack() {
 
     attackCooldown = true;
     enemyHealth -= playerDamage;
-    battleInfo = "You deal " + playerDamage + " damage!"
+    adventureText = "You deal " + playerDamage + " damage!"
 
     if (enemyHealth <= 0) {
         enemyHealth = 0;
-        battleInfo = enemyName + " dies."
+        //adventureText =   YOU DEAL amoutOfDamage AND =            FIX THIS.
+        //set timeout with delay!!
+        adventureText =  "The " + enemyName + " dies."
         setTimeout(winBattle, 2000);
     }
     else {
@@ -468,7 +475,8 @@ function winBattle() {
     worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
     inBattle = false;
     attackCooldown = false;
-    adventureInfo = "You emerge victorious and looted " + enemyGold + " gold from the corpse... ";
+    adventureText = "You emerge victorious and looted " + enemyGold + " gold from the corpse... ";
+    onHoverText = "";
     playerGold += enemyGold;
     updateView();
 }
@@ -477,14 +485,15 @@ function flee() {
     worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
     inBattle = false;
     attackCooldown = false;
-    adventureInfo = "You escaped!";
+    adventureText = "You escaped!";
+    onHoverText = "";
     updateView();
 }
 
 function takeDamage() {
 
     playerHealth -= enemyDamage;
-    battleInfo = "The " + enemyName + " attacks you for " + enemyDamage + " damage!";
+    adventureText = "The " + enemyName + " attacks you for " + enemyDamage + " damage!";
     attackCooldown = false;
     if (playerHealth <= 0) {
 
@@ -504,22 +513,22 @@ function buyItem(item) {
 
             if (!hasApple1 && !hasApple2 && !hasApple3) {
                 hasApple1 = true;
-                adventureInfo = "You bought an apple."
+                adventureText = "You bought an apple."
                 playerGold -= 12;
             }
             else if (hasApple1 && !hasApple2 && !hasApple3) {
                 hasApple2 = true;
-                adventureInfo = "You bought an apple."
+                adventureText = "You bought an apple."
                 playerGold -= 12;
             }
             else if (hasApple1 && hasApple2 && !hasApple3) {
                 hasApple3 = true;
-                adventureInfo = "You bought an apple."
+                adventureText = "You bought an apple."
                 playerGold -= 12;
             }
         } else if (playerGold < 12) {
             onMouseEnterCooldown = true;
-            adventureInfo = "Not enough gold!"
+            adventureText = "You do not have enough gold!"
             setTimeout(mouseOverCooldown, 1000)
         }
     }
@@ -529,12 +538,12 @@ function buyItem(item) {
 
             if (!hasFishingRod) {
                 hasFishingRod = true;
-                adventureInfo = "You bought an apple."
+                adventureText = "You bought a fishing rod."
                 playerGold -= 150;
             }
         } else if (playerGold < 150) {
             onMouseEnterCooldown = true;
-            adventureInfo = "Not enough gold!"
+            adventureText = "You do not have enough gold!"
             setTimeout(mouseOverCooldown, 1000)
         }
 
@@ -544,10 +553,10 @@ function buyItem(item) {
         if (hasDesertRose){
             hasSilverKey = true;
             hasDesertRose = false;
-            adventureInfo = "You traded the rose for a silver key!"
+            adventureText = "You traded the rose for a silver key!"
         }else if (!hasDesertRose){
             onMouseEnterCooldown = true;
-            adventureInfo = "You don't have the desert rose! I heard a rumour it can be found if you search thoroughly in the south-east parts of the desert!"
+            adventureText = "You don't have the desert rose! There is a rumour it can be found if you keep heading south-east in the desert...."
             setTimeout(mouseOverCooldown, 1000)
         }
     }
@@ -555,7 +564,7 @@ function buyItem(item) {
     if (item == "desertRose"){
         if (!hasDesertRose && !hasSilverKey){
             hasDesertRose = true;
-            adventureInfo = "You carefully pluck the rare desert rose from the hidden oasis.."
+            adventureText = "You carefully pluck the rare desert rose from the hidden oasis.."
         }
     }
     updateView();
@@ -567,7 +576,7 @@ function useItem(item) {
             eatApple();
         } else {
             onMouseEnterCooldown = true;
-            adventureInfo = "You are full!"
+            adventureText = "You are full!"
             setTimeout(mouseOverCooldown, 1000)
             updateView();
         }
@@ -577,17 +586,17 @@ function useItem(item) {
 function eatApple() {
     if (hasApple1 && !hasApple2 && !hasApple3) {
         hasApple1 = false;
-        adventureInfo = "You eat an apple.. +25 health!"
+        adventureText = "You eat an apple.. +25 health!"
         heal(25);
     }
     if (hasApple1 && hasApple2 && !hasApple3) {
         hasApple2 = false;
-        adventureInfo = "You eat an apple.. +25 health!"
+        adventureText = "You eat an apple.. +25 health!"
         heal(25);
     }
     if (hasApple1 && hasApple2 && hasApple3) {
         hasApple3 = false;
-        adventureInfo = "You eat an apple.. +25 health!"
+        adventureText = "You eat an apple.. +25 health!"
         heal(25);
     }
     updateView();
@@ -604,81 +613,81 @@ function mouseOverCooldown() {
     onMouseEnterCooldown = false;
 }
 
-function showMenuTooltip(button) {
+function onHoverTooltip(button) {
 
     //class selection
-    if (button == 'adventurer' && adventureInfo != "The adventurer is a balanced class.") {
-        adventureInfo = "The adventurer is a balanced class.";
+    if (button == 'adventurer' && onHoverText != "The adventurer is a balanced class.") {
+        onHoverText = "The adventurer is a balanced class.";
         updateView();
     }
-    if (button == 'warrior' && adventureInfo != "The warrior can take a beating but tires easily from wearing heavy armour.") {
-        adventureInfo = "The warrior can take a beating but tires easily from wearing heavy armour."
+    if (button == 'warrior' && onHoverText != "The warrior can take a beating but tires easily from wearing heavy armour.") {
+        onHoverText = "The warrior can take a beating but tires easily from wearing heavy armour."
         updateView();
     }
-    if (button == 'rogue' && adventureInfo != "Rogue flavour-text idk lol") {
-        adventureInfo = "Rogue flavour-text idk lol"
+    if (button == 'rogue' && onHoverText != "Rogue flavour-text idk lol") {
+        onHoverText = "Rogue flavour-text idk lol"
         updateView();
     }
-    if (button == 'mage' && adventureInfo != "While fragile in combat, the mage is the most powerful class and light armor lets them move around with ease.") {
-        adventureInfo = "While fragile in combat, the mage is the most powerful class and light armor lets them move around with ease.";
+    if (button == 'mage' && onHoverText != "While fragile in combat, the mage is the most powerful class and light armor lets them move around with ease.") {
+        onHoverText = "While fragile in combat, the mage is the most powerful class and light armor lets them move around with ease.";
         updateView();
     }
 
     //interact buttons
-    if (button == 'attack' && adventureInfo != "Attack your enemy!") {
-        adventureInfo = "Attack your enemy!";
+    if (button == 'attack' && onHoverText != "Attack your enemy!") {
+        onHoverText = "Attack your enemy!";
         updateView();
     }
-    if (button == 'items' && adventureInfo != "Use an item (NOT IMPLEMENTED)") {
-        adventureInfo = "Use an item (NOT IMPLEMENTED)";
+    if (button == 'items' && onHoverText != "Use an item (NOT IMPLEMENTED)") {
+        onHoverText = "Use an item (NOT IMPLEMENTED)";
         updateView();
     }
-    if (button == 'flee' && adventureInfo != "Attempt to run away!") {
-        adventureInfo = "Attempt to run away!";
+    if (button == 'flee' && onHoverText != "Attempt to run away!") {
+        onHoverText = "Attempt to run away!";
         updateView();
     }
-    if (button == 'rest' && adventureInfo != "Rest in your tent?") {
-        adventureInfo = "Rest in your tent?";
+    if (button == 'rest' && onHoverText != "Rest in your tent?") {
+        onHoverText = "Rest in your tent?";
         updateView();
     }
-    if (button == 'buyApple' && adventureInfo != "Buy an apple? (12 gold)") {
-        adventureInfo = "Buy an apple? (12 gold)";
+    if (button == 'buyApple' && onHoverText != "Buy an apple? (12 gold)") {
+        onHoverText = "Buy an apple? (12 gold)";
         updateView();
     }
-    if (button == 'buyFishingRod' && adventureInfo != "Buy fishing rod? (150 gold)") {
-        adventureInfo = "Buy fishing rod? (150 gold)"
+    if (button == 'buyFishingRod' && onHoverText != "Buy fishing rod? (150 gold)") {
+        onHoverText = "Buy fishing rod? (150 gold)"
         updateView();
     }
 
     //clears
     if (button == 'enemyTurn') {
-        adventureInfo = "The " + enemyName + " attacks"
+        onHoverText = "The " + enemyName + " attacks"
     }
     if (button == 'clear' && passedOut && playerGold > stolenGoldAmount) {
-        adventureInfo = "A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to " + stolenGoldAmount + " gold from your gold pouch.."
+        onHoverText = "A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to " + stolenGoldAmount + " gold from your gold pouch.."
         updateView();
     } else if (button == 'clear' && passedOut && playerGold <= 0) {
-        adventureInfo = "A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!"
+        onHoverText = "A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!"
         updateView();
     }
 
     //inventory items
-    if (button == 'inventory_apple1' && hasApple1 && adventureInfo != "You see an apple.") {
-        adventureInfo = "You see an apple."
+    if (button == 'inventory_apple1' && hasApple1 && onHoverText != "You see an apple.") {
+        onHoverText = "You see an apple."
         updateView();
     }
-    if (button == 'inventory_apple2' && hasApple1 && adventureInfo != "You see an apple.") {
-        adventureInfo = "You see an apple."
+    if (button == 'inventory_apple2' && hasApple1 && onHoverText != "You see an apple.") {
+        onHoverText = "You see an apple."
         updateView();
     }
-    if (button == 'inventory_apple3' && hasApple1 && adventureInfo != "You see an apple.") {
-        adventureInfo = "You see an apple."
+    if (button == 'inventory_apple3' && hasApple1 && onHoverText != "You see an apple.") {
+        onHoverText = "You see an apple."
         updateView();
     }
 }
 
 function clearTooltip() {
-    adventureInfo = "";
+    onHoverText = "";
     updateView();
 }
 
@@ -710,12 +719,12 @@ function moveCharacter(direction) {
         }
         else if (canGoUp && !lostInDesertNorth && !nextStepOasis && playerEnergy > 0) {
             mapLocationY++;
-            adventureInfo = "You walk north...";
+            adventureText = "You walk north...";
             playerEnergy -= 5;
         }
         else if (canGoUp && lostInDesertNorth && playerEnergy >= 5) {
             mapLocationY--;
-            adventureInfo = "You walk north...?";
+            adventureText = "You walk north...?";
             playerEnergy -= 5;
         }
         else if (canGoUp && nextStepOasis) {
@@ -736,12 +745,12 @@ function moveCharacter(direction) {
         }
         else if (canGoDown && !lostInDesertSouth && !nextStepOasis && playerEnergy > 0) {
             mapLocationY--;
-            adventureInfo = "You walk south...";
+            adventureText = "You walk south...";
             playerEnergy -= 5;
         }
         else if (canGoDown && lostInDesertSouth) {
             mapLocationY++;
-            adventureInfo = "You walk south...?";
+            adventureText = "You walk south...?";
             playerEnergy -= 5;
         }
         else if (canGoDown && nextStepOasis) {
@@ -765,12 +774,12 @@ function moveCharacter(direction) {
         }
         else if (canGoRight && !lostInDesertEast && !nextStepOasis && playerEnergy > 0) {
             mapLocationX++;
-            adventureInfo = "You walk east...";
+            adventureText = "You walk east...";
             playerEnergy -= 5;
         }
         else if (canGoRight && lostInDesertEast) {
             mapLocationX--;
-            adventureInfo = "You walk east...?";
+            adventureText = "You walk east...?";
             playerEnergy -= 5;
         }
         else if (canGoRight && nextStepOasis) {
@@ -794,12 +803,12 @@ function moveCharacter(direction) {
         }
         else if (canGoLeft && !lostInDesertWest && !nextStepOasis && playerEnergy > 0) {
             mapLocationX--;
-            adventureInfo = "You walk west...";
+            adventureText = "You walk west...";
             playerEnergy -= 5;
         }
         else if (canGoLeft && lostInDesertWest) {
             mapLocationX++;
-            adventureInfo = "You walk west...?";
+            adventureText = "You walk west...?";
             playerEnergy -= 5;
         }
         else if (canGoLeft && nextStepOasis) {
@@ -1595,7 +1604,7 @@ function changeLocation() {
 
         areaHasRandomEncounters = false;
 
-        adventureInfo = "You have found a hidden oasis" + (hasDesertRose || hasSilverKey ? "!" : "! There is a rare desert rose growing here!")
+        adventureText = "You have found a hidden oasis" + (hasDesertRose || hasSilverKey ? "!" : "! There is a rare desert rose growing here!")
 
         lostInDesertNorth = false;
         lostInDesertSouth = false;

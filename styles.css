@@ -1,7 +1,7 @@
 html{
     display: flex;
     justify-content: center;
-    background-color: rgb(52, 37, 58);
+    background-color: rgb(29, 21, 32);
     user-select: none;
 }
 .img{
@@ -49,30 +49,6 @@ html{
     justify-content: center;
     height: 100%;
 }
-.battleInfo_container{
-    width: 1024px;
-    height: 160px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 5px solid rgb(211, 134, 45);
-    color: rgb(233, 155, 66);
-    background-color: rgb(75, 51, 85);
-    font-weight: 600;
-    border-top: none;
-}
-.battleInfo{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 500px;
-    height: 50px;
-    border: 5px solid rgba(211, 133, 45, 0.644);
-    background-color: rgba(106, 81, 117, 0.918);
-    color: rgb(211, 134, 45);
-    font-weight: 500;
-    font-size: 100%;
-}
 .playerInfo{
     padding: 5%;
     width: 25%;
@@ -96,22 +72,6 @@ html{
     height: 50px;
     border: 1px solid black;
 }
-/* .inventoryTop{
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
-}
-.inventoryLeft{
-    border-left: 2px solid black;
-    border-right: 2px solid black;
-}
-.inventoryRight{
-    border-right: 2px solid black;
-    border-left: 2px solid black;
-}
-.inventoryBottom{
-    border-bottom: 2px solid black;
-    border-top: 2px solid black;
-} */
 
 .worldActions{
     width: 25%;
@@ -136,7 +96,20 @@ html{
     background-color: rgb(227, 216, 231);
     color: rgb(211, 134, 45);
 }
-.adventureInfo{
+.adventureText{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    border: 5px solid rgb(211, 134, 45);
+    color: rgb(235, 163, 81);
+    background-color: rgba(46, 36, 56, 0.822);
+    font-weight: 600;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+}
+.onHoverText{
     width: 25%;
     padding: 5%;
     font-size: 110%;
@@ -150,7 +123,7 @@ html{
     align-items: center;
     border: 5px solid rgb(211, 134, 45);
     color: rgb(233, 155, 66);
-    background-color: rgb(75, 51, 85);
+    background-color: rgb(46, 36, 56);
     font-weight: 600;
     border-top: none;
 }
