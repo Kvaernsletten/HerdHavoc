@@ -39,9 +39,13 @@ let hasFishingRod = false;
 let hasDesertRose = false;
 let hasCopperKey = false;
 let hasSilverKey = false;
-let hasGoat = false;
+let hasGoat1 = false;
+let hasGoat2 = false;
+let hasGoat3 = false;
 
-let returnedGoat = false;
+let returnedGoat1 = false;
+let returnedGoat2 = false;
+let returnedGoat3 = false;
 
 // Game states
 let isGameRunning = false;
@@ -71,7 +75,9 @@ let inMainCampsite = false;
 let inCampsite = false;
 let inShopWest = false;
 let inShopEast = false;
-let inGoatArea = false;
+let inGoatArea1 = false;
+let inGoatArea2 = false;
+let inGoatArea3 = false;
 
 // Combat states
 let actionMenu = false;
@@ -150,9 +156,11 @@ function updateView() {
                 <img class="player" src="${passedOut ? "imgs/Character_Sleep.png" : playerStates()}">
                 ${areaHasWorldItem ? /*HTML*/`<img class="worldItem" src="${worldItem}">` : ``}
                 ${inShopWest || inShopEast ? /*HTML*/`<img class="worldItem" src="imgs/world_items/NPC.png">` : ``}
-                ${returnedGoat && inMainCampsite ? /*HTML*/`<img class="worldItem" src="imgs/world_items/Goat_WorldItem.png">` : ``}
-            </div>
-            <button class="rightButton" ${canGoRight ? 'onclick="moveCharacter(\'east\')"' : 'disabled'} style="${canGoRight ? '' : 'pointer-events: none; opacity: 0;'}">🡺</button>
+                ${returnedGoat1 && inMainCampsite ? /*HTML*/`<img class="worldItem" src="imgs/world_items/Goat1_WorldItem.png">` : ``}
+                ${returnedGoat2 && inMainCampsite ? /*HTML*/`<img class="worldItem" src="imgs/world_items/Goat2_WorldItem.png">` : ``}
+                ${returnedGoat3 && inMainCampsite ? /*HTML*/`<img class="worldItem" src="imgs/world_items/Goat3_WorldItem.png">` : ``}
+                </div>
+                <button class="rightButton" ${canGoRight ? 'onclick="moveCharacter(\'east\')"' : 'disabled'} style="${canGoRight ? '' : 'pointer-events: none; opacity: 0;'}">🡺</button>
         </div>
         <div class="DownDiv">
             <button class="downButton" ${canGoDown ? 'onclick="moveCharacter(\'south\')"' : 'disabled'} style="${canGoDown ? '' : 'pointer-events: none; opacity: 0;'}">🡻</button>
@@ -170,7 +178,6 @@ function updateView() {
                 ${inCampsite ?
                 /*HTML*/`<button
                 ${inCampsite ? 'onclick="rest()"' : 'disabled="disabled"'}
-                style="${inCampsite ? '' : 'pointer-events: none; opacity: 0;'}"
                 onmouseenter="{onHoverTooltip('rest')}"
                 onmouseleave="if(onHoverText == 'Rest in your tent?') {clearTooltip()}">Rest</button> 
                 ` :
@@ -179,7 +186,6 @@ function updateView() {
                 ${inShopWest ?
                     /*HTML*/`<button
                 ${inShopWest ? 'onclick="buyItem(\'apple\')"' : 'disabled="disabled"'}
-                style="${inShopWest ? '' : 'pointer-events: none; opacity: 0;'}"
                 onmouseenter="{onHoverTooltip('buyApple')}"
                 onmouseleave="if(onHoverText == 'Buy apple? (12 gold)') {clearTooltip()}">Purchase apple</button> 
                 ` :
@@ -188,7 +194,6 @@ function updateView() {
                 ${inShopEast ?
                     /*HTML*/`<button
                 ${inShopEast ? 'onclick="buyItem(\'apple\')"' : 'disabled="disabled"'}
-                style="${inShopEast ? '' : 'pointer-events: none; opacity: 0;'}"
                 onmouseenter="{onHoverTooltip('buyApple')}"
                 onmouseleave="if(onHoverText == 'Buy apple? (12 gold)') {clearTooltip()}">Buy apple</button> 
                 ` :
@@ -197,7 +202,6 @@ function updateView() {
                 ${inShopEast ?
                     /*HTML*/`<button
                 ${inShopEast && !hasFishingRod ? 'onclick="buyItem(\'fishingRod\')"' : 'disabled="disabled"'}
-                style="${inShopEast && !hasFishingRod ? '' : 'pointer-events: none; opacity: 0;'}"
                 onmouseenter="{onHoverTooltip('buyFishingRod')}"
                 onmouseleave="if(onHoverText == 'Buy fishing rod? (150 gold)') {clearTooltip()}">Buy fishing rod</button> 
                 ` :
@@ -206,7 +210,6 @@ function updateView() {
                 ${hasDesertRose && inShopWest ?
                     /*HTML*/`<button
                 ${hasDesertRose && inShopWest ? 'onclick="buyItem(\'silverKey\')"' : 'disabled="disabled"'}
-                style="${hasDesertRose && inShopWest ? '' : 'pointer-events: none; opacity: 0;'}"
                 onmouseenter="{onHoverTooltip('tradeDesertRose')}"
                 onmouseleave="if(onHoverText == 'Trade [desert rose] for [silver key] to the mountain?') {clearTooltip()}">Trade desert rose</button> 
                 ` :
@@ -215,16 +218,30 @@ function updateView() {
                 ${inOasis ?
                         /*HTML*/`<button
                 ${inOasis && !hasDesertRose && !hasSilverKey ? 'onclick="pickUpItem(\'desertRose\')"' : 'disabled="disabled"'}
-                style="${inOasis && !hasDesertRose && !hasSilverKey ? '' : 'pointer-events: none; opacity: 0;'}"
                 onmouseenter="{onHoverTooltip('pickUpDesertRose')}"
                 onmouseleave="if(onHoverText == 'Pick up desert rose?') {clearTooltip()}">Pick up</button> 
                 ` :
                     /*HTML*/``}
 
-                    ${inGoatArea ?
-                        /*HTML*/`<button
-                ${inGoatArea && !hasGoat && !returnedGoat ? 'onclick="pickUpItem(\'goat\')"' : 'disabled="disabled"'}
-                style="${inGoatArea && !hasGoat && !returnedGoat ? '' : 'pointer-events: none; opacity: 0;'}"
+                ${inGoatArea1 && !hasGoat1 && !returnedGoat1 ?
+                    /*HTML*/`<button
+                onclick="pickUpItem('goat1')"
+                onmouseenter="{onHoverTooltip('pickUpGoat')}"
+                onmouseleave="if(onHoverText == 'Take goat?') {clearTooltip()}">Take goat</button> 
+                ` :
+                    /*HTML*/``}
+                
+                ${inGoatArea2 && !hasGoat2 && !returnedGoat2 ?
+                    /*HTML*/`<button
+                onclick="pickUpItem('goat2')"
+                onmouseenter="{onHoverTooltip('pickUpGoat')}"
+                onmouseleave="if(onHoverText == 'Take goat?') {clearTooltip()}">Take goat</button> 
+                ` :
+                /*HTML*/``}
+
+                ${inGoatArea3 && !hasGoat3 && !returnedGoat3 ?
+                    /*HTML*/`<button
+                onclick="pickUpItem('goat3')"
                 onmouseenter="{onHoverTooltip('pickUpGoat')}"
                 onmouseleave="if(onHoverText == 'Take goat?') {clearTooltip()}">Take goat</button> 
                 ` :
@@ -239,43 +256,66 @@ function updateView() {
         <div>Inventory: <br>
         Gold: ${playerGold}
         </div>
-        <div class="inventoryGrid">        
+        <div class="inventoryGrid">
+
         <div id="Inventory_Slot1" class="inventorySlots inventoryLeft inventoryTop"
         onclick="if(hasApple1){useItem('apple')}"><img src=${hasApple1 ? "imgs/inventory_items/Apple.png" : "imgs/inventory_items/Apple_Slot.png"}
         onmouseenter="if(hasApple1){onHoverTooltip('inventory_apple1')}"
-        onmouseleave="if(hasApple1 && onHoverText == 'Eat apple?'){clearTooltip()}"></div>
+        onmouseleave="if(hasApple1 && onHoverText == 'Eat apple?'){clearTooltip()}">
+        </div>
+
         <div id="Inventory_Slot2" class="inventorySlots inventoryTop" 
         onclick="if(hasApple2){useItem('apple')}"><img src=${hasApple2 ? "imgs/inventory_items/Apple.png" : "imgs/inventory_items/Apple_Slot.png"}
         onmouseenter="if(hasApple2){onHoverTooltip('inventory_apple2')}"
-        onmouseleave="if(hasApple2 && onHoverText == 'Eat apple?'){clearTooltip()}"></div>
+        onmouseleave="if(hasApple2 && onHoverText == 'Eat apple?'){clearTooltip()}">
+        </div>
+
         <div id="Inventory_Slot3" class="inventorySlots inventoryRight inventoryTop"
         onclick="if(hasApple3){useItem('apple')}"><img src=${hasApple3 ? "imgs/inventory_items/Apple.png" : "imgs/inventory_items/Apple_Slot.png"}
         onmouseenter="if(hasApple3){onHoverTooltip('inventory_apple3')}"
-        onmouseleave="if(hasApple3 && onHoverText == 'Eat apple?'){clearTooltip()}"></div>
+        onmouseleave="if(hasApple3 && onHoverText == 'Eat apple?'){clearTooltip()}">
+        </div>
+
         <div id="Inventory_Slot4" class="inventorySlots inventoryLeft"
-        onclick="useItem()"><img src=${hasPotion ? "imgs/inventory_items/Potion.png" : "imgs/inventory_items/Empty_Slot.png"}
+        onclick="useItem()">
+        <img src=${hasPotion ? "imgs/inventory_items/Potion.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('inventory_potion')"
-        onmouseleave="if(hasPotion){clearTooltip()}"></div>
+        onmouseleave="if(hasPotion){clearTooltip()}">
+        </div>
+
         <div id="Inventory_Slot5" class="inventorySlots"
-        onclick="useItem()"><img src=${hasFishingRod ? "imgs/inventory_items/Fishingrod.png" : "imgs/inventory_items/Empty_Slot.png"}
+        onclick="useItem()">
+        <img src=${hasFishingRod ? "imgs/inventory_items/Fishingrod.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('inventory_fishingRod')"
-        onmouseleave="if(hasFishingRod){clearTooltip()}"></div>
+        onmouseleave="if(hasFishingRod){clearTooltip()}">
+        </div>
+
         <div id="Inventory_Slot6" class="inventorySlots inventoryRight"
-        onclick="useItem()"><img src=${hasDesertRose ? "imgs/inventory_items/DesertRose.png" : (hasSilverKey ? "imgs/inventory_items/DesertRose_Slot.png" : "imgs/inventory_items/Empty_Slot.png")}                  
+        onclick="useItem()">
+        <img src=${hasDesertRose ? "imgs/inventory_items/DesertRose.png" : (hasSilverKey ? "imgs/inventory_items/DesertRose_Slot.png" : "imgs/inventory_items/Empty_Slot.png")}                  
         onmouseenter="onHoverTooltip('inventory_desertRose')"
-        onmouseleave="if(hasDesertRose){clearTooltip()}"></div>
+        onmouseleave="if(hasDesertRose){clearTooltip()}">
+        </div>
+
         <div id="Inventory_Slot7" class="inventorySlots inventoryLeft inventoryBottom"
-        onclick="useItem()"><img src=${hasCopperKey ? "imgs/inventory_items/CopperKey.png" : "imgs/inventory_items/Empty_Slot.png"}
+        onclick="useItem()">
+        <img src=${hasCopperKey ? "imgs/inventory_items/CopperKey.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('inventory_copperKey')"
-        onmouseleave="if(hasCopperKey){clearTooltip()}"></div>
+        onmouseleave="if(hasCopperKey){clearTooltip()}">
+        </div>
+
         <div id="Inventory_Slot8" class="inventorySlots inventoryBottom"
-        onclick="useItem()"><img src=${hasSilverKey ? "imgs/inventory_items/SilverKey.png" : "imgs/inventory_items/Empty_Slot.png"}
+        onclick="useItem()">
+        <img src=${hasSilverKey ? "imgs/inventory_items/SilverKey.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('inventory_SilverKey')"
-        onmouseleave="if(hasSilverKey){clearTooltip()}"></div>
+        onmouseleave="if(hasSilverKey){clearTooltip()}">
+        </div>
+
         <div id="Inventory_Slot9" class="inventorySlots inventoryRight inventoryBottom"
-        onclick="useItem('goat')"><img src=${hasGoat ? "imgs/inventory_items/Goat.png" : "imgs/inventory_items/Empty_Slot.png"}
+        onclick="useItem('goat')">
+        <img src="${goatStates()}"
         onmouseenter="onHoverTooltip('goat')"
-        onmouseleave="if(hasGoat){clearTooltip()}"></div>
+        onmouseleave="if(hasGoat1){clearTooltip()}"></div>
         </div>
     </div>
     `
@@ -393,7 +433,7 @@ function startGame() {
         playerDamage = 25;
         playerClass = "Adventurer"
     }
-    adventureText = "You step out of your tent only to see that your three goats are missing... You have to find them and bring them back to your camp!";
+    adventureText = "You step out of your tent only to see that your three goats are missing... You have to find them and bring them back here!";
     mapLocationY = 5;
     mapLocationX = 5;
     isGameRunning = true;
@@ -590,12 +630,35 @@ function pickUpItem(item){
             adventureText = "You carefully pluck the rare desert rose from the hidden oasis.."
         }
     }
-    if (item == "goat"){
-        if (!hasGoat && !returnedGoat){
-            hasGoat = true;
+    if (item == "goat1" && !hasGoat2 && !hasGoat3){
+        if (!hasGoat1 && !returnedGoat1){
+            hasGoat1 = true;
             areaHasWorldItem = false;
             adventureText = "You take the goat!"
         }
+    }
+    else if(item == "goat1" && (hasGoat2 || hasGoat3)){
+        adventureText = "You can only carry one goat at a time! Head back and drop off a goat first!"
+    }
+    if (item == "goat2" && !hasGoat1 && !hasGoat3){
+        if (!hasGoat2 && !returnedGoat2){
+            hasGoat2 = true;
+            areaHasWorldItem = false;
+            adventureText = "You take the goat!"
+        }
+    }
+    else if(item == "goat2" && (hasGoat1 || hasGoat3)){
+        adventureText = "You can only carry one goat at a time! Head back and drop off a goat first!"
+    }
+    if (item == "goat3" && !hasGoat1 && !hasGoat2){
+        if (!hasGoat3 && !returnedGoat3){
+            hasGoat1 = true;
+            areaHasWorldItem = false;
+            adventureText = "You take the goat!"
+        }
+    }  
+    else if(item == "goat3" && (hasGoat1 || hasGoat2)){
+        adventureText = "You can only carry one goat at a time! Head back and drop off a goat first!"
     }
     updateView();
 }
@@ -609,9 +672,17 @@ function useItem(item) {
           
         }
     }
-    if (item == 'goat' && inMainCampsite) {
-        returnedGoat = true;
-        hasGoat = false;
+    if (item == 'goat' && inMainCampsite && hasGoat1) {
+        returnedGoat1 = true;
+        hasGoat1 = false;
+    }  
+    if (item == 'goat' && inMainCampsite && hasGoat2) {
+        returnedGoat2 = true;
+        hasGoat2 = false;
+    }  
+    if (item == 'goat' && inMainCampsite && hasGoat3) {
+        returnedGoat3 = true;
+        hasGoat3 = false;
     }  
     else if(item == 'goat' && !inMainCampsite){
         adventureText = "You should bring the goat back to your main campsite first!"
@@ -725,18 +796,48 @@ function clearTooltip() {
 
 
 function playerStates() {
-    // if (goingLeft == true) {
+    if (goingLeft == true) {
 
-    //     return "imgs/Character_L.png"
+        return "imgs/Character_L.png"
 
-    // }
-    // else {
+    }
+    else {
 
-    //     return "imgs/Character_R.png"
+        return "imgs/Character_R.png"
 
-    // }
-    return "imgs/worlditemstest.png"
+    }
+    // return "imgs/worlditemstest.png"
 }
+
+function goatStates(){
+    if (hasGoat1){
+        return "imgs/inventory_items/Goat1.png";
+    }
+    else if(!hasGoat1)
+    {
+        return "imgs/inventory_items/Empty_Slot.png";
+    }
+    if (hasGoat2){
+        return "imgs/inventory_items/Goat2.png";
+    }
+    else if(!hasGoat2)
+    {
+        return "imgs/inventory_items/Empty_Slot.png";
+    }
+    if (hasGoat3){
+        return "imgs/inventory_items/Goat3.png";
+    }
+    else if(!hasGoat3)
+    {
+        return "imgs/inventory_items/Empty_Slot.png";
+    }
+   
+
+}
+
+// ${hasGoat1 ? "imgs/inventory_items/Goat1.png" : "imgs/inventory_items/Empty_Slot.png"}
+// ${hasGoat2 ? "imgs/inventory_items/Goat2.png" : "imgs/inventory_items/Empty_Slot.png"}
+// ${hasGoat3 ? "imgs/inventory_items/Goat3.png" : "imgs/inventory_items/Empty_Slot.png"}
 
 function moveCharacter(direction) {
 
@@ -1196,6 +1297,7 @@ function changeLocation() {
         canGoLeft = false;
         canGoRight = true;
 
+        inGoatArea1 = false;
         areaHasWorldItem = false;
         areaHasRandomEncounters = true;
     }
@@ -1273,14 +1375,14 @@ function changeLocation() {
         canGoLeft = false;
         canGoRight = false;
 
-        inGoatArea = true;
+        inGoatArea1 = true;
         areaHasRandomEncounters = false;
 
-        if(!hasGoat || !returnedGoat){
+        if(!hasGoat1 || !returnedGoat1){
             areaHasWorldItem = true;
-            worldItem = 'imgs/world_items/Goat_WorldItem.png'
+            worldItem = 'imgs/world_items/Goat1_WorldItem.png'
         }
-        if (hasGoat || returnedGoat){ 
+        if (hasGoat1 || returnedGoat1){ 
             areaHasWorldItem = false;
         }
     }
@@ -1376,6 +1478,7 @@ function changeLocation() {
         canGoLeft = false;
         canGoRight = true;
 
+        inGoatArea1 = false;
         areaHasWorldItem = false;
         areaHasRandomEncounters = true;
     }
@@ -1427,12 +1530,27 @@ function changeLocation() {
         canGoDown = false;
         canGoLeft = false;
         canGoRight = true;
+
+        inGoatArea2 = true;
+        areaHasRandomEncounters = false;
+
+        if(!hasGoat2 || !returnedGoat2){
+            areaHasWorldItem = true;
+            worldItem = 'imgs/world_items/Goat2_WorldItem.png'
+        }
+        if (hasGoat2 || returnedGoat2){ 
+            areaHasWorldItem = false;
+        }
     }
     if (mapLocationY == 6 && mapLocationX == 7) {
         canGoUp = false;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        inGoatArea2 = false;
+        areaHasWorldItem = false;
+        areaHasRandomEncounters = true;
     }
     if (mapLocationY == 6 && mapLocationX == 8) {
         canGoUp = true;
