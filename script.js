@@ -8,7 +8,7 @@ let battleBackground;
 
 //NEW
 let adventureText = "Enter a name and a class for your adventure!";
-let onHoverText;
+let onHoverText = "";
 
 //Player stats
 let playerClass;
@@ -325,7 +325,7 @@ function setClass(selectedClass) {
         playerMaxHealth = 100;
         playerEnergy = 100;
         playerMaxEnergy = 100;
-        playerDamage = 10;
+        playerDamage = 25;
         playerClass = "Adventurer"
     }
     else if (selectedClass == "warrior") {
@@ -333,7 +333,7 @@ function setClass(selectedClass) {
         playerMaxHealth = 150;
         playerEnergy = 70;
         playerMaxEnergy = 70;
-        playerDamage = 20;
+        playerDamage = 30;
         playerClass = "Warrior"
     }
     else if (selectedClass == "rogue") {
@@ -341,7 +341,7 @@ function setClass(selectedClass) {
         playerMaxHealth = 85;
         playerEnergy = 125;
         playerMaxEnergy = 125;
-        playerDamage = 30;
+        playerDamage = 40;
         playerClass = "Rogue"
     }
     else if (selectedClass == "mage") {
@@ -349,7 +349,7 @@ function setClass(selectedClass) {
         playerMaxHealth = 70;
         playerEnergy = 150;
         playerMaxEnergy = 150;
-        playerDamage = 40;
+        playerDamage = 45;
         playerClass = "Mage"
     }
     adventureText = "Start game as the " + playerClass + " class?"
@@ -367,7 +367,7 @@ function startGame() {
         playerMaxHealth = 100;
         playerEnergy = 100;
         playerMaxEnergy = 100;
-        playerDamage = 10;
+        playerDamage = 25;
         playerClass = "Adventurer"
     }
     mapLocationY = 5;
