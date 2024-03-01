@@ -124,14 +124,15 @@ function updateView() {
                     <div>Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
             </div>            
             <div class="worldActions">
-                ${actionMenu ? /*HTML*/ `` : /*HTML*/ `<button class="attackButton" 
+                ${actionMenu ? /*HTML*/ `` 
+                : /*HTML*/ `<button class="attackButton" 
                 onmouseenter="onHoverTooltip('attack')"
                 onmouseleave="clearTooltip()" 
                 ${inBattle ? 'onclick="attack(), onHoverTooltip(\'enemyTurn\'), updateView()"' : 'disabled, style="opacity: 0"'}>Attack</button>
-                <button class="itemsButton"
-                onmouseenter="onHoverTooltip('items')"
+                <button class="magicButton"
+                onmouseenter="onHoverTooltip('magic')"
                 onmouseleave="clearTooltip()"
-                ${inBattle ? 'onclick="items()"' : 'disabled, style="opacity: 0"'}>Items</button>
+                ${inBattle ? 'onclick="magic()"' : 'disabled, style="opacity: 0"'}>Magic</button>
                 <button class="fleeButton" 
                 onmouseenter="onHoverTooltip('flee')" 
                 onmouseleave="clearTooltip()" 
@@ -535,7 +536,7 @@ function attack() {
 
 }
 
-function items() {
+function magic() {
     updateView();
 }
 
@@ -753,8 +754,8 @@ function onHoverTooltip(button) {
         onHoverText = "Attack your enemy!";
         updateView();
     }
-    if (button == 'items' && onHoverText != "Use an item (NOT IMPLEMENTED)") {
-        onHoverText = "Use an item (NOT IMPLEMENTED)";
+    if (button == 'magic' && onHoverText != "Cast a spell (NOT IMPLEMENTED)") {
+        onHoverText = "Cast a spell (NOT IMPLEMENTED)";
         updateView();
     }
     if (button == 'flee' && onHoverText != "Attempt to run away!") {
