@@ -165,7 +165,9 @@ function updateView() {
                     <div>Health: ${playerHealth + " / " + playerMaxHealth}</div>
                     <div>Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
         </div>   
-            <div class="worldActions">${inCampsite ?
+            <div class="worldActions">
+                
+                ${inCampsite ?
                 /*HTML*/`<button
                 ${inCampsite ? 'onclick="rest()"' : 'disabled="disabled"'}
                 style="${inCampsite ? '' : 'pointer-events: none; opacity: 0;'}"
@@ -174,15 +176,6 @@ function updateView() {
                 ` :
                     /*HTML*/``}
 
-                ${inMainCampsite && !passedOut ?
-                    /*HTML*/`<button
-                ${inMainCampsite && hasGoat && !returnedGoat ? 'onclick="useItem(\'goat\')"' : 'disabled="disabled"'}
-                style="${inMainCampsite && hasGoat && !returnedGoat ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="{onHoverTooltip('placeGoat')}"
-                onmouseleave="if(onHoverText == 'Place the goat in your camp?') {clearTooltip()}">Return goat</button> 
-                ` :
-                    /*HTML*/``}
-                
                 ${inShopWest ?
                     /*HTML*/`<button
                 ${inShopWest ? 'onclick="buyItem(\'apple\')"' : 'disabled="disabled"'}
@@ -400,7 +393,7 @@ function startGame() {
         playerDamage = 25;
         playerClass = "Adventurer"
     }
-    adventureText = "You step out of your tent, ready for adventure!";
+    adventureText = "You step out of your tent only to see that your three goats are missing... You have to find them and bring them back to your camp!";
     mapLocationY = 5;
     mapLocationX = 5;
     isGameRunning = true;
@@ -616,10 +609,13 @@ function useItem(item) {
           
         }
     }
-    if (item == 'goat') {
+    if (item == 'goat' && inMainCampsite) {
         returnedGoat = true;
         hasGoat = false;
     }  
+    else if(item == 'goat' && !inMainCampsite){
+        adventureText = "You should bring the goat back to your main campsite first!"
+    }
     updateView();
 }
 
