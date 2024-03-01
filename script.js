@@ -6,8 +6,7 @@ let gameScreen = document.getElementById('gameScreen');
 let worldBackground;
 let battleBackground;
 
-//NEW
-let adventureText = "Enter a name and a class for your adventure!";
+let adventureText = "Enter a name and choose a class for your adventure!";
 let onHoverText = "";
 
 //Player stats
@@ -32,7 +31,6 @@ let enemyGold = 0;
 let playerGold = 0;
 let stolenGoldAmount;
 
-
 let hasApple1 = false;
 let hasApple2 = false;
 let hasApple3 = false;
@@ -43,16 +41,14 @@ let hasCopperKey = false;
 let hasSilverKey = false;
 let hasGoat = false;
 
+let returnedGoat = false;
+
 // Game states
 let isGameRunning = false;
 let inBattle = false;
-let mapLocationY;
-let mapLocationX;
 
-let inGrasslands = false;
-let inForest = false;
-let inDesert = false;
-let inCave = false;
+let areaHasWorldItem;
+let worldItem;
 
 let areaHasRandomEncounters = false;
 let encounterChance;
@@ -62,8 +58,23 @@ let canGoLeft;
 let canGoRight;
 let canGoDown;
 
+// Location variables
+let mapLocationY;
+let mapLocationX;
+
+let inGrasslands = false;
+let inForest = false;
+let inDesert = false;
+let inCave = false;
+let inOasis = false;
+let inMainCampsite = false;
+let inCampsite = false;
+let inShopWest = false;
+let inShopEast = false;
+let inGoatArea = false;
+
 // Combat states
-let attackCooldown = false;
+let actionMenu = false;
 
 // Player states
 let goingLeft = false;
@@ -74,15 +85,10 @@ let lostInDesertSouth = false;
 let lostInDesertEast = false;
 let lostInDesertWest = false;
 
-let inShopWest = false;
-let inShopEast = false;
 let nextStepOasis = false;
-let inOasis = false;
-let inCampsite = false;
 
 //UI
 let buttonDisabled = false;
-let onMouseEnterCooldown = false;
 
 changeLocation();
 updateView();
@@ -95,7 +101,7 @@ function updateView() {
         <div class="topBattleDiv">
         </div>
         <div class="middleBattleDiv">
-            <img class="player" src="imgs/Character_R.png">
+            <img class="playerInBattle" src="imgs/Character_R.png">
             <img class="enemy" src="imgs/Character_L.png">
         </div>
         <div class="bottomBattleDiv">
@@ -109,7 +115,7 @@ function updateView() {
                     <div>Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
             </div>            
             <div class="worldActions">
-                ${attackCooldown ? /*HTML*/ `` : /*HTML*/ `<button class="attackButton" 
+                ${actionMenu ? /*HTML*/ `` : /*HTML*/ `<button class="attackButton" 
                 onmouseenter="onHoverTooltip('attack')"
                 onmouseleave="clearTooltip()" 
                 ${inBattle ? 'onclick="attack(), onHoverTooltip(\'enemyTurn\'), updateView()"' : 'disabled, style="opacity: 0"'}>Attack</button>
@@ -140,7 +146,12 @@ function updateView() {
         </div>
         <div class="LeftRightDiv">
             <button class="leftButton" ${canGoLeft ? 'onclick="moveCharacter(\'west\')"' : 'disabled'} style="${canGoLeft ? '' : 'pointer-events: none; opacity: 0;'}">🡸</button>
-            <img class="player" src="${passedOut ? "imgs/Character_Sleep.png" : playerStates()}">
+            <div class="playerContainer">
+                <img class="player" src="${passedOut ? "imgs/Character_Sleep.png" : playerStates()}">
+                ${areaHasWorldItem ? /*HTML*/`<img class="worldItem" src="${worldItem}">` : ``}
+                ${inShopWest || inShopEast ? /*HTML*/`<img class="worldItem" src="imgs/world_items/NPC.png">` : ``}
+                ${returnedGoat && inMainCampsite ? /*HTML*/`<img class="worldItem" src="imgs/world_items/Goat_WorldItem.png">` : ``}
+            </div>
             <button class="rightButton" ${canGoRight ? 'onclick="moveCharacter(\'east\')"' : 'disabled'} style="${canGoRight ? '' : 'pointer-events: none; opacity: 0;'}">🡺</button>
         </div>
         <div class="DownDiv">
@@ -155,58 +166,77 @@ function updateView() {
                     <div>Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
         </div>   
             <div class="worldActions">${inCampsite ?
-                /*HTML*/`<button class="restButton"
+                /*HTML*/`<button
                 ${inCampsite ? 'onclick="rest()"' : 'disabled="disabled"'}
                 style="${inCampsite ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('rest')}"
+                onmouseenter="{onHoverTooltip('rest')}"
                 onmouseleave="if(onHoverText == 'Rest in your tent?') {clearTooltip()}">Rest</button> 
+                ` :
+                    /*HTML*/``}
+
+                ${inMainCampsite && !passedOut ?
+                    /*HTML*/`<button
+                ${inMainCampsite && hasGoat && !returnedGoat ? 'onclick="useItem(\'goat\')"' : 'disabled="disabled"'}
+                style="${inMainCampsite && hasGoat && !returnedGoat ? '' : 'pointer-events: none; opacity: 0;'}"
+                onmouseenter="{onHoverTooltip('placeGoat')}"
+                onmouseleave="if(onHoverText == 'Place the goat in your camp?') {clearTooltip()}">Return goat</button> 
                 ` :
                     /*HTML*/``}
                 
                 ${inShopWest ?
-                    /*HTML*/`<button class="restButton"
+                    /*HTML*/`<button
                 ${inShopWest ? 'onclick="buyItem(\'apple\')"' : 'disabled="disabled"'}
                 style="${inShopWest ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('buyApple')}"
+                onmouseenter="{onHoverTooltip('buyApple')}"
                 onmouseleave="if(onHoverText == 'Buy apple? (12 gold)') {clearTooltip()}">Purchase apple</button> 
                 ` :
                     /*HTML*/``}
 
                 ${inShopEast ?
-                    /*HTML*/`<button class="restButton"
+                    /*HTML*/`<button
                 ${inShopEast ? 'onclick="buyItem(\'apple\')"' : 'disabled="disabled"'}
                 style="${inShopEast ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('buyApple')}"
+                onmouseenter="{onHoverTooltip('buyApple')}"
                 onmouseleave="if(onHoverText == 'Buy apple? (12 gold)') {clearTooltip()}">Buy apple</button> 
                 ` :
                     /*HTML*/``}
                     
                 ${inShopEast ?
-                    /*HTML*/`<button class="restButton"
+                    /*HTML*/`<button
                 ${inShopEast && !hasFishingRod ? 'onclick="buyItem(\'fishingRod\')"' : 'disabled="disabled"'}
                 style="${inShopEast && !hasFishingRod ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('buyFishingRod')}"
+                onmouseenter="{onHoverTooltip('buyFishingRod')}"
                 onmouseleave="if(onHoverText == 'Buy fishing rod? (150 gold)') {clearTooltip()}">Buy fishing rod</button> 
                 ` :
                     /*HTML*/``}
 
                 ${hasDesertRose && inShopWest ?
-                    /*HTML*/`<button class="restButton"
+                    /*HTML*/`<button
                 ${hasDesertRose && inShopWest ? 'onclick="buyItem(\'silverKey\')"' : 'disabled="disabled"'}
                 style="${hasDesertRose && inShopWest ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('tradeDesertRose')}"
+                onmouseenter="{onHoverTooltip('tradeDesertRose')}"
                 onmouseleave="if(onHoverText == 'Trade [desert rose] for [silver key] to the mountain?') {clearTooltip()}">Trade desert rose</button> 
                 ` :
                     /*HTML*/``}
 
                 ${inOasis ?
-                        /*HTML*/`<button class="restButton"
-                ${inOasis && !hasDesertRose && !hasSilverKey ? 'onclick="buyItem(\'desertRose\')"' : 'disabled="disabled"'}
+                        /*HTML*/`<button
+                ${inOasis && !hasDesertRose && !hasSilverKey ? 'onclick="pickUpItem(\'desertRose\')"' : 'disabled="disabled"'}
                 style="${inOasis && !hasDesertRose && !hasSilverKey ? '' : 'pointer-events: none; opacity: 0;'}"
-                onmouseenter="if(!onMouseEnterCooldown) {onHoverTooltip('pickUpDesertRose')}"
+                onmouseenter="{onHoverTooltip('pickUpDesertRose')}"
                 onmouseleave="if(onHoverText == 'Pick up desert rose?') {clearTooltip()}">Pick up</button> 
                 ` :
                     /*HTML*/``}
+
+                    ${inGoatArea ?
+                        /*HTML*/`<button
+                ${inGoatArea && !hasGoat && !returnedGoat ? 'onclick="pickUpItem(\'goat\')"' : 'disabled="disabled"'}
+                style="${inGoatArea && !hasGoat && !returnedGoat ? '' : 'pointer-events: none; opacity: 0;'}"
+                onmouseenter="{onHoverTooltip('pickUpGoat')}"
+                onmouseleave="if(onHoverText == 'Take goat?') {clearTooltip()}">Take goat</button> 
+                ` :
+                    /*HTML*/``}
+                    
             </div>
         
 
@@ -218,39 +248,39 @@ function updateView() {
         </div>
         <div class="inventoryGrid">        
         <div id="Inventory_Slot1" class="inventorySlots inventoryLeft inventoryTop"
-        onclick="if(hasApple1){useItem('apple')}"><img src=${hasApple1 ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Apple_Slot.png"}
-        onmouseenter="if(hasApple1 && onMouseEnterCooldown == false){onHoverTooltip('inventory_apple1')}"
-        onmouseleave="if(hasApple1 && onHoverText == 'You see an apple.'){clearTooltip()}"></div>
+        onclick="if(hasApple1){useItem('apple')}"><img src=${hasApple1 ? "imgs/inventory_items/Apple.png" : "imgs/inventory_items/Apple_Slot.png"}
+        onmouseenter="if(hasApple1){onHoverTooltip('inventory_apple1')}"
+        onmouseleave="if(hasApple1 && onHoverText == 'Eat apple?'){clearTooltip()}"></div>
         <div id="Inventory_Slot2" class="inventorySlots inventoryTop" 
-        onclick="if(hasApple2){useItem('apple')}"><img src=${hasApple2 ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Apple_Slot.png"}
-        onmouseenter="if(hasApple2 && onMouseEnterCooldown == false){onHoverTooltip('inventory_apple2')}"
-        onmouseleave="if(hasApple2 && onHoverText == 'You see an apple.'){clearTooltip()}"></div>
+        onclick="if(hasApple2){useItem('apple')}"><img src=${hasApple2 ? "imgs/inventory_items/Apple.png" : "imgs/inventory_items/Apple_Slot.png"}
+        onmouseenter="if(hasApple2){onHoverTooltip('inventory_apple2')}"
+        onmouseleave="if(hasApple2 && onHoverText == 'Eat apple?'){clearTooltip()}"></div>
         <div id="Inventory_Slot3" class="inventorySlots inventoryRight inventoryTop"
-        onclick="if(hasApple3){useItem('apple')}"><img src=${hasApple3 ? "imgs/InventoryItems/Apple.png" : "imgs/InventoryItems/Apple_Slot.png"}
-        onmouseenter="if(hasApple3 && onMouseEnterCooldown == false){onHoverTooltip('inventory_apple3')}"
-        onmouseleave="if(hasApple3 && onHoverText == 'You see an apple.'){clearTooltip()}"></div>
+        onclick="if(hasApple3){useItem('apple')}"><img src=${hasApple3 ? "imgs/inventory_items/Apple.png" : "imgs/inventory_items/Apple_Slot.png"}
+        onmouseenter="if(hasApple3){onHoverTooltip('inventory_apple3')}"
+        onmouseleave="if(hasApple3 && onHoverText == 'Eat apple?'){clearTooltip()}"></div>
         <div id="Inventory_Slot4" class="inventorySlots inventoryLeft"
-        onclick="useItem()"><img src=${hasPotion ? "imgs/InventoryItems/Potion.png" : "imgs/InventoryItems/Empty_Slot.png"}
+        onclick="useItem()"><img src=${hasPotion ? "imgs/inventory_items/Potion.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('inventory_potion')"
         onmouseleave="if(hasPotion){clearTooltip()}"></div>
         <div id="Inventory_Slot5" class="inventorySlots"
-        onclick="useItem()"><img src=${hasFishingRod ? "imgs/InventoryItems/Fishingrod.png" : "imgs/InventoryItems/Empty_Slot.png"}
+        onclick="useItem()"><img src=${hasFishingRod ? "imgs/inventory_items/Fishingrod.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('inventory_fishingRod')"
         onmouseleave="if(hasFishingRod){clearTooltip()}"></div>
         <div id="Inventory_Slot6" class="inventorySlots inventoryRight"
-        onclick="useItem()"><img src=${hasDesertRose ? "imgs/InventoryItems/DesertRose.png" : (hasSilverKey ? "imgs/InventoryItems/DesertRose_Slot.png" : "imgs/InventoryItems/Empty_Slot.png")}                  
+        onclick="useItem()"><img src=${hasDesertRose ? "imgs/inventory_items/DesertRose.png" : (hasSilverKey ? "imgs/inventory_items/DesertRose_Slot.png" : "imgs/inventory_items/Empty_Slot.png")}                  
         onmouseenter="onHoverTooltip('inventory_desertRose')"
         onmouseleave="if(hasDesertRose){clearTooltip()}"></div>
         <div id="Inventory_Slot7" class="inventorySlots inventoryLeft inventoryBottom"
-        onclick="useItem()"><img src=${hasCopperKey ? "imgs/InventoryItems/CopperKey.png" : "imgs/InventoryItems/Empty_Slot.png"}
+        onclick="useItem()"><img src=${hasCopperKey ? "imgs/inventory_items/CopperKey.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('inventory_copperKey')"
         onmouseleave="if(hasCopperKey){clearTooltip()}"></div>
         <div id="Inventory_Slot8" class="inventorySlots inventoryBottom"
-        onclick="useItem()"><img src=${hasSilverKey ? "imgs/InventoryItems/SilverKey.png" : "imgs/InventoryItems/Empty_Slot.png"}
+        onclick="useItem()"><img src=${hasSilverKey ? "imgs/inventory_items/SilverKey.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('inventory_SilverKey')"
         onmouseleave="if(hasSilverKey){clearTooltip()}"></div>
         <div id="Inventory_Slot9" class="inventorySlots inventoryRight inventoryBottom"
-        onclick="useItem()"><img src=${hasGoat ? "imgs/InventoryItems/Goat.png" : "imgs/InventoryItems/Empty_Slot.png"}
+        onclick="useItem('goat')"><img src=${hasGoat ? "imgs/inventory_items/Goat.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('goat')"
         onmouseleave="if(hasGoat){clearTooltip()}"></div>
         </div>
@@ -304,7 +334,7 @@ function updateView() {
                     <div>Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
         </div>   
             <div class="worldActions">
-                <button class="restButton"
+                <button
                 onclick="startGame()">Start game</button>
             </div>
             <div class="onHoverText">${onHoverText}</div>
@@ -370,6 +400,7 @@ function startGame() {
         playerDamage = 25;
         playerClass = "Adventurer"
     }
+    adventureText = "You step out of your tent, ready for adventure!";
     mapLocationY = 5;
     mapLocationX = 5;
     isGameRunning = true;
@@ -387,8 +418,6 @@ function rest() {
         changeLocation();
     }
     else {
-        onMouseEnterCooldown = true;
-        setTimeout(mouseOverCooldown, 1000)
         playerEnergy = playerMaxEnergy;
         adventureText = 'You take a moment to rest and recover your energy!';
     }
@@ -400,12 +429,14 @@ function passOut() {
     stolenGoldAmount = Math.floor(playerGold * 0.25);
     passedOut = true;
     nextStepOasis = false;
-    if (playerGold > stolenGoldAmount) {
+    if (playerGold > stolenGoldAmount && stolenGoldAmount != 0) {
         adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to ' + stolenGoldAmount + ' gold from your gold pouch..'
         playerGold -= stolenGoldAmount;
     } else if (playerGold <= stolenGoldAmount) {
         adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!'
         playerGold = 0;
+    }else if (stolenGoldAmount == 0){
+        adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite..'
     }
 
     updateView();
@@ -449,7 +480,7 @@ function setUpEnemy() {
 
 function attack() {
 
-    attackCooldown = true;
+    actionMenu = true;
     enemyHealth -= playerDamage;
     adventureText = "You deal " + playerDamage + " damage!"
 
@@ -474,7 +505,7 @@ function items() {
 function winBattle() {
     worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
     inBattle = false;
-    attackCooldown = false;
+    actionMenu = false;
     adventureText = "You emerge victorious and looted " + enemyGold + " gold from the corpse... ";
     onHoverText = "";
     playerGold += enemyGold;
@@ -484,7 +515,7 @@ function winBattle() {
 function flee() {
     worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
     inBattle = false;
-    attackCooldown = false;
+    actionMenu = false;
     adventureText = "You escaped!";
     onHoverText = "";
     updateView();
@@ -494,7 +525,7 @@ function takeDamage() {
 
     playerHealth -= enemyDamage;
     adventureText = "The " + enemyName + " attacks you for " + enemyDamage + " damage!";
-    attackCooldown = false;
+    actionMenu = false;
     if (playerHealth <= 0) {
 
         die();
@@ -527,9 +558,7 @@ function buyItem(item) {
                 playerGold -= 12;
             }
         } else if (playerGold < 12) {
-            onMouseEnterCooldown = true;
             adventureText = "You do not have enough gold!"
-            setTimeout(mouseOverCooldown, 1000)
         }
     }
 
@@ -538,13 +567,12 @@ function buyItem(item) {
 
             if (!hasFishingRod) {
                 hasFishingRod = true;
+                areaHasWorldItem = false;
                 adventureText = "You bought a fishing rod."
                 playerGold -= 150;
             }
         } else if (playerGold < 150) {
-            onMouseEnterCooldown = true;
             adventureText = "You do not have enough gold!"
-            setTimeout(mouseOverCooldown, 1000)
         }
 
     }
@@ -555,16 +583,25 @@ function buyItem(item) {
             hasDesertRose = false;
             adventureText = "You traded the rose for a silver key!"
         }else if (!hasDesertRose){
-            onMouseEnterCooldown = true;
             adventureText = "You don't have the desert rose! There is a rumour it can be found if you keep heading south-east in the desert...."
-            setTimeout(mouseOverCooldown, 1000)
         }
     }
+    updateView();
+}
 
+function pickUpItem(item){
     if (item == "desertRose"){
         if (!hasDesertRose && !hasSilverKey){
             hasDesertRose = true;
+            areaHasWorldItem = false;
             adventureText = "You carefully pluck the rare desert rose from the hidden oasis.."
+        }
+    }
+    if (item == "goat"){
+        if (!hasGoat && !returnedGoat){
+            hasGoat = true;
+            areaHasWorldItem = false;
+            adventureText = "You take the goat!"
         }
     }
     updateView();
@@ -575,12 +612,15 @@ function useItem(item) {
         if (playerHealth < playerMaxHealth) {
             eatApple();
         } else {
-            onMouseEnterCooldown = true;
             adventureText = "You are full!"
-            setTimeout(mouseOverCooldown, 1000)
-            updateView();
+          
         }
     }
+    if (item == 'goat') {
+        returnedGoat = true;
+        hasGoat = false;
+    }  
+    updateView();
 }
 
 function eatApple() {
@@ -588,16 +628,19 @@ function eatApple() {
         hasApple1 = false;
         adventureText = "You eat an apple.. +25 health!"
         heal(25);
+        onHoverText = "";
     }
     if (hasApple1 && hasApple2 && !hasApple3) {
         hasApple2 = false;
         adventureText = "You eat an apple.. +25 health!"
         heal(25);
+        onHoverText = "";
     }
     if (hasApple1 && hasApple2 && hasApple3) {
         hasApple3 = false;
         adventureText = "You eat an apple.. +25 health!"
         heal(25);
+        onHoverText = "";
     }
     updateView();
 }
@@ -607,10 +650,6 @@ function heal(healAmount) {
     if (playerHealth >= playerMaxHealth) {
         playerHealth = playerMaxHealth;
     }
-}
-
-function mouseOverCooldown() {
-    onMouseEnterCooldown = false;
 }
 
 function onHoverTooltip(button) {
@@ -660,9 +699,6 @@ function onHoverTooltip(button) {
     }
 
     //clears
-    if (button == 'enemyTurn') {
-        onHoverText = "The " + enemyName + " attacks"
-    }
     if (button == 'clear' && passedOut && playerGold > stolenGoldAmount) {
         onHoverText = "A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to " + stolenGoldAmount + " gold from your gold pouch.."
         updateView();
@@ -672,16 +708,16 @@ function onHoverTooltip(button) {
     }
 
     //inventory items
-    if (button == 'inventory_apple1' && hasApple1 && onHoverText != "You see an apple.") {
-        onHoverText = "You see an apple."
+    if (button == 'inventory_apple1' && hasApple1 && onHoverText != "Eat apple?") {
+        onHoverText = "Eat apple?"
         updateView();
     }
-    if (button == 'inventory_apple2' && hasApple1 && onHoverText != "You see an apple.") {
-        onHoverText = "You see an apple."
+    if (button == 'inventory_apple2' && hasApple1 && onHoverText != "Eat apple?") {
+        onHoverText = "Eat apple?"
         updateView();
     }
-    if (button == 'inventory_apple3' && hasApple1 && onHoverText != "You see an apple.") {
-        onHoverText = "You see an apple."
+    if (button == 'inventory_apple3' && hasApple1 && onHoverText != "Eat apple?") {
+        onHoverText = "Eat apple?"
         updateView();
     }
 }
@@ -693,16 +729,17 @@ function clearTooltip() {
 
 
 function playerStates() {
-    if (goingLeft == true) {
+    // if (goingLeft == true) {
 
-        return "imgs/Character_L.png"
+    //     return "imgs/Character_L.png"
 
-    }
-    else {
+    // }
+    // else {
 
-        return "imgs/Character_R.png"
+    //     return "imgs/Character_R.png"
 
-    }
+    // }
+    return "imgs/worlditemstest.png"
 }
 
 function moveCharacter(direction) {
@@ -1017,6 +1054,8 @@ function changeLocation() {
         inGrasslands = false;
         inDesert = true;
         inOasis = false;
+        
+        areaHasWorldItem = false;
 
         lostInDesertNorth = false;
         lostInDesertSouth = false;
@@ -1160,6 +1199,9 @@ function changeLocation() {
         canGoDown = false;
         canGoLeft = false;
         canGoRight = true;
+
+        areaHasWorldItem = false;
+        areaHasRandomEncounters = true;
     }
     if (mapLocationY == 4 && mapLocationX == 1) {
         canGoUp = false;
@@ -1212,6 +1254,7 @@ function changeLocation() {
         canGoRight = false;
 
         inShopEast = false;
+        areaHasWorldItem = false;
         areaHasRandomEncounters = false;
     }
     if (mapLocationY == 4 && mapLocationX == 9) {
@@ -1233,6 +1276,17 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = false;
+
+        inGoatArea = true;
+        areaHasRandomEncounters = false;
+
+        if(!hasGoat || !returnedGoat){
+            areaHasWorldItem = true;
+            worldItem = 'imgs/world_items/Goat_WorldItem.png'
+        }
+        if (hasGoat || returnedGoat){ 
+            areaHasWorldItem = false;
+        }
     }
     // if(mapLocationY == 5 && mapLocationX == 1){
 
@@ -1254,6 +1308,7 @@ function changeLocation() {
 
         areaHasRandomEncounters = true;
         inGrasslands = true;
+        inMainCampsite = false;
         inCampsite = false;
     }
     if (mapLocationY == 5 && mapLocationX == 5) {
@@ -1262,13 +1317,15 @@ function changeLocation() {
         canGoLeft = true;
         canGoRight = true;
 
+        inMainCampsite = true;
         inCampsite = true;
         areaHasRandomEncounters = false;
+
         lostInDesertNorth = false;
         lostInDesertSouth = false;
         lostInDesertEast = false;
         lostInDesertWest = false;
-        inOasis = false;
+        inOasis = false;        
     }
     if (mapLocationY == 5 && mapLocationX == 6) {
         canGoUp = false;
@@ -1278,6 +1335,7 @@ function changeLocation() {
 
         areaHasRandomEncounters = true;
         inGrasslands = true;
+        inMainCampsite = false;
         inCampsite = false;
     }
     if (mapLocationY == 5 && mapLocationX == 7) {
@@ -1293,6 +1351,14 @@ function changeLocation() {
         canGoRight = false;
 
         inShopEast = true;
+
+        if(!hasFishingRod){
+            areaHasWorldItem = true;
+            worldItem = 'imgs/world_items/FishingRod_WorldItem.png'
+        }
+        if (hasFishingRod){ 
+            areaHasWorldItem = false;
+        }
     }
     if (mapLocationY == 5 && mapLocationX == 9) {
         canGoUp = false;
@@ -1313,6 +1379,9 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = true;
+
+        areaHasWorldItem = false;
+        areaHasRandomEncounters = true;
     }
     if (mapLocationY == 6 && mapLocationX == 1) {
         canGoUp = false;
@@ -1353,6 +1422,8 @@ function changeLocation() {
 
         inGrasslands = true;
         areaHasRandomEncounters = true;
+
+        inMainCampsite = false;
         inCampsite = false;
     }
     if (mapLocationY == 6 && mapLocationX == 6) {
@@ -1602,9 +1673,18 @@ function changeLocation() {
         canGoLeft = true;
         canGoRight = true;
 
+        
         areaHasRandomEncounters = false;
 
         adventureText = "You have found a hidden oasis" + (hasDesertRose || hasSilverKey ? "!" : "! There is a rare desert rose growing here!")
+        
+        if(!hasDesertRose || !hasSilverKey){
+            areaHasWorldItem = true;
+            worldItem = 'imgs/world_items/DesertRose_WorldItem.png'
+        }
+        if (hasDesertRose || hasSilverKey){ 
+            areaHasWorldItem = false; 
+        }
 
         lostInDesertNorth = false;
         lostInDesertSouth = false;

@@ -7,13 +7,30 @@ html{
 .img{
     image-rendering: pixelated;
 }
+.playerContainer{
+    width: 768px;
+    height: 467px;
+    position: relative;
+}
 .player{
+    width: 768px;
+    height: 467px;
+    image-rendering: pixelated;
+    position: absolute;
+}
+.worldItem{
+    width: 768px;
+    height: 467px;
+    image-rendering: pixelated;
+    position: absolute;
+}
+.playerInBattle{
     width: 768px;
     height: 467px;
     image-rendering: pixelated;
 }
 .characterSelect{
-    margin-top: 400px;
+    margin-top: 350px;
     width: 768px;
     height: 467px;
     image-rendering: pixelated;

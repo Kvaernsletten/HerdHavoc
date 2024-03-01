@@ -1,8 +1,8 @@
+
+
 Define rules for if area has random encounters**
 
 change combat flow
-
-separate adventureInfo and *new* onmouseoverInfo
 
 gender select?
 
