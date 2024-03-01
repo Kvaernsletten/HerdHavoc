@@ -1,7 +1,4 @@
 
-
-Define rules for if area has random encounters**
-
 change combat flow
 
 gender select?
@@ -13,3 +10,5 @@ enemy variation > stronger enemies in certain areas
 level ups, more damage with levels & rework damage calculations for player and enemies
 
 add style cursor pointer to inventory items
+
+NPC dialogue buttons
