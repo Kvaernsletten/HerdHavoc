@@ -82,6 +82,7 @@ let inShopEast = false;
 let inGoatArea1 = false;
 let inGoatArea2 = false;
 let inGoatArea3 = false;
+let inFishableArea = false;
 let inFrontOfCopperDoor = false;
 let inFrontOfSilverDoor = false;
 
@@ -209,7 +210,7 @@ function updateView() {
                 ` :
                     /*HTML*/``}
                     
-                ${inShopEast ?
+                ${inShopEast && !hasfishingRod ?
                     /*HTML*/`<button
                 ${inShopEast && !hasFishingRod ? 'onclick="buyItem(\'fishingRod\')"' : 'disabled="disabled"'}
                 onmouseenter="{onHoverTooltip('buyFishingRod')}"
@@ -688,20 +689,37 @@ function useItem(item) {
     if (item == 'goat' && inMainCampsite && hasGoat1) {
         returnedGoat1 = true;
         hasGoat1 = false;
+        adventureText = "You return the goat to your campsite!"
         
     }  
     if (item == 'goat' && inMainCampsite && hasGoat2) {
         returnedGoat2 = true;
         hasGoat2 = false;
+        adventureText = "You return the goat to your campsite!"
         
     }  
     if (item == 'goat' && inMainCampsite && hasGoat3) {
         returnedGoat3 = true;
         hasGoat3 = false;
+        adventureText = "You return the goat to your campsite!"
         
     }  
     else if(item == 'goat' && !inMainCampsite){
         adventureText = "You should bring the goat back to your main campsite first!"
+    }
+
+    if (item == 'fishingRod' && inFishableArea && !hasCopperKey){
+        if(!hasCopperKey){
+            hasCopperKey = true;
+        adventureText = "You use your fishing rod to pull an old rusty key from the depths of the forest lake!"
+        }
+        else if(hasCopperKey){
+            adventureText = "This water doesn't seem suitable for fish to live in..."
+        }
+ 
+    }
+    else if (item == 'fishingRod' && !inFishableArea){
+        adventureText = "There's no fishable water in this area... You might try elsewhere!"
     }
 
     if( item == 'desertRose'){
@@ -1497,6 +1515,7 @@ function setUpArea() {
         inGoatArea1 = false;
         inGoatArea2 = false;
         inGoatArea3 = false;  
+        inFishableArea = false;
     }
     if (mapLocationY == 5 && mapLocationX == 6) {
         canGoUp = false;
@@ -1643,6 +1662,8 @@ function setUpArea() {
         canGoDown = false;
         canGoLeft = false;
         canGoRight = false;
+
+        inFishableArea = true;
     }
     if (mapLocationY == 6 && mapLocationX == 10) {
         canGoUp = false;
@@ -1724,6 +1745,8 @@ function setUpArea() {
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        inFishableArea = false;
     }
     if (mapLocationY == 7 && mapLocationX == 10) {
         canGoUp = true;
