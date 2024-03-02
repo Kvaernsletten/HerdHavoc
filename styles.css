@@ -30,18 +30,18 @@ html{
     image-rendering: pixelated;
     position: absolute;
 }
-.playerInBattle{
-    width: 768px;
+.playerInCombat{
+    width: 384px;
+    height: 467px;
+    image-rendering: pixelated;
+}
+.enemyInCombat{
+    width: 384px;
     height: 467px;
     image-rendering: pixelated;
 }
 .characterSelect{
     margin-top: 350px;
-    width: 768px;
-    height: 467px;
-    image-rendering: pixelated;
-}
-.enemy{
     width: 768px;
     height: 467px;
     image-rendering: pixelated;

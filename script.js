@@ -116,8 +116,8 @@ function updateView() {
         <div class="topBattleDiv">
         </div>
         <div class="middleBattleDiv">
-            <img class="playerInBattle" src="imgs/Character_R.png">
-            <img class="enemy" src="imgs/Character_L.png">
+            <img class="playerInCombat" src="imgs/Character_Male_inCombat.png">
+            <img class="enemyInCombat" src="imgs/Enemy_sillyBandit_inCombat.png">
         </div>
         <div class="bottomBattleDiv">
         </div> 
@@ -705,7 +705,7 @@ function useItem(item) {
     }
 
     if( item == 'desertRose'){
-        adventureText = "The rose has a vile stench omg gross!"
+        adventureText = "The rose has a vile stench! You did not expect that!"
     }
 
     if (item == 'copperKey' && inFrontOfCopperDoor && !copperKeyUsed){
@@ -1878,7 +1878,6 @@ function setUpArea() {
         canGoLeft = true;
         canGoRight = true;
 
-        
         areaHasRandomEncounters = false;
 
         adventureText = "You have found a hidden oasis" + (hasDesertRose || hasSilverKey ? "!" : "! There is a rare desert rose growing here!")
