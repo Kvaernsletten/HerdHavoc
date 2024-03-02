@@ -704,16 +704,16 @@ function useItem(item) {
         adventureText = "You return the goat to your campsite!"
         
     }  
-    else if(item == 'goat' && !inMainCampsite){
+    else if(item == 'goat' && !inMainCampsite && (hasGoat1 || hasGoat2 || hasGoat3)){
         adventureText = "You should bring the goat back to your main campsite first!"
     }
 
-    if (item == 'fishingRod' && inFishableArea && !hasCopperKey){
+    if (item == 'fishingRod' && inFishableArea && !hasCopperKey && hasFishingRod){
         if(!hasCopperKey){
             hasCopperKey = true;
         adventureText = "You use your fishing rod to pull an old rusty key from the depths of the forest lake!"
         }
-        else if(hasCopperKey){
+        else if(item == 'fishingRod' && hasCopperKey && hasFishingRod){
             adventureText = "This water doesn't seem suitable for fish to live in..."
         }
  
@@ -722,27 +722,27 @@ function useItem(item) {
         adventureText = "There's no fishable water in this area... You might try elsewhere!"
     }
 
-    if( item == 'desertRose'){
+    if( item == 'desertRose' && hasDesertRose){
         adventureText = "The rose has a vile stench! You did not expect that!"
     }
 
-    if (item == 'copperKey' && inFrontOfCopperDoor && !copperKeyUsed){
+    if (item == 'copperKey' && hasCopperKey && inFrontOfCopperDoor && !copperKeyUsed){
         copperKeyUsed = true;
         doorUnlocked = true;
         canGoUp = true;
         changeLocation();
     }
-    else if(item == 'copperKey' && !inFrontOfCopperDoor || copperKeyUsed){
+    else if(item == 'copperKey' && hasCopperKey && !inFrontOfCopperDoor || copperKeyUsed){
         adventureText = "There are no compatible locks for this key in the area..."
     }
 
-    if (item == 'silverKey' && inFrontOfSilverDoor && !silverKeyUsed){
+    if (item == 'silverKey' && hasSilverKey && inFrontOfSilverDoor && !silverKeyUsed){
         silverKeyUsed = true;
         doorUnlocked = true;
         canGoUp = true;
         changeLocation();
     }
-    else if(item == 'silverKey' && !inFrontOfSilverDoor || silverKeyUsed){
+    else if(item == 'silverKey' && hasSilverKey && !inFrontOfSilverDoor || silverKeyUsed){
         adventureText = "There are no compatible locks for this key in the area..."
     }
 
