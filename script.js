@@ -210,7 +210,7 @@ function updateView() {
                 ` :
                     /*HTML*/``}
                     
-                ${inShopEast && !hasfishingRod ?
+                ${inShopEast && !hasFishingRod ?
                     /*HTML*/`<button
                 ${inShopEast && !hasFishingRod ? 'onclick="buyItem(\'fishingRod\')"' : 'disabled="disabled"'}
                 onmouseenter="{onHoverTooltip('buyFishingRod')}"
@@ -718,7 +718,7 @@ function useItem(item) {
         }
  
     }
-    else if (item == 'fishingRod' && !inFishableArea){
+    else if (item == 'fishingRod' && !inFishableArea && hasFishingRod){
         adventureText = "There's no fishable water in this area... You might try elsewhere!"
     }
 
