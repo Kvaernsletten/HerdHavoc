@@ -45,6 +45,8 @@ let hasGoat1 = false;
 let hasGoat2 = false;
 let hasGoat3 = false;
 
+let copperKeyUsed = false;
+let silverKeyUsed = false;
 let returnedGoat1 = false;
 let returnedGoat2 = false;
 let returnedGoat3 = false;
@@ -80,6 +82,10 @@ let inShopEast = false;
 let inGoatArea1 = false;
 let inGoatArea2 = false;
 let inGoatArea3 = false;
+let inFrontOfCopperDoor = false;
+let inFrontOfSilverDoor = false;
+
+let doorUnlocked = false;
 
 // Combat states
 let actionMenu = false;
@@ -99,7 +105,7 @@ let nextStepOasis = false;
 let buttonDisabled = false;
 
 
-changeLocation();
+setUpArea();
 updateView();
 function updateView() {
 
@@ -281,37 +287,37 @@ function updateView() {
         </div>
 
         <div id="Inventory_Slot4" class="inventorySlots inventoryLeft"
-        onclick="useItem()">
+        onclick="useItem('potion')">
         <img src=${hasPotion ? "imgs/inventory_items/Potion.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('inventory_potion')"
         onmouseleave="if(hasPotion){clearTooltip()}">
         </div>
 
         <div id="Inventory_Slot5" class="inventorySlots"
-        onclick="useItem()">
+        onclick="useItem('fishingRod')">
         <img src=${hasFishingRod ? "imgs/inventory_items/Fishingrod.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('inventory_fishingRod')"
         onmouseleave="if(hasFishingRod){clearTooltip()}">
         </div>
 
         <div id="Inventory_Slot6" class="inventorySlots inventoryRight"
-        onclick="useItem()">
+        onclick="useItem('desertRose')">
         <img src=${hasDesertRose ? "imgs/inventory_items/DesertRose.png" : (hasSilverKey ? "imgs/inventory_items/DesertRose_Slot.png" : "imgs/inventory_items/Empty_Slot.png")}                  
         onmouseenter="onHoverTooltip('inventory_desertRose')"
         onmouseleave="if(hasDesertRose){clearTooltip()}">
         </div>
 
         <div id="Inventory_Slot7" class="inventorySlots inventoryLeft inventoryBottom"
-        onclick="useItem()">
+        onclick="useItem('copperKey')">
         <img src=${hasCopperKey ? "imgs/inventory_items/CopperKey.png" : "imgs/inventory_items/Empty_Slot.png"}
         onmouseenter="onHoverTooltip('inventory_copperKey')"
         onmouseleave="if(hasCopperKey){clearTooltip()}">
         </div>
 
         <div id="Inventory_Slot8" class="inventorySlots inventoryBottom"
-        onclick="useItem()">
+        onclick="useItem('silverKey')">
         <img src=${hasSilverKey ? "imgs/inventory_items/SilverKey.png" : "imgs/inventory_items/Empty_Slot.png"}
-        onmouseenter="onHoverTooltip('inventory_SilverKey')"
+        onmouseenter="onHoverTooltip('inventory_silverKey')"
         onmouseleave="if(hasSilverKey){clearTooltip()}">
         </div>
 
@@ -442,7 +448,7 @@ function startGame() {
     mapLocationX = 5;
     isGameRunning = true;
     inventoryGoat = "imgs/inventory_items/Empty_Slot.png"
-    changeLocation();
+    setUpArea();
     updateView();
 }
 
@@ -453,7 +459,7 @@ function rest() {
         mapLocationY = 5;
         mapLocationX = 5;
         passedOut = false;
-        changeLocation();
+        setUpArea();
     }
     else {
         playerEnergy = playerMaxEnergy;
@@ -697,6 +703,31 @@ function useItem(item) {
     else if(item == 'goat' && !inMainCampsite){
         adventureText = "You should bring the goat back to your main campsite first!"
     }
+
+    if( item == 'desertRose'){
+        adventureText = "The rose has a vile stench omg gross!"
+    }
+
+    if (item == 'copperKey' && inFrontOfCopperDoor && !copperKeyUsed){
+        copperKeyUsed = true;
+        doorUnlocked = true;
+        canGoUp = true;
+        changeLocation();
+    }
+    else if(item == 'copperKey' && !inFrontOfCopperDoor || copperKeyUsed){
+        adventureText = "There are no compatible locks for this key in the area..."
+    }
+
+    if (item == 'silverKey' && inFrontOfSilverDoor && !silverKeyUsed){
+        silverKeyUsed = true;
+        doorUnlocked = true;
+        canGoUp = true;
+        changeLocation();
+    }
+    else if(item == 'silverKey' && !inFrontOfSilverDoor || silverKeyUsed){
+        adventureText = "There are no compatible locks for this key in the area..."
+    }
+
     updateView();
 }
 
@@ -772,15 +803,6 @@ function onHoverTooltip(button) {
     }
     if (button == 'buyFishingRod' && onHoverText != "Buy fishing rod? (150 gold)") {
         onHoverText = "Buy fishing rod? (150 gold)"
-        updateView();
-    }
-
-    //clears
-    if (button == 'clear' && passedOut && playerGold > stolenGoldAmount) {
-        onHoverText = "A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to " + stolenGoldAmount + " gold from your gold pouch.."
-        updateView();
-    } else if (button == 'clear' && passedOut && playerGold <= 0) {
-        onHoverText = "A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!"
         updateView();
     }
 
@@ -955,13 +977,13 @@ function moveCharacter(direction) {
             mapLocationX = 0;
         }
     }
-    changeLocation();
+    setUpArea();
     updateView();
 }
 
 
 
-function changeLocation() {
+function setUpArea() {
 
     // Y: 0
     if (mapLocationY == 0 && mapLocationX == 0) {
@@ -1097,19 +1119,31 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+        
+        doorUnlocked = false;
+        inFrontOfCopperDoor = false;
+        areaHasRandomEncounters = true;
     }
     if (mapLocationY == 1 && mapLocationX == 9) {
-        if (!hasSilverKey) {
-            canGoUp = false;
-        } else {
-            canGoUp = true;
+        
+        inFrontOfCopperDoor = true;
+
+        if(copperKeyUsed){
+            doorUnlocked = true;
         }
+        if (doorUnlocked) {
+            canGoUp = true;
+        } else {
+            canGoUp = false;
+        }
+
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
 
         inGrasslands = true;
         inCave = false;
+        areaHasRandomEncounters = false;
     }
     if (mapLocationY == 1 && mapLocationX == 10) {
         canGoUp = true;
@@ -1117,7 +1151,10 @@ function changeLocation() {
         canGoLeft = true;
         canGoRight = false;
 
+        doorUnlocked = false;
         inCampsite = false;
+        inFrontOfCopperDoor = false;
+        areaHasRandomEncounters = true;
     }
 
     // Y: 2
@@ -1191,35 +1228,24 @@ function changeLocation() {
         canGoLeft = false;
         canGoRight = true;
 
-        inGoatArea3 = true;
-        areaHasRandomEncounters = false;
-
-        if(!hasGoat3 || !returnedGoat3){
-            areaHasWorldItem = true;
-            worldItem = 'imgs/world_items/Goat3_WorldItem.png'
-        }
-        if (hasGoat3 || returnedGoat3){ 
-            areaHasWorldItem = false;
-        }
     }
     if (mapLocationY == 2 && mapLocationX == 8) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
-
-        inGoatArea3 = false;
-        areaHasWorldItem = false;
-        areaHasRandomEncounters = true;
     }
     if (mapLocationY == 2 && mapLocationX == 9) {
-        canGoUp = true;
+        canGoUp = false;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = false;
 
+        doorUnlocked = false;
         inGrasslands = false;
         inCave = true;
+        inFrontOfCopperDoor = false;
+        areaHasRandomEncounters = true;
     }
     if (mapLocationY == 2 && mapLocationX == 10) {
         canGoUp = false;
@@ -1299,7 +1325,7 @@ function changeLocation() {
     }
     if (mapLocationY == 3 && mapLocationX == 9) {
         canGoUp = false;
-        canGoDown = true;
+        canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
     }
@@ -1308,6 +1334,10 @@ function changeLocation() {
         canGoDown = false;
         canGoLeft = true;
         canGoRight = false;
+
+        inFrontOfSilverDoor = false;
+        areaHasRandomEncounters = true;
+        doorUnlocked = false;
     }
 
     // Y: 4
@@ -1380,12 +1410,27 @@ function changeLocation() {
         canGoDown = false;
         canGoLeft = false;
         canGoRight = true;
+
+        inFrontOfSilverDoor = false;
+        areaHasRandomEncounters = true;
+        doorUnlocked = false;
     }
     if (mapLocationY == 4 && mapLocationX == 10) {
-        canGoUp = true;
+        inFrontOfSilverDoor = true;
+        areaHasRandomEncounters = false;
+
+        if(silverKeyUsed){
+            doorUnlocked = true;
+        }
+        if (doorUnlocked) {
+            canGoUp = true;
+        } else {
+            canGoUp = false;
+        }
         canGoDown = true;
         canGoLeft = true;
         canGoRight = false;
+
     }
 
     // Y: 5
@@ -1439,11 +1484,19 @@ function changeLocation() {
         inCampsite = true;
         areaHasRandomEncounters = false;
 
+        inShopEast = false;
+        inShopWest = false;
+        inFrontOfCopperDoor = false;
+        inFrontOfSilverDoor = false;
+        doorUnlocked = false;
         lostInDesertNorth = false;
         lostInDesertSouth = false;
         lostInDesertEast = false;
         lostInDesertWest = false;
-        inOasis = false;        
+        inOasis = false;      
+        inGoatArea1 = false;
+        inGoatArea2 = false;
+        inGoatArea3 = false;  
     }
     if (mapLocationY == 5 && mapLocationX == 6) {
         canGoUp = false;
@@ -1489,6 +1542,13 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = false;
+
+        inGoatArea3 = false;
+        areaHasWorldItem = false;
+        areaHasRandomEncounters = true;
+
+        inFrontOfSilverDoor = false;
+        doorUnlocked = false;
     }
 
     // Y: 6
@@ -1589,6 +1649,17 @@ function changeLocation() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = false;
+
+        inGoatArea3 = true;
+        areaHasRandomEncounters = false;
+
+        if(!hasGoat3 || !returnedGoat3){
+            areaHasWorldItem = true;
+            worldItem = 'imgs/world_items/Goat3_WorldItem.png'
+        }
+        if (hasGoat3 || returnedGoat3){ 
+            areaHasWorldItem = false;
+        }
     }
 
     // Y: 7
@@ -1871,7 +1942,7 @@ function changeLocation() {
         canGoRight = false;
     }
 
-    worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
+    changeLocation();
 
     if (areaHasRandomEncounters) {
         encounterChance = Math.floor(Math.random() * (10 - 1) + 1);
@@ -1880,3 +1951,14 @@ function changeLocation() {
         }
     }
 }
+
+function changeLocation(){
+    if(doorUnlocked){
+        worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}` + `-unlocked` + `.png)"`
+    }
+    else{
+    worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
+    }
+}
+
+
