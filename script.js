@@ -721,15 +721,14 @@ function useItem(item) {
         adventureText = "You should bring the goat back to your main campsite first!"
     }
 
-    if (item == 'fishingRod' && inFishableArea && !hasCopperKey && hasFishingRod){
+    if (item == 'fishingRod' && inFishableArea && hasFishingRod){
         if(!hasCopperKey){
             hasCopperKey = true;
         adventureText = "You use your fishing rod to pull an old rusty key from the depths of the forest lake!"
         }
-        else if(item == 'fishingRod' && inFishableArea && hasCopperKey && hasFishingRod){
+        else if(hasCopperKey){
             adventureText = "This water doesn't seem suitable for fish to live in..."
         }
- 
     }
     else if (item == 'fishingRod' && !inFishableArea && hasFishingRod){
         adventureText = "There's no fishable water in this area... You might try elsewhere!"
