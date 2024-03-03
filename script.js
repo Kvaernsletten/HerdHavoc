@@ -104,6 +104,8 @@ let nextStepOasis = false;
 
 //UI
 let buttonDisabled = false;
+let healthBarColor = "lightgreen";
+let energyBarColor = "lightgreen";
 
 
 setUpArea();
@@ -127,8 +129,8 @@ function updateView() {
         <div class="worldInfo_container">
             <div class="playerInfo">${playerName ?? "Dio"}
                 <div>${playerClass ?? "Adventurer"} Lv. ${playerLevel}</div>
-                    <div>Health: ${playerHealth + " / " + playerMaxHealth}</div>
-                    <div>Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
+                    <div style="color:${healthBarColor}">Health: ${playerHealth + " / " + playerMaxHealth}</div>
+                    <div style="color:${energyBarColor}">Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
             </div>            
             <div class="worldActions">
                 ${actionMenu ? /*HTML*/ `` 
@@ -181,8 +183,8 @@ function updateView() {
     <div class="worldInfo_container">
         <div class="playerInfo">${playerName ?? "Dio"}
             <div>${playerClass ?? "Adventurer"} Lv. ${playerLevel}</div>
-                    <div>Health: ${playerHealth + " / " + playerMaxHealth}</div>
-                    <div>Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
+            <div style="color:${healthBarColor}">Health: ${playerHealth + " / " + playerMaxHealth}</div>
+            <div style="color:${energyBarColor}">Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
         </div>   
             <div class="worldActions">
                 
@@ -326,7 +328,7 @@ function updateView() {
         onclick="useItem('goat')">
         <img src=${hasGoat1 || hasGoat2 || hasGoat3 ? inventoryGoat : "imgs/inventory_items/Goat_Empty.png"} 
         onmouseenter="onHoverTooltip('inventory_goat')"
-        onmouseleave="if(hasGoat1 || hasGoat2 || hasGoat3){clearTooltip()}"></div>
+        onmouseleave="if((hasGoat1 || hasGoat2 || hasGoat3) || (returnedGoat1 || returnedGoat2 || returnedGoat3)){clearTooltip()}"></div>
         </div>
     </div>
     `
@@ -466,13 +468,23 @@ function rest() {
         playerEnergy = playerMaxEnergy;
         adventureText = 'You take a moment to rest and recover your energy!';
     }
-
+    statusBars();
     updateView();
 }
 
 function passOut() {
     stolenGoldAmount = Math.floor(playerGold * 0.25);
     passedOut = true;
+    areaHasWorldItem = false;
+    inShopWest = false;
+    inShopEast = false;
+    inGoatArea1 = false;
+    inGoatArea2 = false;
+    inGoatArea3 = false;
+    inFishableArea = false;
+    inFrontOfCopperDoor = false;
+    inFrontOfSilverDoor = false;
+    inOasis = false;
     nextStepOasis = false;
     if (playerGold > stolenGoldAmount && stolenGoldAmount != 0) {
         adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to ' + stolenGoldAmount + ' gold from your gold pouch..'
@@ -575,6 +587,7 @@ function takeDamage() {
 
         die();
     }
+    statusBars();
     updateView();
 }
 
@@ -776,6 +789,7 @@ function heal(healAmount) {
     if (playerHealth >= playerMaxHealth) {
         playerHealth = playerMaxHealth;
     }
+    statusBars();
 }
 
 function onHoverTooltip(button) {
@@ -995,6 +1009,7 @@ function moveCharacter(direction) {
             mapLocationX = 0;
         }
     }
+    statusBars();
     setUpArea();
     updateView();
 }
@@ -1980,6 +1995,29 @@ function changeLocation(){
     }
     else{
     worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
+    }
+}
+
+function statusBars(){
+
+    if(playerHealth > (0.5 * playerMaxHealth)){
+        energyBarColor = 'lightgreen'
+    }
+    if(playerHealth > (0.25 * playerMaxHealth) && playerHealth <= (0.5 * playerMaxHealth)){
+        energyBarColor = 'yellow'
+    }
+    if(playerHealth <= (0.25 * playerMaxHealth)){
+        energyBarColor = 'red'
+    }
+
+    if(playerEnergy > (0.5 * playerMaxEnergy)){
+        energyBarColor = 'lightgreen'
+    }
+    if(playerEnergy > (0.25 * playerMaxEnergy) && playerEnergy <= (0.5 * playerMaxEnergy)){
+        energyBarColor = 'yellow'
+    }
+    if(playerEnergy <= (0.25 * playerMaxEnergy)){
+        energyBarColor = 'red'
     }
 }
 
