@@ -726,7 +726,7 @@ function useItem(item) {
             hasCopperKey = true;
         adventureText = "You use your fishing rod to pull an old rusty key from the depths of the forest lake!"
         }
-        else if(item == 'fishingRod' && hasCopperKey && hasFishingRod){
+        else if(item == 'fishingRod' && inFishableArea && hasCopperKey && hasFishingRod){
             adventureText = "This water doesn't seem suitable for fish to live in..."
         }
  
@@ -745,7 +745,7 @@ function useItem(item) {
         canGoUp = true;
         changeLocation();
     }
-    else if(item == 'copperKey' && hasCopperKey && !inFrontOfCopperDoor || copperKeyUsed){
+    else if(item == 'copperKey' && hasCopperKey && !inFrontOfCopperDoor || item == 'copperKey' && copperKeyUsed){
         adventureText = "There are no compatible locks for this key in the area..."
     }
 
@@ -755,7 +755,7 @@ function useItem(item) {
         canGoUp = true;
         changeLocation();
     }
-    else if(item == 'silverKey' && hasSilverKey && !inFrontOfSilverDoor || silverKeyUsed){
+    else if(item == 'silverKey' && hasSilverKey && !inFrontOfSilverDoor || item == 'silverKey' && silverKeyUsed){
         adventureText = "There are no compatible locks for this key in the area..."
     }
 
@@ -1287,6 +1287,7 @@ function setUpArea() {
         canGoRight = false;
 
         inCampsite = true;
+        areaHasRandomEncounters = false;
     }
 
     // Y: 3

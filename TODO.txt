@@ -1,5 +1,7 @@
 change combat flow
 
+put skull in desert entrance
+
 flee random chance to fail and lose gold?
 
 fix die()
