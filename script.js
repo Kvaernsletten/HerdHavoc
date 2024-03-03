@@ -2001,13 +2001,13 @@ function changeLocation(){
 function statusBars(){
 
     if(playerHealth > (0.5 * playerMaxHealth)){
-        energyBarColor = 'lightgreen'
+        healthBarColor = 'lightgreen'
     }
     if(playerHealth > (0.25 * playerMaxHealth) && playerHealth <= (0.5 * playerMaxHealth)){
-        energyBarColor = 'yellow'
+        healthBarColor = 'yellow'
     }
     if(playerHealth <= (0.25 * playerMaxHealth)){
-        energyBarColor = 'red'
+        healthBarColor = 'red'
     }
 
     if(playerEnergy > (0.5 * playerMaxEnergy)){
