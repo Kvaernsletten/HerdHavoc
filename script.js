@@ -18,23 +18,26 @@ let playerMaxHealth = 100;
 let playerEnergy = 100;
 let playerMaxEnergy = 100;
 let playerDamage;
+let playerXP = 0;
+let playerNextLevelXP = 27;
+let excessXP;
 
 //Enemy stats
 let enemyName;
 let enemyLevel = 1;
 let enemyHealth;
-let enemyEnergy;
 let enemyDamage;
 let enemyGold = 0;
+let yieldXP;
 
 //inventory
-let playerGold = 0;
+let playerGold = 70;
 let stolenGoldAmount;
 
-let hasApple1 = false;
+let hasApple1 = true;
 let hasApple2 = false;
 let hasApple3 = false;
-let hasPotion = false;
+let hasPotion = true;
 let hasFishingRod = false;
 let hasDesertRose = false;
 let hasCopperKey = false;
@@ -108,6 +111,20 @@ let buttonDisabled = false;
 let healthBarColor = "lightgreen";
 let energyBarColor = "lightgreen";
 
+//Music
+let bgm_grasslands = new Audio("sfx/grasslands.ogg")
+let bgm_forest = new Audio("sfx/forest.ogg")
+let bgm_desert = new Audio("sfx/desert.ogg")
+let bgm_cave = new Audio("sfx/cave.ogg")
+let fadeInInterval;
+let fadeOutInterval
+bgm_grasslands.volume = 0.0001;
+bgm_forest.volume = 0.0001;
+bgm_desert.volume = 0.0001;
+bgm_cave.volume = 0.0001;
+
+//SFX
+let coinsAudio = new Audio("sfx/Coins.mp3")
 
 setUpArea();
 updateView();
@@ -121,7 +138,7 @@ function updateView() {
         </div>
         <div class="middleBattleDiv">
             <img class="playerInCombat" src=${playerMale ? "imgs/Character_Male_inCombat.png" : "imgs/Character_Female_inCombat.png"}>
-            <img class="enemyInCombat" src="imgs/Enemy_sillyBandit_inCombat.png">
+            <img class="enemyInCombat" src=${enemySprite}>
         </div>
         <div class="bottomBattleDiv">
         </div> 
@@ -129,12 +146,13 @@ function updateView() {
     </div>
         <div class="worldInfo_container">
             <div class="playerInfo">${playerName ?? "Dio"}
-                <div>${playerClass ?? "Adventurer"} Lv. ${playerLevel}</div>
+                <div>${playerClass ?? "Adventurer"} (Lv. ${playerLevel})</div>
+                    <div>XP: ${playerXP + " / " + playerNextLevelXP}</div>
                     <div style="color:${healthBarColor}">Health: ${playerHealth + " / " + playerMaxHealth}</div>
                     <div style="color:${energyBarColor}">Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
             </div>            
             <div class="worldActions">
-                ${actionMenu ? /*HTML*/ `` 
+                ${actionMenu ? /*HTML*/ ``
                 : /*HTML*/ `<button class="attackButton" 
                 onmouseenter="onHoverTooltip('attack')"
                 onmouseleave="clearTooltip()" 
@@ -151,10 +169,9 @@ function updateView() {
             </div>
         <div class="onHoverText">${onHoverText}</div>
 
-        <div class="enemyInfo">${enemyName ?? "???"}
-        <div>${playerClass ?? "Enemy"} Lv. ${playerLevel}</div>  
-        <div>Health: ${enemyHealth ?? " "}</div>
-        <div>Energy: ${enemyEnergy ?? " "}</div>                    
+        <div class="enemyInfo">${enemyName.charAt(0).toUpperCase() + enemyName.slice(1) ?? "???"}
+        <div>Enemy (Lv. ${enemyLevel})</div>  
+        <div>Health: ${enemyHealth ?? " "}</div>                
     </div>
     `
 
@@ -183,7 +200,8 @@ function updateView() {
     </div>
     <div class="worldInfo_container">
         <div class="playerInfo">${playerName ?? "Dio"}
-            <div>${playerClass ?? "Adventurer"} Lv. ${playerLevel}</div>
+            <div>${playerClass ?? "Adventurer"} (Lv. ${playerLevel})</div>
+            <div>XP: ${playerXP + " / " + playerNextLevelXP}</div>
             <div style="color:${healthBarColor}">Health: ${playerHealth + " / " + playerMaxHealth}</div>
             <div style="color:${energyBarColor}">Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
         </div>   
@@ -201,7 +219,12 @@ function updateView() {
                     /*HTML*/`<button
                 ${inShopWest ? 'onclick="buyItem(\'apple\')"' : 'disabled="disabled"'}
                 onmouseenter="{onHoverTooltip('buyApple')}"
-                onmouseleave="if(onHoverText == 'Buy apple? (12 gold)') {clearTooltip()}">Purchase apple</button> 
+                onmouseleave="if(onHoverText == 'Buy an apple? (12 gold)') {clearTooltip()}">Buy apple</button>
+                <button
+                ${inShopWest ? 'onclick="buyItem(\'potion\')"' : 'disabled="disabled"'}
+                onmouseenter="{onHoverTooltip('buyPotion')}"
+                onmouseleave="if(onHoverText == 'Buy a potion? (50 gold)') {clearTooltip()}">Buy potion</button>  
+                
                 ` :
                     /*HTML*/``}
 
@@ -233,7 +256,7 @@ function updateView() {
                         /*HTML*/`<button
                 ${inOasis && !hasDesertRose && !hasSilverKey ? 'onclick="pickUpItem(\'desertRose\')"' : 'disabled="disabled"'}
                 onmouseenter="{onHoverTooltip('pickUpDesertRose')}"
-                onmouseleave="if(onHoverText == 'Pick up desert rose?') {clearTooltip()}">Pick up</button> 
+                onmouseleave="if(onHoverText == 'Pick up desert rose?') {clearTooltip()}">Take rose</button> 
                 ` :
                     /*HTML*/``}
 
@@ -275,26 +298,26 @@ function updateView() {
         <div id="Inventory_Slot1" class="inventorySlots inventoryLeft inventoryTop"
         onclick="if(hasApple1){useItem('apple')}"><img src=${hasApple1 ? "imgs/inventory_items/Apple.png" : "imgs/inventory_items/Apple_Slot.png"}
         onmouseenter="if(hasApple1){onHoverTooltip('inventory_apple1')}"
-        onmouseleave="if(hasApple1 && onHoverText == 'Eat apple?'){clearTooltip()}">
+        onmouseleave="if(hasApple1 && onHoverText == 'Eat apple? (+25 health)'){clearTooltip()}">
         </div>
 
         <div id="Inventory_Slot2" class="inventorySlots inventoryTop" 
         onclick="if(hasApple2){useItem('apple')}"><img src=${hasApple2 ? "imgs/inventory_items/Apple.png" : "imgs/inventory_items/Apple_Slot.png"}
         onmouseenter="if(hasApple2){onHoverTooltip('inventory_apple2')}"
-        onmouseleave="if(hasApple2 && onHoverText == 'Eat apple?'){clearTooltip()}">
+        onmouseleave="if(hasApple2 && onHoverText == 'Eat apple? (+25 health)'){clearTooltip()}">
         </div>
 
         <div id="Inventory_Slot3" class="inventorySlots inventoryRight inventoryTop"
         onclick="if(hasApple3){useItem('apple')}"><img src=${hasApple3 ? "imgs/inventory_items/Apple.png" : "imgs/inventory_items/Apple_Slot.png"}
         onmouseenter="if(hasApple3){onHoverTooltip('inventory_apple3')}"
-        onmouseleave="if(hasApple3 && onHoverText == 'Eat apple?'){clearTooltip()}">
+        onmouseleave="if(hasApple3 && onHoverText == 'Eat apple? (+25 health)'){clearTooltip()}">
         </div>
 
         <div id="Inventory_Slot4" class="inventorySlots inventoryLeft"
         onclick="useItem('potion')">
-        <img src=${hasPotion ? "imgs/inventory_items/Potion.png" : "imgs/inventory_items/Empty_Slot.png"}
+        <img src=${hasPotion ? "imgs/inventory_items/Potion.png" : "imgs/inventory_items/Potion_Empty.png"}
         onmouseenter="onHoverTooltip('inventory_potion')"
-        onmouseleave="if(hasPotion){clearTooltip()}">
+        onmouseleave="clearTooltip()">
         </div>
 
         <div id="Inventory_Slot5" class="inventorySlots"
@@ -477,23 +500,33 @@ function passOut() {
     stolenGoldAmount = Math.floor(playerGold * 0.25);
     passedOut = true;
     areaHasWorldItem = false;
-    inShopWest = false;
+    nextStepOasis = false;
     inShopEast = false;
+    inShopWest = false;
+    inFrontOfCopperDoor = false;
+    inFrontOfSilverDoor = false;
+    doorUnlocked = false;
+    lostInDesertNorth = false;
+    lostInDesertSouth = false;
+    lostInDesertEast = false;
+    lostInDesertWest = false;
+    inOasis = false;
     inGoatArea1 = false;
     inGoatArea2 = false;
     inGoatArea3 = false;
     inFishableArea = false;
-    inFrontOfCopperDoor = false;
-    inFrontOfSilverDoor = false;
-    inOasis = false;
-    nextStepOasis = false;
+    inGrasslands = false;
+    inForest = false;
+    inDesert = false;
+    inCave = false;
+
     if (playerGold > stolenGoldAmount && stolenGoldAmount != 0) {
         adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to ' + stolenGoldAmount + ' gold from your gold pouch..'
         playerGold -= stolenGoldAmount;
     } else if (playerGold <= stolenGoldAmount) {
         adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!'
         playerGold = 0;
-    }else if (stolenGoldAmount == 0){
+    } else if (stolenGoldAmount == 0) {
         adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite..'
     }
 
@@ -525,15 +558,47 @@ function enterCombat() {
 
 function setUpEnemy() {
 
-    enemyName = "silly bandit"
+    if (inGrasslands) {
+        enemyName = "silly bandit"
+        enemySprite = "imgs/Enemy_sillyBandit_inCombat.png"
+        onHoverText = "Choose an action";
+        enemyGold = Math.floor(Math.random() * 21) + 5;
+        enemyLevel = 1;
+        enemyHealth = 65;
+        enemyDamage = 5;
+        yieldXP = 10;
 
-    onHoverText = "Choose an action";
-    enemyGold = Math.floor(Math.random() * (20 - 1) + 1);
-    enemyHealth = 65;
-    enemyEnergy = 100;
-    enemyDamage = 5;
-
-    return enemyName;
+    }
+    if (inForest) {
+        enemyName = "forest goblin"
+        enemySprite = "imgs/Enemy_forestGoblin_inCombat.png"
+        onHoverText = "Choose an action";
+        enemyGold = Math.floor(Math.random() * 21) + 5;
+        enemyLevel = 3;
+        enemyHealth = 85;
+        enemyDamage = 10;
+        yieldXP = 15;
+    }
+    if (inDesert) {
+        enemyName = "skeleton warrior"
+        enemySprite = "imgs/Enemy_skeleton_inCombat.png"
+        onHoverText = "Choose an action";
+        enemyGold = Math.floor(Math.random() * 21) + 5;
+        enemyLevel = 6;
+        enemyHealth = 105;
+        enemyDamage = 15;
+        yieldXP = 20;
+    }
+    if (inCave) {
+        enemyName = "cave troll"
+        enemySprite = "imgs/Enemy_caveTroll_inCombat.png"
+        onHoverText = "Choose an action";
+        enemyGold = Math.floor(Math.random() * 21) + 5;
+        enemyLevel = 10;
+        enemyHealth = 125;
+        enemyDamage = 20;
+        yieldXP = 30;
+    }
 }
 
 function attack() {
@@ -546,7 +611,7 @@ function attack() {
         enemyHealth = 0;
         //adventureText =   YOU DEAL amoutOfDamage AND =            FIX THIS.
         //set timeout with delay!!
-        adventureText =  "The " + enemyName + " dies."
+        adventureText = "The " + enemyName + " dies."
         setTimeout(winBattle, 2000);
     }
     else {
@@ -567,14 +632,59 @@ function winBattle() {
     adventureText = "You emerge victorious and looted " + enemyGold + " gold from the corpse... ";
     clearTooltip();
     playerGold += enemyGold;
+    playerXP += yieldXP;
+    levelUp();
     updateView();
+}
+
+function levelUp() {
+    if (playerXP >= playerNextLevelXP) {
+        playerLevel++;
+        excessXP = playerXP - playerNextLevelXP;
+        playerXP = 0;
+        playerXP += excessXP;
+        playerNextLevelXP = playerLevel * 27;
+
+        if (playerClass == 'Adventurer') {
+            playerMaxHealth += 5;
+            playerMaxEnergy += 5;
+            playerDamage += 7;
+        }
+        if (playerClass == 'Warrior') {
+            playerMaxHealth += 5;
+            playerMaxEnergy += 5;
+            playerDamage += 7;
+        }
+        if (playerClass == 'Rogue') {
+            playerMaxHealth += 5;
+            playerMaxEnergy += 5;
+            playerDamage += 10;
+        }
+        if (playerClass == 'Mage') {
+            playerMaxHealth += 5;
+            playerMaxEnergy += 5;
+            playerDamage += 7;
+        }
+
+    }
 }
 
 function flee() {
     worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
     inBattle = false;
     actionMenu = false;
-    adventureText = "You escaped!";
+
+    droppedGold = Math.floor(playerGold * 0.10);
+    if (playerGold > droppedGold && droppedGold != 0) {
+        adventureText = 'You grab a handful of gold coins amounting to ' + droppedGold + 'and toss it at your enemy as a distraction to escape...'
+        playerGold -= droppedGold;
+    } else if (playerGold <= droppedGold) {
+        adventureText = 'You grab all of your gold coins and toss it and toss it at your enemy as a distraction to escape...'
+        playerGold = 0;
+    } else if (droppedGold == 0) {
+        adventureText = 'You escaped!'
+    }
+
     clearTooltip();
     updateView();
 }
@@ -585,7 +695,6 @@ function takeDamage() {
     adventureText = "The " + enemyName + " attacks you for " + enemyDamage + " damage!";
     actionMenu = false;
     if (playerHealth <= 0) {
-
         die();
     }
     statusBars();
@@ -593,7 +702,7 @@ function takeDamage() {
 }
 
 function die() {
-    location.reload(); // lol
+    location.reload();
 }
 
 function buyItem(item) {
@@ -605,18 +714,34 @@ function buyItem(item) {
                 hasApple1 = true;
                 adventureText = "You bought an apple."
                 playerGold -= 12;
+                coinsAudio.play();
             }
             else if (hasApple1 && !hasApple2 && !hasApple3) {
                 hasApple2 = true;
                 adventureText = "You bought an apple."
                 playerGold -= 12;
+                coinsAudio.play();
             }
             else if (hasApple1 && hasApple2 && !hasApple3) {
                 hasApple3 = true;
                 adventureText = "You bought an apple."
                 playerGold -= 12;
+                coinsAudio.play();
             }
         } else if (playerGold < 12) {
+            adventureText = "You do not have enough gold!"
+        }
+    }
+
+    if (item == "potion") {
+        if (playerGold >= 50) {
+
+            if (!hasPotion) {
+                hasPotion = true;
+                adventureText = "You bought a potion."
+                playerGold -= 50;
+            }
+        } else if (playerGold < 50) {
             adventureText = "You do not have enough gold!"
         }
     }
@@ -636,57 +761,57 @@ function buyItem(item) {
 
     }
 
-    if (item == "silverKey"){
-        if (hasDesertRose){
+    if (item == "silverKey") {
+        if (hasDesertRose) {
             hasSilverKey = true;
             hasDesertRose = false;
             adventureText = "You traded the rose for a silver key!"
-        }else if (!hasDesertRose){
+        } else if (!hasDesertRose) {
             adventureText = "You don't have the desert rose! There is a rumour it can be found if you keep heading south-east in the desert...."
         }
     }
     updateView();
 }
 
-function pickUpItem(item){
-    if (item == "desertRose"){
-        if (!hasDesertRose && !hasSilverKey){
+function pickUpItem(item) {
+    if (item == "desertRose") {
+        if (!hasDesertRose && !hasSilverKey) {
             hasDesertRose = true;
             areaHasWorldItem = false;
             adventureText = "You carefully pluck the rare desert rose from the hidden oasis.."
         }
     }
-    if (item == "goat1" && !hasGoat2 && !hasGoat3){
-        if (!hasGoat1 && !returnedGoat1){
+    if (item == "goat1" && !hasGoat2 && !hasGoat3) {
+        if (!hasGoat1 && !returnedGoat1) {
             hasGoat1 = true;
             areaHasWorldItem = false;
             adventureText = "You take the goat!"
             inventoryGoat = "imgs/inventory_items/Goat1.png"
         }
     }
-    else if(item == "goat1" && (hasGoat2 || hasGoat3)){
+    else if (item == "goat1" && (hasGoat2 || hasGoat3)) {
         adventureText = "You can only carry one goat at a time! Head back and drop off a goat first!"
     }
-    if (item == "goat2" && !hasGoat1 && !hasGoat3){
-        if (!hasGoat2 && !returnedGoat2){
+    if (item == "goat2" && !hasGoat1 && !hasGoat3) {
+        if (!hasGoat2 && !returnedGoat2) {
             hasGoat2 = true;
             areaHasWorldItem = false;
             adventureText = "You take the goat!"
             inventoryGoat = "imgs/inventory_items/Goat2.png"
         }
     }
-    else if(item == "goat2" && (hasGoat1 || hasGoat3)){
+    else if (item == "goat2" && (hasGoat1 || hasGoat3)) {
         adventureText = "You can only carry one goat at a time! Head back and drop off a goat first!"
     }
-    if (item == "goat3" && !hasGoat1 && !hasGoat2){
-        if (!hasGoat3 && !returnedGoat3){
+    if (item == "goat3" && !hasGoat1 && !hasGoat2) {
+        if (!hasGoat3 && !returnedGoat3) {
             hasGoat3 = true;
             areaHasWorldItem = false;
             adventureText = "You take the goat!"
             inventoryGoat = "imgs/inventory_items/Goat3.png"
         }
-    }  
-    else if(item == "goat3" && (hasGoat1 || hasGoat2)){
+    }
+    else if (item == "goat3" && (hasGoat1 || hasGoat2)) {
         adventureText = "You can only carry one goat at a time! Head back and drop off a goat first!"
     }
     updateView();
@@ -700,62 +825,77 @@ function useItem(item) {
             adventureText = "You are full!"
         }
     }
+    if (item == 'potion' && hasPotion) {
+        if (playerEnergy < playerMaxEnergy) {
+            hasPotion = false;
+            adventureText = "You drink the potion.. +50 energy!"
+            playerEnergy += 50;
+            if (playerEnergy >= playerMaxEnergy) {
+                playerEnergy = playerMaxEnergy;
+            }
+            clearTooltip();
+            statusBars();
+        } else {
+            adventureText = "You already feel energized!"
+        }
+    }
+
     if (item == 'goat' && inMainCampsite && hasGoat1) {
         returnedGoat1 = true;
         hasGoat1 = false;
         adventureText = "You return the goat to your campsite!"
-        
-    }  
+
+    }
     if (item == 'goat' && inMainCampsite && hasGoat2) {
         returnedGoat2 = true;
         hasGoat2 = false;
         adventureText = "You return the goat to your campsite!"
-        
-    }  
+
+    }
     if (item == 'goat' && inMainCampsite && hasGoat3) {
         returnedGoat3 = true;
         hasGoat3 = false;
         adventureText = "You return the goat to your campsite!"
-        
-    }  
-    else if(item == 'goat' && !inMainCampsite && (hasGoat1 || hasGoat2 || hasGoat3)){
+
+    }
+    else if (item == 'goat' && !inMainCampsite && (hasGoat1 || hasGoat2 || hasGoat3)) {
         adventureText = "You should bring the goat back to your main campsite first!"
     }
 
-    if (item == 'fishingRod' && inFishableArea && hasFishingRod){
-        if(!hasCopperKey){
+    if (item == 'fishingRod' && inFishableArea && hasFishingRod) {
+        if (!hasCopperKey) {
             hasCopperKey = true;
-        adventureText = "You use your fishing rod to pull an old rusty key from the depths of the forest lake!"
+            adventureText = "You use your fishing rod to pull an old rusty key from the depths of the forest lake!"
         }
-        else if(hasCopperKey){
+        else if (hasCopperKey) {
             adventureText = "This water doesn't seem suitable for fish to live in..."
         }
     }
-    else if (item == 'fishingRod' && !inFishableArea && hasFishingRod){
+    else if (item == 'fishingRod' && !inFishableArea && hasFishingRod) {
         adventureText = "There's no fishable water in this area... You might try elsewhere!"
     }
 
-    if( item == 'desertRose' && hasDesertRose){
+    if (item == 'desertRose' && hasDesertRose) {
         adventureText = "The rose has a vile stench! You did not expect that!"
     }
 
-    if (item == 'copperKey' && hasCopperKey && inFrontOfCopperDoor && !copperKeyUsed){
+    if (item == 'copperKey' && hasCopperKey && inFrontOfCopperDoor && !copperKeyUsed) {
         copperKeyUsed = true;
         doorUnlocked = true;
         canGoUp = true;
         changeLocation();
     }
-    else if(item == 'copperKey' && hasCopperKey && !inFrontOfCopperDoor || item == 'copperKey' && copperKeyUsed){
+    else if (item == 'copperKey' && hasCopperKey && !inFrontOfCopperDoor || item == 'copperKey' && copperKeyUsed) {
         adventureText = "There are no compatible locks for this key in the area..."
     }
 
-    if (item == 'silverKey' && hasSilverKey && inFrontOfSilverDoor && !silverKeyUsed){
+    if (item == 'silverKey' && hasSilverKey && inFrontOfSilverDoor && !silverKeyUsed) {
         silverKeyUsed = true;
         doorUnlocked = true;
         canGoUp = true;
         changeLocation();
     }
-    else if(item == 'silverKey' && hasSilverKey && !inFrontOfSilverDoor || item == 'silverKey' && silverKeyUsed){
+    else if (item == 'silverKey' && hasSilverKey && !inFrontOfSilverDoor || item == 'silverKey' && silverKeyUsed) {
         adventureText = "There are no compatible locks for this key in the area..."
     }
 
@@ -791,6 +931,7 @@ function heal(healAmount) {
     }
     statusBars();
 }
+
 
 function onHoverTooltip(button) {
 
@@ -833,45 +974,53 @@ function onHoverTooltip(button) {
         onHoverText = "Buy an apple? (12 gold)";
         updateView();
     }
+    if (button == 'buyPotion' && onHoverText != "Buy a potion? (50 gold)") {
+        onHoverText = "Buy a potion? (50 gold)";
+        updateView();
+    }
     if (button == 'buyFishingRod' && onHoverText != "Buy fishing rod? (150 gold)") {
         onHoverText = "Buy fishing rod? (150 gold)"
         updateView();
     }
 
     //inventory items
-    if (button == 'inventory_apple1' && hasApple1 && onHoverText != "Eat apple?") {
-        onHoverText = "Eat apple?"
+    if (button == 'inventory_apple1' && hasApple1 && onHoverText != "Eat apple? (+25 health)") {
+        onHoverText = "Eat apple? (+25 health)"
         updateView();
     }
-    if (button == 'inventory_apple2' && hasApple1 && onHoverText != "Eat apple?") {
-        onHoverText = "Eat apple?"
+    if (button == 'inventory_apple2' && hasApple1 && onHoverText != "Eat apple? (+25 health)") {
+        onHoverText = "Eat apple? (+25 health)"
         updateView();
     }
-    if (button == 'inventory_apple3' && hasApple1 && onHoverText != "Eat apple?") {
-        onHoverText = "Eat apple?"
+    if (button == 'inventory_apple3' && hasApple1 && onHoverText != "Eat apple? (+25 health)") {
+        onHoverText = "Eat apple? (+25 health)"
         updateView();
     }
-    if (button == 'inventory_potion' && hasPotion && onHoverText != "Drink potion?"){
-        onHoverText = "Drink potion?"
+    if (button == 'inventory_potion' && hasPotion && onHoverText != "Drink potion? (+50 energy)") {
+        onHoverText = "Drink potion? (+50 energy)"
         updateView();
     }
-    if (button == 'inventory_fishingRod' && hasFishingRod && onHoverText != "Use fishing rod?"){
+    if (button == 'inventory_potion' && !hasPotion && onHoverText != "Your empty potion flask..") {
+        onHoverText = "Your empty potion flask.."
+        updateView();
+    }
+    if (button == 'inventory_fishingRod' && hasFishingRod && onHoverText != "Use fishing rod?") {
         onHoverText = "Use fishing rod?"
         updateView();
     }
-    if (button == 'inventory_desertRose' && hasDesertRose && onHoverText != "Smell flower?"){
+    if (button == 'inventory_desertRose' && hasDesertRose && onHoverText != "Smell flower?") {
         onHoverText = "Smell flower?"
         updateView();
     }
-    if (button == 'inventory_copperKey' && hasCopperKey && onHoverText != "Use copper key?"){
+    if (button == 'inventory_copperKey' && hasCopperKey && onHoverText != "Use copper key?") {
         onHoverText = "Use copper key?"
         updateView();
     }
-    if (button == 'inventory_silverKey' && hasSilverKey && onHoverText != "Use silver key?"){
+    if (button == 'inventory_silverKey' && hasSilverKey && onHoverText != "Use silver key?") {
         onHoverText = "Use silver key?"
         updateView();
-    }    
-    if (button == 'inventory_goat' && (hasGoat1 || hasGoat2 || hasGoat3) && onHoverText != "Leave the goat?"){
+    }
+    if (button == 'inventory_goat' && (hasGoat1 || hasGoat2 || hasGoat3) && onHoverText != "Leave the goat?") {
         onHoverText = "Leave the goat?"
         updateView();
     }
@@ -887,19 +1036,19 @@ function clearTooltip() {
 function playerStates() {
     if (goingLeft) {
 
-        if(playerMale){
+        if (playerMale) {
             return "imgs/Character_L.png"
         }
-        else if(!playerMale){
+        else if (!playerMale) {
             return "imgs/Character_Female_L.png"
         }
     }
     else {
 
-        if(playerMale){
+        if (playerMale) {
             return "imgs/Character_R.png"
         }
-        else if(!playerMale){
+        else if (!playerMale) {
             return "imgs/Character_Female_R.png"
         }
 
@@ -1161,16 +1310,16 @@ function setUpArea() {
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
-        
+
         doorUnlocked = false;
         inFrontOfCopperDoor = false;
         areaHasRandomEncounters = true;
     }
     if (mapLocationY == 1 && mapLocationX == 9) {
-        
+
         inFrontOfCopperDoor = true;
 
-        if(copperKeyUsed){
+        if (copperKeyUsed) {
             doorUnlocked = true;
         }
         if (doorUnlocked) {
@@ -1186,6 +1335,12 @@ function setUpArea() {
         inGrasslands = true;
         inCave = false;
         areaHasRandomEncounters = false;
+
+        if (bgm_grasslands.volume <= 0.700) {
+            clearInterval(fadeInInterval)
+            clearInterval(fadeOutInterval)
+            BGM('grasslands');
+        }
     }
     if (mapLocationY == 1 && mapLocationX == 10) {
         canGoUp = true;
@@ -1235,13 +1390,19 @@ function setUpArea() {
         inGrasslands = false;
         inDesert = true;
         inOasis = false;
-        
+
         areaHasWorldItem = false;
 
         lostInDesertNorth = false;
         lostInDesertSouth = false;
         lostInDesertEast = false;
         lostInDesertWest = false;
+
+        if (bgm_desert.volume <= 0.700) {
+            clearInterval(fadeInInterval)
+            clearInterval(fadeOutInterval)
+            BGM('desert');
+        }
     }
     if (mapLocationY == 2 && mapLocationX == 4) {
         canGoUp = true;
@@ -1251,6 +1412,12 @@ function setUpArea() {
 
         inGrasslands = true;
         inDesert = false;
+
+        if (bgm_grasslands.volume <= 0.700) {
+            clearInterval(fadeInInterval)
+            clearInterval(fadeOutInterval)
+            BGM('grasslands');
+        }
     }
     if (mapLocationY == 2 && mapLocationX == 5) {
         canGoUp = true;
@@ -1288,6 +1455,12 @@ function setUpArea() {
         inCave = true;
         inFrontOfCopperDoor = false;
         areaHasRandomEncounters = true;
+
+        if (bgm_cave.volume <= 0.700) {
+            clearInterval(fadeInInterval)
+            clearInterval(fadeOutInterval)
+            BGM('cave');
+        }
     }
     if (mapLocationY == 2 && mapLocationX == 10) {
         canGoUp = false;
@@ -1462,7 +1635,7 @@ function setUpArea() {
         inFrontOfSilverDoor = true;
         areaHasRandomEncounters = false;
 
-        if(silverKeyUsed){
+        if (silverKeyUsed) {
             doorUnlocked = true;
         }
         if (doorUnlocked) {
@@ -1486,11 +1659,11 @@ function setUpArea() {
         inGoatArea1 = true;
         areaHasRandomEncounters = false;
 
-        if(!hasGoat1 || !returnedGoat1){
+        if (!hasGoat1 || !returnedGoat1) {
             areaHasWorldItem = true;
             worldItem = 'imgs/world_items/Goat1_WorldItem.png'
         }
-        if (hasGoat1 || returnedGoat1){ 
+        if (hasGoat1 || returnedGoat1) {
             areaHasWorldItem = false;
         }
     }
@@ -1507,6 +1680,11 @@ function setUpArea() {
 
     // }
     if (mapLocationY == 5 && mapLocationX == 4) {
+        if (bgm_grasslands.volume <= 0.700) {
+            clearInterval(fadeInInterval)
+            clearInterval(fadeOutInterval)
+            BGM('grasslands'); 
+        }
         canGoUp = true;
         canGoDown = true;
         canGoLeft = false;
@@ -1526,21 +1704,6 @@ function setUpArea() {
         inMainCampsite = true;
         inCampsite = true;
         areaHasRandomEncounters = false;
-
-        inShopEast = false;
-        inShopWest = false;
-        inFrontOfCopperDoor = false;
-        inFrontOfSilverDoor = false;
-        doorUnlocked = false;
-        lostInDesertNorth = false;
-        lostInDesertSouth = false;
-        lostInDesertEast = false;
-        lostInDesertWest = false;
-        inOasis = false;      
-        inGoatArea1 = false;
-        inGoatArea2 = false;
-        inGoatArea3 = false;  
-        inFishableArea = false;
     }
     if (mapLocationY == 5 && mapLocationX == 6) {
         canGoUp = false;
@@ -1567,11 +1730,11 @@ function setUpArea() {
 
         inShopEast = true;
 
-        if(!hasFishingRod){
+        if (!hasFishingRod) {
             areaHasWorldItem = true;
             worldItem = 'imgs/world_items/FishingRod_WorldItem.png'
         }
-        if (hasFishingRod){ 
+        if (hasFishingRod) {
             areaHasWorldItem = false;
         }
     }
@@ -1658,11 +1821,11 @@ function setUpArea() {
         inGoatArea2 = true;
         areaHasRandomEncounters = false;
 
-        if(!hasGoat2 || !returnedGoat2){
+        if (!hasGoat2 || !returnedGoat2) {
             areaHasWorldItem = true;
             worldItem = 'imgs/world_items/Goat2_WorldItem.png'
         }
-        if (hasGoat2 || returnedGoat2){ 
+        if (hasGoat2 || returnedGoat2) {
             areaHasWorldItem = false;
         }
     }
@@ -1699,11 +1862,11 @@ function setUpArea() {
         inGoatArea3 = true;
         areaHasRandomEncounters = false;
 
-        if(!hasGoat3 || !returnedGoat3){
+        if (!hasGoat3 || !returnedGoat3) {
             areaHasWorldItem = true;
             worldItem = 'imgs/world_items/Goat3_WorldItem.png'
         }
-        if (hasGoat3 || returnedGoat3){ 
+        if (hasGoat3 || returnedGoat3) {
             areaHasWorldItem = false;
         }
     }
@@ -1743,6 +1906,11 @@ function setUpArea() {
 
         inGrasslands = true;
         inForest = false;
+        if (bgm_grasslands.volume <= 0.700) {
+            clearInterval(fadeInInterval)
+            clearInterval(fadeOutInterval)
+            BGM('grasslands');
+        }
     }
     if (mapLocationY == 7 && mapLocationX == 6) {
         canGoUp = false;
@@ -1752,6 +1920,12 @@ function setUpArea() {
 
         inGrasslands = false;
         inForest = true;
+        if (bgm_forest.volume <= 0.700) {
+            clearInterval(fadeInInterval)
+            clearInterval(fadeOutInterval)
+            BGM('forest');
+        }
+        
     }
     if (mapLocationY == 7 && mapLocationX == 7) {
         canGoUp = true;
@@ -1807,6 +1981,11 @@ function setUpArea() {
 
         inGrasslands = true;
         inForest = false;
+        if (bgm_grasslands.volume <= 0.700) {
+            clearInterval(fadeInInterval)
+            clearInterval(fadeOutInterval)
+            BGM('grasslands');
+        }
     }
     if (mapLocationY == 8 && mapLocationX == 5) {
         canGoUp = false;
@@ -1870,6 +2049,11 @@ function setUpArea() {
 
         inGrasslands = true;
         inForest = false;
+        if (bgm_grasslands.volume <= 0.700) {
+            clearInterval(fadeInInterval)
+            clearInterval(fadeOutInterval)
+            BGM('grasslands');
+        }
     }
     if (mapLocationY == 9 && mapLocationX == 4) {
         canGoUp = false;
@@ -1879,6 +2063,11 @@ function setUpArea() {
 
         inGrasslands = false;
         inForest = true;
+        if (bgm_forest.volume <= 0.700) {
+            clearInterval(fadeInInterval)
+            clearInterval(fadeOutInterval)
+            BGM('forest');
+        }
     }
     if (mapLocationY == 9 && mapLocationX == 5) {
         canGoUp = false;
@@ -1929,13 +2118,13 @@ function setUpArea() {
         areaHasRandomEncounters = false;
 
         adventureText = "You have found a hidden oasis" + (hasDesertRose || hasSilverKey ? "!" : "! There is a rare desert rose growing here!")
-        
-        if(!hasDesertRose || !hasSilverKey){
+
+        if (!hasDesertRose || !hasSilverKey) {
             areaHasWorldItem = true;
             worldItem = 'imgs/world_items/DesertRose_WorldItem.png'
         }
-        if (hasDesertRose || hasSilverKey){ 
-            areaHasWorldItem = false; 
+        if (hasDesertRose || hasSilverKey) {
+            areaHasWorldItem = false;
         }
 
         lostInDesertNorth = false;
@@ -1999,40 +2188,206 @@ function setUpArea() {
     }
 }
 
-function changeLocation(){
-    if(doorUnlocked){
+function changeLocation() {
+    if (doorUnlocked) {
         worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}` + `-unlocked` + `.png)"`
     }
-    else{
-    worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
+    else {
+        worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
     }
 }
 
-function statusBars(){
+function statusBars() {
 
-    if(playerHealth > (0.5 * playerMaxHealth)){
+    if (playerHealth > (0.5 * playerMaxHealth)) {
         healthBarColor = 'lightgreen'
     }
-    if(playerHealth > (0.25 * playerMaxHealth) && playerHealth <= (0.5 * playerMaxHealth)){
+    if (playerHealth > (0.25 * playerMaxHealth) && playerHealth <= (0.5 * playerMaxHealth)) {
         healthBarColor = 'yellow'
     }
-    if(playerHealth <= (0.25 * playerMaxHealth)){
+    if (playerHealth <= (0.25 * playerMaxHealth)) {
         healthBarColor = 'red'
     }
 
-    if(playerEnergy > (0.5 * playerMaxEnergy)){
+    if (playerEnergy > (0.5 * playerMaxEnergy)) {
         energyBarColor = 'lightgreen'
     }
-    if(playerEnergy > (0.25 * playerMaxEnergy) && playerEnergy <= (0.5 * playerMaxEnergy)){
+    if (playerEnergy > (0.25 * playerMaxEnergy) && playerEnergy <= (0.5 * playerMaxEnergy)) {
         energyBarColor = 'yellow'
     }
-    if(playerEnergy <= (0.25 * playerMaxEnergy)){
+    if (playerEnergy <= (0.25 * playerMaxEnergy)) {
         energyBarColor = 'red'
     }
 }
 
-function changeCharacter(){
 
+function BGM(area) {
+    clearInterval(fadeInInterval);
+    clearInterval(fadeOutInterval);
+
+    if (area == 'grasslands') {
+        if (!bgm_grasslands.paused) {
+            bgm_grasslands.pause();
+            bgm_grasslands.currentTime = 0;
+        }
+        bgm_grasslands.volume = 0.0001;
+        bgm_grasslands.loop = true;
+        bgm_grasslands.play();
+        fadeInInterval = setInterval(function() { audioFadeIn('grasslands') }, 50);
+        if (bgm_forest.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 50);
+        }
+        if (bgm_desert.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 50);
+        }
+        if (bgm_cave.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 50);
+        }
+        
+    } 
+    else if (area == 'forest') {
+        if (!bgm_forest.paused) {
+            bgm_forest.pause();
+            bgm_forest.currentTime = 0;
+        }
+        bgm_forest.volume = 0.0001;
+        bgm_forest.loop = true;
+        bgm_forest.play();
+        fadeInInterval = setInterval(function() { audioFadeIn('forest') }, 50);
+        if (bgm_grasslands.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 50);
+        }
+        if (bgm_desert.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 50);
+        }
+        if (bgm_cave.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 50);
+        }
+    } 
+    else if (area == 'desert'){
+        if (!bgm_desert.paused) {
+            bgm_desert.pause();
+            bgm_desert.currentTime = 0;
+        }
+        bgm_desert.volume = 0.0001;
+        bgm_desert.loop = true;
+        bgm_desert.play();
+        fadeInInterval = setInterval(function() { audioFadeIn('desert') }, 50);
+        if (bgm_grasslands.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 50);
+        }
+        if (bgm_forest.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 50);
+        }
+        if (bgm_cave.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 50);
+        }
+    }
+    else if (area == 'cave'){
+        if (!bgm_cave.paused) {
+            bgm_cave.pause();
+            bgm_cave.currentTime = 0;
+        }
+        bgm_cave.volume = 0.0001;
+        bgm_cave.loop = true;
+        bgm_cave.play();
+        fadeInInterval = setInterval(function() { audioFadeIn('cave') }, 50);
+        if (bgm_grasslands.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 50);
+        }
+        if (bgm_desert.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 50);
+        }
+        if (bgm_forest.volume > 0.5){
+            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 50);
+        }
+    }
 }
+
+function audioFadeIn(area) {
+    if (area == 'grasslands') {
+        if (bgm_grasslands.volume < 0.9) {
+            bgm_grasslands.volume += 0.05;
+        }
+        if (bgm_grasslands.volume >= 0.9) {
+            clearInterval(fadeInInterval);
+        }
+    }
+    if (area == 'forest') {
+        if (bgm_forest.volume < 0.9) {
+            bgm_forest.volume += 0.05;
+        }
+        if (bgm_forest.volume >= 0.9) {
+            clearInterval(fadeInInterval);
+        }
+    }
+    if (area == 'desert') {
+        if (bgm_desert.volume < 0.9) {
+            bgm_desert.volume += 0.05;
+        }
+        if (bgm_desert.volume >= 0.9) {
+            clearInterval(fadeInInterval);
+        }
+    }
+    if (area == 'cave') {
+        if (bgm_cave.volume < 0.9) {
+            bgm_cave.volume += 0.05;
+        }
+        if (bgm_cave.volume >= 0.9) {
+            clearInterval(fadeInInterval);
+        }
+    }
+}
+
+function audioFadeOut(area) {
+    if (area == 'grasslands') {
+        if (bgm_grasslands.volume > 0.1) {
+            bgm_grasslands.volume -= 0.05;
+        }
+        if (bgm_grasslands.volume <= 0.1) {
+            clearInterval(fadeOutInterval);
+            bgm_grasslands.volume = 0.0;
+            bgm_grasslands.pause();
+            bgm_grasslands.currentTime = 0;
+        }
+    } 
+    if (area == 'forest') {
+        if (bgm_forest.volume > 0.1) {
+            bgm_forest.volume -= 0.05;
+        }
+        if (bgm_forest.volume <= 0.1) {
+            clearInterval(fadeOutInterval);
+            bgm_forest.volume = 0.0;
+            bgm_forest.pause();
+            bgm_forest.currentTime = 0;
+        }
+    }
+    if (area == 'desert') {
+        if (bgm_desert.volume > 0.1) {
+            bgm_desert.volume -= 0.05;
+        }
+        if (bgm_desert.volume <= 0.1) {
+            clearInterval(fadeOutInterval);
+            bgm_desert.volume = 0.0;
+            bgm_desert.pause();
+            bgm_desert.currentTime = 0;
+        }
+    }
+    if (area == 'cave') {
+        if (bgm_cave.volume > 0.1) {
+            bgm_cave.volume -= 0.05;
+        }
+        if (bgm_cave.volume <= 0.1) {
+            clearInterval(fadeOutInterval);
+            bgm_cave.volume = 0.0;
+            bgm_cave.pause();
+            bgm_cave.currentTime = 0;
+        }
+    }
+}
+
+
+
+
 
 
