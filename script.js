@@ -92,6 +92,7 @@ let doorUnlocked = false;
 let actionMenu = false;
 
 // Player states
+let playerMale = true;
 let goingLeft = false;
 let passedOut = false;
 
@@ -119,7 +120,7 @@ function updateView() {
         <div class="topBattleDiv">
         </div>
         <div class="middleBattleDiv">
-            <img class="playerInCombat" src="imgs/Character_Male_inCombat.png">
+            <img class="playerInCombat" src=${playerMale ? "imgs/Character_Male_inCombat.png" : "imgs/Character_Female_inCombat.png"}>
             <img class="enemyInCombat" src="imgs/Enemy_sillyBandit_inCombat.png">
         </div>
         <div class="bottomBattleDiv">
@@ -166,7 +167,7 @@ function updateView() {
         <div class="LeftRightDiv">
             <button class="leftButton" ${canGoLeft ? 'onclick="moveCharacter(\'west\')"' : 'disabled'} style="${canGoLeft ? '' : 'pointer-events: none; opacity: 0;'}">🡸</button>
             <div class="playerContainer">
-                <img class="player" src="${passedOut ? "imgs/Character_Sleep.png" : playerStates()}">
+                <img class="player" src="${passedOut ? (playerMale ? "imgs/Character_Sleep.png" : "imgs/Character_Sleep_Female.png") : playerStates()}">
                 ${areaHasWorldItem ? /*HTML*/`<img class="worldItem" src="${worldItem}">` : ``}
                 ${inShopWest || inShopEast ? /*HTML*/`<img class="worldItem" src="imgs/world_items/NPC.png">` : ``}
                 ${returnedGoat1 && inMainCampsite ? /*HTML*/`<img class="worldItem" src="imgs/world_items/Goat1_WorldItem.png">` : ``}
@@ -343,14 +344,14 @@ function updateView() {
             <button class="upButton" ${canGoUp ? 'onclick="moveCharacter(\'north\')"' : 'disabled, style="opacity: 0"'}>🡹</button>
             </div>
             <div class="inputDiv">
-            <input id="nameInput" type="text" class="nameInput" placeholder="[Enter name]">
+            <input id="nameInput" type="text" class="nameInput" placeholder="[Enter name]" max="12">
             <button class="nameButton" onclick="setName()">Set name</button>
             </div>
            
         <div class="LeftRightDiv">
-            <button class="leftButton" onclick="goingLeft = true, updateView();">🡸</button>
-            <img class="characterSelect" src=${goingLeft ? "imgs/Character_L.png" : "imgs/Character_R.png"}>
-            <button class="rightButton" onclick="goingLeft = false, updateView();">🡺</button>
+            <button class="leftButton" onclick="goingLeft = !goingLeft, playerMale = !playerMale, updateView();">🡸</button>
+            <img class="characterSelect" src=${goingLeft ? "imgs/Character_Female_R.png" : "imgs/Character_R.png"}>
+            <button class="rightButton" onclick="goingLeft = !goingLeft, playerMale = !playerMale, updateView();">🡺</button>
         </div>
         <div class="DownDiv">
             <button class="classButtons" 
@@ -884,14 +885,23 @@ function clearTooltip() {
 
 
 function playerStates() {
-    if (goingLeft == true) {
+    if (goingLeft) {
 
-        return "imgs/Character_L.png"
-
+        if(playerMale){
+            return "imgs/Character_L.png"
+        }
+        else if(!playerMale){
+            return "imgs/Character_Female_L.png"
+        }
     }
     else {
 
-        return "imgs/Character_R.png"
+        if(playerMale){
+            return "imgs/Character_R.png"
+        }
+        else if(!playerMale){
+            return "imgs/Character_Female_R.png"
+        }
 
     }
     // return "imgs/worlditemstest.png"
@@ -2019,6 +2029,10 @@ function statusBars(){
     if(playerEnergy <= (0.25 * playerMaxEnergy)){
         energyBarColor = 'red'
     }
+}
+
+function changeCharacter(){
+
 }
 
 
