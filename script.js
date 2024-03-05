@@ -6,7 +6,7 @@ let gameScreen = document.getElementById('gameScreen');
 let worldBackground;
 let battleBackground;
 
-let adventureText = "Enter a name and choose a class for your adventure!";
+let adventureText = "Choose a class for your adventure!";
 let onHoverText = "";
 
 //Player stats
@@ -132,6 +132,8 @@ let unlockAudio = new Audio("sfx/Unlock.mp3")
 let eatAudio = new Audio("sfx/Eat.mp3")
 let drinkAudio = new Audio("sfx/Drink.mp3")
 let goatAudio = new Audio("sfx/Goat.mp3")
+let pickUpAudio = new Audio("sfx/Pickup.mp3")
+let fishingAudio = new Audio("sfx/Fishing.mp3")
 
 BGM('startScreen');
 setUpArea();
@@ -379,12 +381,14 @@ function updateView() {
             </div>
             <div class="inputDiv">
             <input id="nameInput" type="text" class="nameInput" placeholder="[Enter name]" max="12">
-            <button class="nameButton" onclick="setName()">Set name</button>
+            <button class="nameButton" onclick="setName()">Confirm name</button>
             </div>
            
         <div class="LeftRightDiv">
             <button class="leftButton" onclick="goingLeft = !goingLeft, playerMale = !playerMale, updateView();">🡸</button>
-            <div class="gameInfo">blablal</div>
+            <div class="gameInfo">
+                Select character
+            </div>
             <img class="characterSelect" src=${goingLeft ? "imgs/Character_Female_R.png" : "imgs/Character_R.png"}>
             <button class="rightButton" onclick="goingLeft = !goingLeft, playerMale = !playerMale, updateView();">🡺</button>
         </div>
@@ -586,7 +590,7 @@ function setUpEnemy() {
         enemyName = "forest goblin"
         enemySprite = "imgs/Enemy_forestGoblin_inCombat.png"
         onHoverText = "Choose an action";
-        enemyGold = Math.floor(Math.random() * 21) + 5;
+        enemyGold = Math.floor(Math.random() * 27) + 7;
         enemyLevel = 3;
         enemyHealth = 85;
         enemyDamage = 10;
@@ -596,7 +600,7 @@ function setUpEnemy() {
         enemyName = "skeleton warrior"
         enemySprite = "imgs/Enemy_skeleton_inCombat.png"
         onHoverText = "Choose an action";
-        enemyGold = Math.floor(Math.random() * 21) + 5;
+        enemyGold = Math.floor(Math.random() * 30) + 12;
         enemyLevel = 6;
         enemyHealth = 105;
         enemyDamage = 15;
@@ -606,7 +610,7 @@ function setUpEnemy() {
         enemyName = "cave troll"
         enemySprite = "imgs/Enemy_caveTroll_inCombat.png"
         onHoverText = "Choose an action";
-        enemyGold = Math.floor(Math.random() * 21) + 5;
+        enemyGold = Math.floor(Math.random() * 45) + 15;
         enemyLevel = 10;
         enemyHealth = 125;
         enemyDamage = 20;
@@ -797,6 +801,7 @@ function pickUpItem(item) {
             hasDesertRose = true;
             areaHasWorldItem = false;
             adventureText = "You carefully pluck the rare desert rose from the hidden oasis.."
+            pickUpAudio.play();
         }
     }
     if (item == "goat1" && !hasGoat2 && !hasGoat3) {
@@ -805,6 +810,7 @@ function pickUpItem(item) {
             areaHasWorldItem = false;
             adventureText = "You take the goat!"
             inventoryGoat = "imgs/inventory_items/Goat1.png"
+            pickUpAudio.play();
         }
     }
     else if (item == "goat1" && (hasGoat2 || hasGoat3)) {
@@ -816,6 +822,7 @@ function pickUpItem(item) {
             areaHasWorldItem = false;
             adventureText = "You take the goat!"
             inventoryGoat = "imgs/inventory_items/Goat2.png"
+            pickUpAudio.play();
         }
     }
     else if (item == "goat2" && (hasGoat1 || hasGoat3)) {
@@ -827,6 +834,7 @@ function pickUpItem(item) {
             areaHasWorldItem = false;
             adventureText = "You take the goat!"
             inventoryGoat = "imgs/inventory_items/Goat3.png"
+            pickUpAudio.play();
         }
     }
     else if (item == "goat3" && (hasGoat1 || hasGoat2)) {
@@ -886,6 +894,7 @@ function useItem(item) {
         if (!hasCopperKey) {
             hasCopperKey = true;
             adventureText = "You use your fishing rod to pull an old rusty key from the depths of the forest lake!"
+            fishingAudio.play();
         }
         else if (hasCopperKey) {
             adventureText = "This water doesn't seem suitable for fish to live in..."
@@ -2560,6 +2569,8 @@ function muteAudio(){
         eatAudio.volume = 0;
         drinkAudio.volume = 0;
         goatAudio.volume = 0;
+        pickUpAudio.volume = 0;
+        fishingAudio.volume = 0;
     }
     else if(!muted){
         bgm_grasslands.volume = 0.0001;
@@ -2573,7 +2584,9 @@ function muteAudio(){
         eatAudio.volume = 1;
         drinkAudio.volume = 1;
         goatAudio.volume = 1;
-        
+        pickUpAudio.volume = 1;
+        fishingAudio.volume = 1;
+
         currentMusic.volume = 0.3;
         currentMusic.play();
     }
