@@ -1,14 +1,8 @@
 change combat flow
 
-put skull in desert entrance
-
 flee random chance to fail and lose gold?
 
-fix die()
-
-enemy variation > stronger enemies in forest, desert, cave
-
-level ups, more damage with levels & rework damage calculations for player and enemies
+rework damage calculations for player and enemies
 
 add style cursor pointer to inventory items
 

@@ -57,6 +57,7 @@ let returnedGoat3 = false;
 // Game states
 let isGameRunning = false;
 let inBattle = false;
+let playerAlive = true;
 
 let areaHasWorldItem;
 let worldItem;
@@ -147,7 +148,7 @@ function updateView() {
         <div class="topBattleDiv">
         </div>
         <div class="middleBattleDiv">
-            <img class="playerInCombat" src=${playerMale ? "imgs/Character_Male_inCombat.png" : "imgs/Character_Female_inCombat.png"}>
+            <img class="playerInCombat" src=${playerAlive ? (playerMale ? "imgs/Character_Male_inCombat.png" : "imgs/Character_Female_inCombat.png") : (playerMale ? "imgs/Character_Male_dead.png" : "imgs/Character_Female_dead.png")}>
             <img class="enemyInCombat" src=${enemySprite}>
         </div>
         <div class="bottomBattleDiv">
@@ -162,7 +163,7 @@ function updateView() {
                     <div style="color:${energyBarColor}">Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
             </div>            
             <div class="worldActions">
-                ${actionMenu ? /*HTML*/ ``
+                ${playerAlive ? /*HTML*/ `${actionMenu ? /*HTML*/ ``
                 : /*HTML*/ `<button class="attackButton" 
                 onmouseenter="onHoverTooltip('attack')"
                 onmouseleave="clearTooltip()" 
@@ -175,7 +176,12 @@ function updateView() {
                 onmouseenter="onHoverTooltip('flee')" 
                 onmouseleave="clearTooltip()" 
                 ${inBattle ? 'onclick="flee()"' : 'disabled, style="opacity: 0"'}>Flee</button>
-                `}
+                `}` 
+                : /*HTML*/ `<button class="fleeButton" 
+                onmouseenter="onHoverTooltip('restart')" 
+                onmouseleave="clearTooltip()" 
+                ${!playerAlive ? 'onclick="restartGame()"' : 'disabled, style="opacity: 0"'}>Restart</button>`}
+                
             </div>
         <div class="onHoverText">${onHoverText}</div>
 
@@ -719,6 +725,12 @@ function takeDamage() {
 }
 
 function die() {
+    playerHealth = 0;
+    adventureText = "You died.."
+    playerAlive = false;
+}
+
+function restartGame(){
     location.reload();
 }
 
@@ -997,8 +1009,8 @@ function onHoverTooltip(button) {
         onHoverText = "Cast a spell (NOT IMPLEMENTED)";
         updateView();
     }
-    if (button == 'flee' && onHoverText != "Attempt to run away!") {
-        onHoverText = "Attempt to run away!";
+    if (button == 'flee' && onHoverText != "Toss a handful of your gold as a distraction and run away") {
+        onHoverText = "Toss a handful of your gold as a distraction and run away";
         updateView();
     }
     if (button == 'rest' && onHoverText != "Rest in your tent?") {
@@ -1015,6 +1027,10 @@ function onHoverTooltip(button) {
     }
     if (button == 'buyFishingRod' && onHoverText != "Buy fishing rod? (150 gold)") {
         onHoverText = "Buy fishing rod? (150 gold)"
+        updateView();
+    }
+    if (button == 'restart' && onHoverText != "Restart game?"){
+        onHoverText = "Restart game?"
         updateView();
     }
 
