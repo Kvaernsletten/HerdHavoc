@@ -155,7 +155,7 @@ function updateView() {
         <div class="worldInfo_container">
             <div class="playerInfo">${playerName ?? "Dio"}
                 <div>${playerClass ?? "Adventurer"} (Lv. ${playerLevel})</div>
-                    <div>XP: ${playerXP + " / " + playerNextLevelXP}</div>
+                    <div style="color: rgb(85, 189, 175)">XP: ${playerXP + " / " + playerNextLevelXP}</div>
                     <div style="color:${healthBarColor}">Health: ${playerHealth + " / " + playerMaxHealth}</div>
                     <div style="color:${energyBarColor}">Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
             </div>            
@@ -182,7 +182,7 @@ function updateView() {
         <div>Health: ${enemyHealth ?? " "}</div>                
     </div>
     </div>
-    <button onclick="muteAudio()">Mute</button>
+    <button class="leftButton" onclick="muteAudio(), updateView()">Mute</button>
     `
 
             // NOT IN BATTLE:
@@ -211,7 +211,7 @@ function updateView() {
     <div class="worldInfo_container">
         <div class="playerInfo">${playerName ?? "Dio"}
             <div>${playerClass ?? "Adventurer"} (Lv. ${playerLevel})</div>
-            <div>XP: ${playerXP + " / " + playerNextLevelXP}</div>
+            <div style="color: rgb(85, 189, 175)">XP: ${playerXP + " / " + playerNextLevelXP}</div>
             <div style="color:${healthBarColor}">Health: ${playerHealth + " / " + playerMaxHealth}</div>
             <div style="color:${energyBarColor}">Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
         </div>   
@@ -365,7 +365,7 @@ function updateView() {
         onmouseleave="if((hasGoat1 || hasGoat2 || hasGoat3) || (returnedGoat1 || returnedGoat2 || returnedGoat3)){clearTooltip()}"></div>
         </div>
     </div>
-    <button onclick="muteAudio()">Mute</button>
+    <button class="leftButton" onclick="muteAudio(), updateView()">Mute</button>
     `
         }
     `
@@ -384,6 +384,7 @@ function updateView() {
            
         <div class="LeftRightDiv">
             <button class="leftButton" onclick="goingLeft = !goingLeft, playerMale = !playerMale, updateView();">🡸</button>
+            <div class="gameInfo">blablal</div>
             <img class="characterSelect" src=${goingLeft ? "imgs/Character_Female_R.png" : "imgs/Character_R.png"}>
             <button class="rightButton" onclick="goingLeft = !goingLeft, playerMale = !playerMale, updateView();">🡺</button>
         </div>
@@ -421,7 +422,7 @@ function updateView() {
             <div class="onHoverText">${onHoverText}</div>
         <div class="inventoryGrid"></div>
         </div>
-        <button onclick="muteAudio()">Mute</button>
+        <button class="leftButton" onclick="muteAudio(), updateView()">Mute</button>
         `
 }
 
@@ -1254,12 +1255,15 @@ function setUpArea() {
         canGoDown = false;
         canGoLeft = false;
         canGoRight = true;
+        playMusic('grasslands_area')
+        
     }
     if (mapLocationY == 0 && mapLocationX == 8) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = false;
+        playMusic('grasslands_area')
     }
     // if(mapLocationY == 0 && mapLocationX == 9){
 
@@ -1310,34 +1314,44 @@ function setUpArea() {
         canGoDown = false;
         canGoLeft = false;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 1 && mapLocationX == 5) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 1 && mapLocationX == 6) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 1 && mapLocationX == 7) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 1 && mapLocationX == 8) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
-
+        
         doorUnlocked = false;
         inFrontOfCopperDoor = false;
         areaHasRandomEncounters = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 1 && mapLocationX == 9) {
 
@@ -1356,16 +1370,13 @@ function setUpArea() {
         canGoLeft = true;
         canGoRight = true;
 
+
         inGrasslands = true;
         inCave = false;
         areaHasRandomEncounters = false;
 
+        playMusic('grasslands_area')
         currentMusic = bgm_grasslands;
-        if (bgm_grasslands.volume <= 0.050) {
-            clearInterval(fadeInInterval)
-            clearInterval(fadeOutInterval)
-            BGM('grasslands');
-        }
     }
     if (mapLocationY == 1 && mapLocationX == 10) {
         canGoUp = true;
@@ -1377,6 +1388,8 @@ function setUpArea() {
         inCampsite = false;
         inFrontOfCopperDoor = false;
         areaHasRandomEncounters = true;
+
+        playMusic('grasslands_area')
     }
 
     // Y: 2
@@ -1424,11 +1437,7 @@ function setUpArea() {
         lostInDesertWest = false;
 
         currentMusic = bgm_desert;
-        if (bgm_desert.volume <= 0.050) {
-            clearInterval(fadeInInterval)
-            clearInterval(fadeOutInterval)
-            BGM('desert');
-        }
+        playMusic('desert_area')
     }
     if (mapLocationY == 2 && mapLocationX == 4) {
         canGoUp = true;
@@ -1440,23 +1449,23 @@ function setUpArea() {
         inDesert = false;
 
         currentMusic = bgm_grasslands;
-        if (bgm_grasslands.volume <= 0.050) {
-            clearInterval(fadeInInterval)
-            clearInterval(fadeOutInterval)
-            BGM('grasslands');
-        }
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 2 && mapLocationX == 5) {
         canGoUp = true;
         canGoDown = true;
         canGoLeft = false;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 2 && mapLocationX == 6) {
         canGoUp = true;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 2 && mapLocationX == 7) {
         canGoUp = false;
@@ -1464,12 +1473,15 @@ function setUpArea() {
         canGoLeft = false;
         canGoRight = true;
 
+        playMusic('cave_area')
     }
     if (mapLocationY == 2 && mapLocationX == 8) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('cave_area')
     }
     if (mapLocationY == 2 && mapLocationX == 9) {
         canGoUp = false;
@@ -1484,11 +1496,7 @@ function setUpArea() {
         areaHasRandomEncounters = true;
 
         currentMusic = bgm_cave;
-        if (bgm_cave.volume <= 0.050) {
-            clearInterval(fadeInInterval)
-            clearInterval(fadeOutInterval)
-            BGM('cave');
-        }
+        playMusic('cave_area')
     }
     if (mapLocationY == 2 && mapLocationX == 10) {
         canGoUp = false;
@@ -1498,6 +1506,8 @@ function setUpArea() {
 
         inCampsite = true;
         areaHasRandomEncounters = false;
+
+        playMusic('grasslands_area')
     }
 
     // Y: 3
@@ -1509,6 +1519,8 @@ function setUpArea() {
 
         lostInDesertNorth = true;
         lostInDesertWest = true;
+
+        playMusic('desert_area')
     }
     if (mapLocationY == 3 && mapLocationX == 1) {
         canGoUp = true;
@@ -1518,6 +1530,8 @@ function setUpArea() {
 
         lostInDesertNorth = true;
         lostInDesertWest = false;
+
+        playMusic('desert_area')
     }
     if (mapLocationY == 3 && mapLocationX == 2) {
         canGoUp = true;
@@ -1527,6 +1541,8 @@ function setUpArea() {
 
         lostInDesertNorth = true;
         lostInDesertEast = false;
+
+        playMusic('desert_area')
     }
     if (mapLocationY == 3 && mapLocationX == 3) {
         canGoUp = true;
@@ -1536,42 +1552,56 @@ function setUpArea() {
 
         lostInDesertNorth = true;
         lostInDesertEast = true;
+
+        playMusic('desert_area')
     }
     if (mapLocationY == 3 && mapLocationX == 4) {
         canGoUp = true;
         canGoDown = true;
         canGoLeft = false;
         canGoRight = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 3 && mapLocationX == 5) {
         canGoUp = true;
         canGoDown = true;
         canGoLeft = false;
         canGoRight = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 3 && mapLocationX == 6) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = false;
         canGoRight = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 3 && mapLocationX == 7) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = false;
         canGoRight = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 3 && mapLocationX == 8) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = false;
         canGoRight = true;
+
+        playMusic('cave_area')
     }
     if (mapLocationY == 3 && mapLocationX == 9) {
         canGoUp = false;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('cave_area')
     }
     if (mapLocationY == 3 && mapLocationX == 10) {
         canGoUp = true;
@@ -1582,6 +1612,8 @@ function setUpArea() {
         inFrontOfSilverDoor = false;
         areaHasRandomEncounters = true;
         doorUnlocked = false;
+
+        playMusic('cave_area')
     }
 
     // Y: 4
@@ -1594,42 +1626,56 @@ function setUpArea() {
         inGoatArea1 = false;
         areaHasWorldItem = false;
         areaHasRandomEncounters = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 4 && mapLocationX == 1) {
         canGoUp = false;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 4 && mapLocationX == 2) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 4 && mapLocationX == 3) {
         canGoUp = false;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 4 && mapLocationX == 4) {
         canGoUp = true;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 4 && mapLocationX == 5) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 4 && mapLocationX == 6) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 4 && mapLocationX == 7) {
         canGoUp = false;
@@ -1638,6 +1684,8 @@ function setUpArea() {
         canGoRight = true;
 
         areaHasRandomEncounters = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 4 && mapLocationX == 8) {
         canGoUp = true;
@@ -1648,6 +1696,8 @@ function setUpArea() {
         inShopEast = false;
         areaHasWorldItem = false;
         areaHasRandomEncounters = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 4 && mapLocationX == 9) {
         canGoUp = true;
@@ -1658,6 +1708,8 @@ function setUpArea() {
         inFrontOfSilverDoor = false;
         areaHasRandomEncounters = true;
         doorUnlocked = false;
+
+        playMusic('cave_area')
     }
     if (mapLocationY == 4 && mapLocationX == 10) {
         inFrontOfSilverDoor = true;
@@ -1675,6 +1727,7 @@ function setUpArea() {
         canGoLeft = true;
         canGoRight = false;
 
+        playMusic('cave_area')
     }
 
     // Y: 5
@@ -1695,6 +1748,7 @@ function setUpArea() {
             areaHasWorldItem = false;
         }
         
+        playMusic('grasslands_area')
     }
     // if(mapLocationY == 5 && mapLocationX == 1){
 
@@ -1704,6 +1758,8 @@ function setUpArea() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = false;
+
+        playMusic('grasslands_area')
     }
     // if(mapLocationY == 5 && mapLocationX == 3){
 
@@ -1718,6 +1774,8 @@ function setUpArea() {
         inGrasslands = true;
         inMainCampsite = false;
         inCampsite = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 5 && mapLocationX == 5) {
         canGoUp = true;
@@ -1730,11 +1788,7 @@ function setUpArea() {
         areaHasRandomEncounters = false;
 
         currentMusic = bgm_grasslands;
-        if (bgm_grasslands.volume <= 0.050) {
-            clearInterval(fadeInInterval)
-            clearInterval(fadeOutInterval)
-            BGM('grasslands'); 
-        }
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 5 && mapLocationX == 6) {
         canGoUp = false;
@@ -1746,12 +1800,16 @@ function setUpArea() {
         inGrasslands = true;
         inMainCampsite = false;
         inCampsite = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 5 && mapLocationX == 7) {
         canGoUp = false;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 5 && mapLocationX == 8) {
         canGoUp = false;
@@ -1768,12 +1826,16 @@ function setUpArea() {
         if (hasFishingRod) {
             areaHasWorldItem = false;
         }
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 5 && mapLocationX == 9) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = false;
         canGoRight = false;
+
+        playMusic('cave_area')
     }
     if (mapLocationY == 5 && mapLocationX == 10) {
         canGoUp = true;
@@ -1787,6 +1849,8 @@ function setUpArea() {
 
         inFrontOfSilverDoor = false;
         doorUnlocked = false;
+
+        playMusic('cave_area')
     }
 
     // Y: 6
@@ -1799,12 +1863,16 @@ function setUpArea() {
         inGoatArea1 = false;
         areaHasWorldItem = false;
         areaHasRandomEncounters = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 6 && mapLocationX == 1) {
         canGoUp = false;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 6 && mapLocationX == 2) {
         canGoUp = true;
@@ -1813,6 +1881,8 @@ function setUpArea() {
         canGoRight = true;
 
         areaHasRandomEncounters = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 6 && mapLocationX == 3) {
         canGoUp = true;
@@ -1822,6 +1892,8 @@ function setUpArea() {
 
         inShopWest = false;
         areaHasRandomEncounters = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 6 && mapLocationX == 4) {
         canGoUp = true;
@@ -1830,6 +1902,8 @@ function setUpArea() {
         canGoRight = true;
 
         areaHasRandomEncounters = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 6 && mapLocationX == 5) {
         canGoUp = true;
@@ -1842,6 +1916,8 @@ function setUpArea() {
 
         inMainCampsite = false;
         inCampsite = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 6 && mapLocationX == 6) {
         canGoUp = false;
@@ -1859,6 +1935,8 @@ function setUpArea() {
         if (hasGoat2 || returnedGoat2) {
             areaHasWorldItem = false;
         }
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 6 && mapLocationX == 7) {
         canGoUp = false;
@@ -1869,12 +1947,16 @@ function setUpArea() {
         inGoatArea2 = false;
         areaHasWorldItem = false;
         areaHasRandomEncounters = true;
+        
+        playMusic('forest_area')
     }
     if (mapLocationY == 6 && mapLocationX == 8) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = false;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 6 && mapLocationX == 9) {
         canGoUp = true;
@@ -1883,6 +1965,8 @@ function setUpArea() {
         canGoRight = false;
 
         inFishableArea = true;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 6 && mapLocationX == 10) {
         canGoUp = false;
@@ -1900,6 +1984,8 @@ function setUpArea() {
         if (hasGoat3 || returnedGoat3) {
             areaHasWorldItem = false;
         }
+
+        playMusic('cave_area')
     }
 
     // Y: 7
@@ -1914,6 +2000,8 @@ function setUpArea() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 7 && mapLocationX == 3) {
         canGoUp = false;
@@ -1922,6 +2010,8 @@ function setUpArea() {
         canGoRight = false;
 
         inShopWest = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 7 && mapLocationX == 4) {
         canGoUp = true;
@@ -1939,11 +2029,7 @@ function setUpArea() {
         inForest = false;
 
         currentMusic = bgm_grasslands;
-        if (bgm_grasslands.volume <= 0.050) {
-            clearInterval(fadeInInterval)
-            clearInterval(fadeOutInterval)
-            BGM('grasslands');
-        }
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 7 && mapLocationX == 6) {
         canGoUp = false;
@@ -1955,11 +2041,7 @@ function setUpArea() {
         inForest = true;
 
         currentMusic = bgm_forest;
-        if (bgm_forest.volume <= 0.050) {
-            clearInterval(fadeInInterval)
-            clearInterval(fadeOutInterval)
-            BGM('forest');
-        }
+        playMusic('forest_area')
         
     }
     if (mapLocationY == 7 && mapLocationX == 7) {
@@ -1967,12 +2049,16 @@ function setUpArea() {
         canGoDown = false;
         canGoLeft = true;
         canGoRight = false;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 7 && mapLocationX == 8) {
         canGoUp = true;
         canGoDown = true;
         canGoLeft = false;
         canGoRight = true;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 7 && mapLocationX == 9) {
         canGoUp = false;
@@ -1981,12 +2067,16 @@ function setUpArea() {
         canGoRight = true;
 
         inFishableArea = false;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 7 && mapLocationX == 10) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = false;
+
+        playMusic('forest_area')
     }
 
     // Y: 8
@@ -2001,12 +2091,16 @@ function setUpArea() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 8 && mapLocationX == 3) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 8 && mapLocationX == 4) {
         canGoUp = true;
@@ -2018,35 +2112,39 @@ function setUpArea() {
         inForest = false;
 
         currentMusic = bgm_grasslands;
-        if (bgm_grasslands.volume < 0.050) {
-            clearInterval(fadeInInterval)
-            clearInterval(fadeOutInterval)
-            BGM('grasslands');
-        }
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 8 && mapLocationX == 5) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = false;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 8 && mapLocationX == 6) {
         canGoUp = true;
         canGoDown = false;
         canGoLeft = false;
         canGoRight = true;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 8 && mapLocationX == 7) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 8 && mapLocationX == 8) {
         canGoUp = true;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = false;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 8 && mapLocationX == 9) {
         canGoUp = true;
@@ -2055,6 +2153,8 @@ function setUpArea() {
         canGoRight = true;
 
         inCampsite = true;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 8 && mapLocationX == 10) {
         canGoUp = true;
@@ -2063,6 +2163,8 @@ function setUpArea() {
         canGoRight = false;
 
         inCampsite = false;
+
+        playMusic('forest_area')
     }
 
     // Y: 9
@@ -2077,6 +2179,8 @@ function setUpArea() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = true;
+
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 9 && mapLocationX == 3) {
         canGoUp = false;
@@ -2088,11 +2192,7 @@ function setUpArea() {
         inForest = false;
 
         currentMusic = bgm_grasslands;
-        if (bgm_grasslands.volume <= 0.050) {
-            clearInterval(fadeInInterval)
-            clearInterval(fadeOutInterval)
-            BGM('grasslands');
-        }
+        playMusic('grasslands_area')
     }
     if (mapLocationY == 9 && mapLocationX == 4) {
         canGoUp = false;
@@ -2104,35 +2204,39 @@ function setUpArea() {
         inForest = true;
 
         currentMusic = bgm_forest;
-        if (bgm_forest.volume <= 0.050) {
-            clearInterval(fadeInInterval)
-            clearInterval(fadeOutInterval)
-            BGM('forest');
-        }
+        playMusic('forest_area')
     }
     if (mapLocationY == 9 && mapLocationX == 5) {
         canGoUp = false;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 9 && mapLocationX == 6) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 9 && mapLocationX == 7) {
         canGoUp = false;
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 9 && mapLocationX == 8) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = false;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 9 && mapLocationX == 9) {
         canGoUp = true;
@@ -2141,12 +2245,16 @@ function setUpArea() {
         canGoRight = true;
 
         inCampsite = false;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 9 && mapLocationX == 10) {
         canGoUp = true;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = false;
+
+        playMusic('forest_area')
     }
 
     // Y: 10
@@ -2175,6 +2283,8 @@ function setUpArea() {
 
         nextStepOasis = false;
         inOasis = true;
+
+        playMusic('desert_area')
     }
     // if(mapLocationY == 10 && mapLocationX == 1){
 
@@ -2211,12 +2321,16 @@ function setUpArea() {
         canGoDown = true;
         canGoLeft = false;
         canGoRight = true;
+
+        playMusic('forest_area')
     }
     if (mapLocationY == 10 && mapLocationX == 10) {
         canGoUp = false;
         canGoDown = true;
         canGoLeft = true;
         canGoRight = false;
+
+        playMusic('forest_area')
     }
 
     changeLocation();
@@ -2463,6 +2577,31 @@ function muteAudio(){
         currentMusic.volume = 0.3;
         currentMusic.play();
     }
+}
+
+function playMusic(music){
+
+    if(music == 'grasslands_area' && bgm_grasslands.volume <= 0.050){
+        clearInterval(fadeInInterval)
+        clearInterval(fadeOutInterval)
+        BGM('grasslands'); 
+    }
+    else if(music == 'forest_area' && bgm_forest.volume <= 0.050){
+        clearInterval(fadeInInterval)
+        clearInterval(fadeOutInterval)
+        BGM('forest'); 
+    }
+    else if(music == 'desert_area' && bgm_desert.volume <= 0.050){
+        clearInterval(fadeInInterval)
+        clearInterval(fadeOutInterval)
+        BGM('desert'); 
+    }
+    else if(music == 'cave_area' && bgm_cave.volume <= 0.050){
+        clearInterval(fadeInInterval)
+        clearInterval(fadeOutInterval)
+        BGM('cave'); 
+    }
+
 
 }
 

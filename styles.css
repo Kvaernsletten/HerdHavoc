@@ -40,6 +40,9 @@ html{
     height: 466px;
     image-rendering: pixelated;
 }
+.gameInfo{
+    position: absolute;
+}
 .characterSelect{
     margin-top: 350px;
     width: 768px;
