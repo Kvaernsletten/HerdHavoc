@@ -111,6 +111,9 @@ let buttonDisabled = false;
 let healthBarColor = "lightgreen";
 let energyBarColor = "lightgreen";
 
+let muted = false;
+let currentMusic;
+
 //Music
 let bgm_grasslands = new Audio("sfx/grasslands.ogg")
 let bgm_forest = new Audio("sfx/forest.ogg")
@@ -125,7 +128,12 @@ bgm_cave.volume = 0.0001;
 
 //SFX
 let coinsAudio = new Audio("sfx/Coins.mp3")
+let unlockAudio = new Audio("sfx/Unlock.mp3")
+let eatAudio = new Audio("sfx/Eat.mp3")
+let drinkAudio = new Audio("sfx/Drink.mp3")
+let goatAudio = new Audio("sfx/Goat.mp3")
 
+BGM('startScreen');
 setUpArea();
 updateView();
 function updateView() {
@@ -173,6 +181,8 @@ function updateView() {
         <div>Enemy (Lv. ${enemyLevel})</div>  
         <div>Health: ${enemyHealth ?? " "}</div>                
     </div>
+    </div>
+    <button onclick="muteAudio()">Mute</button>
     `
 
             // NOT IN BATTLE:
@@ -355,6 +365,7 @@ function updateView() {
         onmouseleave="if((hasGoat1 || hasGoat2 || hasGoat3) || (returnedGoat1 || returnedGoat2 || returnedGoat3)){clearTooltip()}"></div>
         </div>
     </div>
+    <button onclick="muteAudio()">Mute</button>
     `
         }
     `
@@ -409,8 +420,9 @@ function updateView() {
             </div>
             <div class="onHoverText">${onHoverText}</div>
         <div class="inventoryGrid"></div>
-
-    `
+        </div>
+        <button onclick="muteAudio()">Mute</button>
+        `
 }
 
 function setName() {
@@ -676,7 +688,7 @@ function flee() {
 
     droppedGold = Math.floor(playerGold * 0.10);
     if (playerGold > droppedGold && droppedGold != 0) {
-        adventureText = 'You grab a handful of gold coins amounting to ' + droppedGold + 'and toss it at your enemy as a distraction to escape...'
+        adventureText = 'You grab a handful of gold coins and toss it at your enemy as a distraction to escape... You lose ' + droppedGold + ' gold!'
         playerGold -= droppedGold;
     } else if (playerGold <= droppedGold) {
         adventureText = 'You grab all of your gold coins and toss it and toss it at your enemy as a distraction to escape...'
@@ -714,18 +726,21 @@ function buyItem(item) {
                 hasApple1 = true;
                 adventureText = "You bought an apple."
                 playerGold -= 12;
+                coinsAudio.currentTime = 0;
                 coinsAudio.play();
             }
             else if (hasApple1 && !hasApple2 && !hasApple3) {
                 hasApple2 = true;
                 adventureText = "You bought an apple."
                 playerGold -= 12;
+                coinsAudio.currentTime = 0;
                 coinsAudio.play();
             }
             else if (hasApple1 && hasApple2 && !hasApple3) {
                 hasApple3 = true;
                 adventureText = "You bought an apple."
                 playerGold -= 12;
+                coinsAudio.currentTime = 0;
                 coinsAudio.play();
             }
         } else if (playerGold < 12) {
@@ -740,6 +755,7 @@ function buyItem(item) {
                 hasPotion = true;
                 adventureText = "You bought a potion."
                 playerGold -= 50;
+                coinsAudio.play();
             }
         } else if (playerGold < 50) {
             adventureText = "You do not have enough gold!"
@@ -754,6 +770,7 @@ function buyItem(item) {
                 areaHasWorldItem = false;
                 adventureText = "You bought a fishing rod."
                 playerGold -= 150;
+                coinsAudio.play();
             }
         } else if (playerGold < 150) {
             adventureText = "You do not have enough gold!"
@@ -833,6 +850,7 @@ function useItem(item) {
             if (playerEnergy >= playerMaxEnergy) {
                 playerEnergy = playerMaxEnergy;
             }
+            drinkAudio.play();
             clearTooltip();
             statusBars();
         } else {
@@ -844,22 +862,23 @@ function useItem(item) {
         returnedGoat1 = true;
         hasGoat1 = false;
         adventureText = "You return the goat to your campsite!"
-
+        goatAudio.play();
     }
     if (item == 'goat' && inMainCampsite && hasGoat2) {
         returnedGoat2 = true;
         hasGoat2 = false;
         adventureText = "You return the goat to your campsite!"
-
+        goatAudio.play();
     }
     if (item == 'goat' && inMainCampsite && hasGoat3) {
         returnedGoat3 = true;
         hasGoat3 = false;
         adventureText = "You return the goat to your campsite!"
-
+        goatAudio.play();
     }
     else if (item == 'goat' && !inMainCampsite && (hasGoat1 || hasGoat2 || hasGoat3)) {
         adventureText = "You should bring the goat back to your main campsite first!"
+        goatAudio.play();
     }
 
     if (item == 'fishingRod' && inFishableArea && hasFishingRod) {
@@ -882,6 +901,7 @@ function useItem(item) {
     if (item == 'copperKey' && hasCopperKey && inFrontOfCopperDoor && !copperKeyUsed) {
         copperKeyUsed = true;
         doorUnlocked = true;
+        unlockAudio.play();
         canGoUp = true;
         changeLocation();
     }
@@ -892,6 +912,7 @@ function useItem(item) {
     if (item == 'silverKey' && hasSilverKey && inFrontOfSilverDoor && !silverKeyUsed) {
         silverKeyUsed = true;
         doorUnlocked = true;
+        unlockAudio.play();
         canGoUp = true;
         changeLocation();
     }
@@ -906,18 +927,21 @@ function eatApple() {
     if (hasApple1 && !hasApple2 && !hasApple3) {
         hasApple1 = false;
         adventureText = "You eat an apple.. +25 health!"
+        eatAudio.play();
         heal(25);
         clearTooltip();
     }
     if (hasApple1 && hasApple2 && !hasApple3) {
         hasApple2 = false;
         adventureText = "You eat an apple.. +25 health!"
+        eatAudio.play();
         heal(25);
         clearTooltip();
     }
     if (hasApple1 && hasApple2 && hasApple3) {
         hasApple3 = false;
         adventureText = "You eat an apple.. +25 health!"
+        eatAudio.play();
         heal(25);
         clearTooltip();
     }
@@ -1336,7 +1360,8 @@ function setUpArea() {
         inCave = false;
         areaHasRandomEncounters = false;
 
-        if (bgm_grasslands.volume <= 0.700) {
+        currentMusic = bgm_grasslands;
+        if (bgm_grasslands.volume <= 0.050) {
             clearInterval(fadeInInterval)
             clearInterval(fadeOutInterval)
             BGM('grasslands');
@@ -1398,7 +1423,8 @@ function setUpArea() {
         lostInDesertEast = false;
         lostInDesertWest = false;
 
-        if (bgm_desert.volume <= 0.700) {
+        currentMusic = bgm_desert;
+        if (bgm_desert.volume <= 0.050) {
             clearInterval(fadeInInterval)
             clearInterval(fadeOutInterval)
             BGM('desert');
@@ -1413,7 +1439,8 @@ function setUpArea() {
         inGrasslands = true;
         inDesert = false;
 
-        if (bgm_grasslands.volume <= 0.700) {
+        currentMusic = bgm_grasslands;
+        if (bgm_grasslands.volume <= 0.050) {
             clearInterval(fadeInInterval)
             clearInterval(fadeOutInterval)
             BGM('grasslands');
@@ -1456,7 +1483,8 @@ function setUpArea() {
         inFrontOfCopperDoor = false;
         areaHasRandomEncounters = true;
 
-        if (bgm_cave.volume <= 0.700) {
+        currentMusic = bgm_cave;
+        if (bgm_cave.volume <= 0.050) {
             clearInterval(fadeInInterval)
             clearInterval(fadeOutInterval)
             BGM('cave');
@@ -1666,6 +1694,7 @@ function setUpArea() {
         if (hasGoat1 || returnedGoat1) {
             areaHasWorldItem = false;
         }
+        
     }
     // if(mapLocationY == 5 && mapLocationX == 1){
 
@@ -1680,11 +1709,6 @@ function setUpArea() {
 
     // }
     if (mapLocationY == 5 && mapLocationX == 4) {
-        if (bgm_grasslands.volume <= 0.700) {
-            clearInterval(fadeInInterval)
-            clearInterval(fadeOutInterval)
-            BGM('grasslands'); 
-        }
         canGoUp = true;
         canGoDown = true;
         canGoLeft = false;
@@ -1704,6 +1728,13 @@ function setUpArea() {
         inMainCampsite = true;
         inCampsite = true;
         areaHasRandomEncounters = false;
+
+        currentMusic = bgm_grasslands;
+        if (bgm_grasslands.volume <= 0.050) {
+            clearInterval(fadeInInterval)
+            clearInterval(fadeOutInterval)
+            BGM('grasslands'); 
+        }
     }
     if (mapLocationY == 5 && mapLocationX == 6) {
         canGoUp = false;
@@ -1906,7 +1937,9 @@ function setUpArea() {
 
         inGrasslands = true;
         inForest = false;
-        if (bgm_grasslands.volume <= 0.700) {
+
+        currentMusic = bgm_grasslands;
+        if (bgm_grasslands.volume <= 0.050) {
             clearInterval(fadeInInterval)
             clearInterval(fadeOutInterval)
             BGM('grasslands');
@@ -1920,7 +1953,9 @@ function setUpArea() {
 
         inGrasslands = false;
         inForest = true;
-        if (bgm_forest.volume <= 0.700) {
+
+        currentMusic = bgm_forest;
+        if (bgm_forest.volume <= 0.050) {
             clearInterval(fadeInInterval)
             clearInterval(fadeOutInterval)
             BGM('forest');
@@ -1981,7 +2016,9 @@ function setUpArea() {
 
         inGrasslands = true;
         inForest = false;
-        if (bgm_grasslands.volume <= 0.700) {
+
+        currentMusic = bgm_grasslands;
+        if (bgm_grasslands.volume < 0.050) {
             clearInterval(fadeInInterval)
             clearInterval(fadeOutInterval)
             BGM('grasslands');
@@ -2049,7 +2086,9 @@ function setUpArea() {
 
         inGrasslands = true;
         inForest = false;
-        if (bgm_grasslands.volume <= 0.700) {
+
+        currentMusic = bgm_grasslands;
+        if (bgm_grasslands.volume <= 0.050) {
             clearInterval(fadeInInterval)
             clearInterval(fadeOutInterval)
             BGM('grasslands');
@@ -2063,7 +2102,9 @@ function setUpArea() {
 
         inGrasslands = false;
         inForest = true;
-        if (bgm_forest.volume <= 0.700) {
+
+        currentMusic = bgm_forest;
+        if (bgm_forest.volume <= 0.050) {
             clearInterval(fadeInInterval)
             clearInterval(fadeOutInterval)
             BGM('forest');
@@ -2225,23 +2266,28 @@ function BGM(area) {
     clearInterval(fadeInInterval);
     clearInterval(fadeOutInterval);
 
-    if (area == 'grasslands') {
+    if(muted){
+        return;
+    }
+
+    else if(!muted){
+
+        if (area == 'grasslands') {
         if (!bgm_grasslands.paused) {
             bgm_grasslands.pause();
             bgm_grasslands.currentTime = 0;
         }
-        bgm_grasslands.volume = 0.0001;
         bgm_grasslands.loop = true;
         bgm_grasslands.play();
-        fadeInInterval = setInterval(function() { audioFadeIn('grasslands') }, 50);
-        if (bgm_forest.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 50);
+        fadeInInterval = setInterval(function() { audioFadeIn('grasslands') }, 200);
+        if (bgm_forest.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 200);
         }
-        if (bgm_desert.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 50);
+        if (bgm_desert.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 200);
         }
-        if (bgm_cave.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 50);
+        if (bgm_cave.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 200);
         }
         
     } 
@@ -2250,18 +2296,17 @@ function BGM(area) {
             bgm_forest.pause();
             bgm_forest.currentTime = 0;
         }
-        bgm_forest.volume = 0.0001;
         bgm_forest.loop = true;
         bgm_forest.play();
-        fadeInInterval = setInterval(function() { audioFadeIn('forest') }, 50);
-        if (bgm_grasslands.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 50);
+        fadeInInterval = setInterval(function() { audioFadeIn('forest') }, 200);
+        if (bgm_grasslands.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 200);
         }
-        if (bgm_desert.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 50);
+        if (bgm_desert.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 200);
         }
-        if (bgm_cave.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 50);
+        if (bgm_cave.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 200);
         }
     } 
     else if (area == 'desert'){
@@ -2269,18 +2314,17 @@ function BGM(area) {
             bgm_desert.pause();
             bgm_desert.currentTime = 0;
         }
-        bgm_desert.volume = 0.0001;
         bgm_desert.loop = true;
         bgm_desert.play();
-        fadeInInterval = setInterval(function() { audioFadeIn('desert') }, 50);
-        if (bgm_grasslands.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 50);
+        fadeInInterval = setInterval(function() { audioFadeIn('desert') }, 200);
+        if (bgm_grasslands.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 200);
         }
-        if (bgm_forest.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 50);
+        if (bgm_forest.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 200);
         }
-        if (bgm_cave.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 50);
+        if (bgm_cave.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 200);
         }
     }
     else if (area == 'cave'){
@@ -2288,59 +2332,61 @@ function BGM(area) {
             bgm_cave.pause();
             bgm_cave.currentTime = 0;
         }
-        bgm_cave.volume = 0.0001;
         bgm_cave.loop = true;
         bgm_cave.play();
-        fadeInInterval = setInterval(function() { audioFadeIn('cave') }, 50);
-        if (bgm_grasslands.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 50);
+        fadeInInterval = setInterval(function() { audioFadeIn('cave') }, 200);
+        if (bgm_grasslands.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 200);
         }
-        if (bgm_desert.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 50);
+        if (bgm_desert.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 200);
         }
-        if (bgm_forest.volume > 0.5){
-            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 50);
+        if (bgm_forest.volume > 0.1){
+            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 200);
         }
+    } 
     }
+
+
 }
 
 function audioFadeIn(area) {
     if (area == 'grasslands') {
-        if (bgm_grasslands.volume < 0.9) {
+        if (bgm_grasslands.volume < 0.3) {
             bgm_grasslands.volume += 0.05;
         }
-        if (bgm_grasslands.volume >= 0.9) {
+        if (bgm_grasslands.volume >= 0.3) {
             clearInterval(fadeInInterval);
         }
     }
     if (area == 'forest') {
-        if (bgm_forest.volume < 0.9) {
+        if (bgm_forest.volume < 0.3) {
             bgm_forest.volume += 0.05;
         }
-        if (bgm_forest.volume >= 0.9) {
+        if (bgm_forest.volume >= 0.3) {
             clearInterval(fadeInInterval);
         }
     }
     if (area == 'desert') {
-        if (bgm_desert.volume < 0.9) {
+        if (bgm_desert.volume < 0.3) {
             bgm_desert.volume += 0.05;
         }
-        if (bgm_desert.volume >= 0.9) {
+        if (bgm_desert.volume >= 0.3) {
             clearInterval(fadeInInterval);
         }
     }
     if (area == 'cave') {
-        if (bgm_cave.volume < 0.9) {
+        if (bgm_cave.volume < 0.3) {
             bgm_cave.volume += 0.05;
         }
-        if (bgm_cave.volume >= 0.9) {
+        if (bgm_cave.volume >= 0.3) {
             clearInterval(fadeInInterval);
         }
     }
 }
 
 function audioFadeOut(area) {
-    if (area == 'grasslands') {
+    if (area == 'grasslands' || area == 'campsite')  {
         if (bgm_grasslands.volume > 0.1) {
             bgm_grasslands.volume -= 0.05;
         }
@@ -2384,6 +2430,41 @@ function audioFadeOut(area) {
             bgm_cave.currentTime = 0;
         }
     }
+
+}
+
+function muteAudio(){
+        muted = !muted;
+    if(muted){
+        bgm_grasslands.volume = 0;
+        bgm_forest.volume = 0;
+        bgm_desert.volume = 0;
+        bgm_cave.volume = 0;
+
+
+        coinsAudio.volume = 0;
+        unlockAudio.volume = 0;
+        eatAudio.volume = 0;
+        drinkAudio.volume = 0;
+        goatAudio.volume = 0;
+    }
+    else if(!muted){
+        bgm_grasslands.volume = 0.0001;
+        bgm_forest.volume = 0.0001;
+        bgm_desert.volume = 0.0001;
+        bgm_cave.volume = 0.0001;
+
+
+        coinsAudio.volume = 1;
+        unlockAudio.volume = 1;
+        eatAudio.volume = 1;
+        drinkAudio.volume = 1;
+        goatAudio.volume = 1;
+        
+        currentMusic.volume = 0.3;
+        currentMusic.play();
+    }
+
 }
 
 
