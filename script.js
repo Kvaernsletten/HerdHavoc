@@ -788,6 +788,7 @@ function buyItem(item) {
             hasSilverKey = true;
             hasDesertRose = false;
             adventureText = "You traded the rose for a silver key!"
+            pickUpAudio.play();
         } else if (!hasDesertRose) {
             adventureText = "You don't have the desert rose! There is a rumour it can be found if you keep heading south-east in the desert...."
         }
