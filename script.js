@@ -2441,7 +2441,6 @@ function muteAudio(){
         bgm_desert.volume = 0;
         bgm_cave.volume = 0;
 
-
         coinsAudio.volume = 0;
         unlockAudio.volume = 0;
         eatAudio.volume = 0;
