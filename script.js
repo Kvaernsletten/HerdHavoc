@@ -113,6 +113,11 @@ let buttonDisabled = false;
 let healthBarColor = "lightgreen";
 let energyBarColor = "lightgreen";
 
+let adventurerSelected = true;
+let warriorSelected = false;
+let rogueSelected = false;
+let mageSelected = false;
+
 let muted = false;
 let currentMusic;
 
@@ -400,20 +405,24 @@ function updateView() {
             <button class="rightButton" onclick="playerMale = !playerMale, setUpCharacter(), updateView();">🡺</button>
         </div>
         <div class="DownDiv">
-            <button class="classButtons" 
-            onclick="setClass('adventurer')"
+            <button class="classButtons"
+            style="${adventurerSelected ? 'border: 5px solid orange;' : ''}" 
+            onclick="setClass('adventurer'), classSelectButtons(); adventurerSelected = true;"
             onmouseenter="onHoverTooltip('adventurer')"
             onmouseleave="clearTooltip()">Adventurer</button>
-            <button class="classButtons" 
-            onclick="setClass('warrior')"
+            <button class="classButtons"
+            style="${warriorSelected ? 'border: 5px solid orange;' : ''}"  
+            onclick="setClass('warrior'), classSelectButtons(); warriorSelected = true;"
             onmouseenter="onHoverTooltip('warrior')"
             onmouseleave="clearTooltip()">Warrior</button>
-            <button class="classButtons" 
-            onclick="setClass('rogue')"
+            <button class="classButtons"
+            style="${rogueSelected ? 'border: 5px solid orange;' : ''}"  
+            onclick="setClass('rogue'), classSelectButtons(); rogueSelected = true;"
             onmouseenter="onHoverTooltip('rogue')"
             onmouseleave="clearTooltip()">Rogue</button>
-            <button class="classButtons" 
-            onclick="setClass('mage')"
+            <button class="classButtons"
+            style="${mageSelected ? 'border: 5px solid orange;' : ''}"  
+            onclick="setClass('mage'), classSelectButtons(); mageSelected = true;"
             onmouseenter="onHoverTooltip('mage')"
             onmouseleave="clearTooltip()">Mage</button>
             </div> 
@@ -442,6 +451,13 @@ function setName() {
     updateView();
 }
 
+function classSelectButtons(){
+    adventurerSelected = false;
+    warriorSelected = false;
+    rogueSelected = false;
+    mageSelected = false;
+    updateView();
+}
 
 function setClass(selectedClass) {
 
@@ -497,6 +513,7 @@ function setUpCharacter(){
     }
     updateView();
 }
+
 
 
 function startGame() {
