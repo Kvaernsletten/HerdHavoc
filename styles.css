@@ -53,8 +53,8 @@ html{
 }
 .characterSelect{
     margin-top: 350px;
-    margin-left: 130px;
-    width: 768px;
+    margin-left: 320px;
+    width: 384px;
     height: 466px;
     image-rendering: pixelated;
     position: absolute;

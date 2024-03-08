@@ -99,6 +99,7 @@ let actionMenu = false;
 let playerMale = true;
 let goingLeft = false;
 let passedOut = false;
+let playerCombatSprite;
 
 let lostInDesertNorth = false;
 let lostInDesertSouth = false;
@@ -148,7 +149,7 @@ function updateView() {
         <div class="topBattleDiv">
         </div>
         <div class="middleBattleDiv">
-            <img class="playerInCombat" src=${playerAlive ? (playerMale ? "imgs/Character_Male_inCombat.png" : "imgs/Character_Female_inCombat.png") : (playerMale ? "imgs/Character_Male_dead.png" : "imgs/Character_Female_dead.png")}>
+            <img class="playerInCombat" src=${playerAlive ? playerCombatSprite : (playerMale ? "imgs/Character_Male_dead.png" : "imgs/Character_Female_dead.png")}>
             <img class="enemyInCombat" src=${enemySprite}>
         </div>
         <div class="bottomBattleDiv">
@@ -391,12 +392,12 @@ function updateView() {
             </div>
            
         <div class="LeftRightDiv">
-            <button class="leftButton" onclick="goingLeft = !goingLeft, playerMale = !playerMale, updateView();">🡸</button>
+            <button class="leftButton" onclick="playerMale = !playerMale, setUpCharacter(), updateView();">🡸</button>
             <div class="gameInfo">
                 Select character
             </div>
-            <img class="characterSelect" src=${goingLeft ? "imgs/Character_Female_R.png" : "imgs/Character_R.png"}>
-            <button class="rightButton" onclick="goingLeft = !goingLeft, playerMale = !playerMale, updateView();">🡺</button>
+            <img class="characterSelect" src=${playerMale ? playerCombatSprite ?? "imgs/Character_Male_inCombat.png" : playerCombatSprite ?? "imgs/Character_Female_inCombat.png"}>
+            <button class="rightButton" onclick="playerMale = !playerMale, setUpCharacter(), updateView();">🡺</button>
         </div>
         <div class="DownDiv">
             <button class="classButtons" 
@@ -441,6 +442,7 @@ function setName() {
     updateView();
 }
 
+
 function setClass(selectedClass) {
 
     if (selectedClass == "adventurer") {
@@ -475,8 +477,24 @@ function setClass(selectedClass) {
         playerDamage = 45;
         playerClass = "Mage"
     }
-    adventureText = "Start game as the " + playerClass + " class?"
+    adventureText = "Start game with the " + (playerClass ?? " Adventurer") + " class?"
+    setUpCharacter();
+    updateView();
+}
 
+function setUpCharacter(){
+    if(playerClass == "Adventurer"){
+        playerCombatSprite = playerMale ? "imgs/Character_Male_inCombat.png" : "imgs/Character_Female_inCombat.png";
+    }
+    else if(playerClass == "Warrior"){
+        playerCombatSprite = playerMale ? "imgs/Character_Male_Warrior_inCombat.png" : "imgs/Character_Female_Warrior_inCombat.png";
+    }
+    else if(playerClass == "Rogue"){
+        playerCombatSprite = playerMale ? "imgs/Character_Male_Rogue_inCombat.png" : "imgs/Character_Female_Rogue_inCombat.png";
+    }
+    else if(playerClass == "Mage"){
+        playerCombatSprite = playerMale ? "imgs/Character_Male_Mage_inCombat.png" : "imgs/Character_Female_Mage_inCombat.png";
+    }
     updateView();
 }
 
@@ -498,6 +516,7 @@ function startGame() {
     mapLocationX = 5;
     isGameRunning = true;
     inventoryGoat = "imgs/inventory_items/Empty_Slot.png"
+    setUpCharacter();
     setUpArea();
     updateView();
 }
@@ -648,6 +667,28 @@ function magic() {
     updateView();
 }
 
+function takeDamage() {
+
+    playerHealth -= enemyDamage;
+    adventureText = "The " + enemyName + " attacks you for " + enemyDamage + " damage!";
+    actionMenu = false;
+    if (playerHealth <= 0) {
+        die();
+    }
+    statusBars();
+    updateView();
+}
+
+function die() {
+    playerHealth = 0;
+    adventureText = "You died.."
+    playerAlive = false;
+}
+
+function restartGame(){
+    location.reload();
+}
+
 function winBattle() {
     worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
     inBattle = false;
@@ -710,28 +751,6 @@ function flee() {
 
     clearTooltip();
     updateView();
-}
-
-function takeDamage() {
-
-    playerHealth -= enemyDamage;
-    adventureText = "The " + enemyName + " attacks you for " + enemyDamage + " damage!";
-    actionMenu = false;
-    if (playerHealth <= 0) {
-        die();
-    }
-    statusBars();
-    updateView();
-}
-
-function die() {
-    playerHealth = 0;
-    adventureText = "You died.."
-    playerAlive = false;
-}
-
-function restartGame(){
-    location.reload();
 }
 
 function buyItem(item) {
