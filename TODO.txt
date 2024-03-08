@@ -1,11 +1,3 @@
 change combat flow
 
-flee random chance to fail and lose gold?
-
-rework damage calculations for player and enemies
-
-add style cursor pointer to inventory items
-
-NPC dialogue buttons
-
-gender select?
+rework damage calculations for player and enemies *** IN PROGRESS ***

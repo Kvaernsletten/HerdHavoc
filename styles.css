@@ -138,6 +138,7 @@ html{
     justify-content: center;
     align-items: center;
     height: 50px;
+    padding: 5px;
     border: 5px solid rgb(211, 134, 45);
     color: rgb(235, 163, 81);
     background-color: rgba(46, 36, 56, 0.822);
