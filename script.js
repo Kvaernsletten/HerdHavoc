@@ -1,12 +1,11 @@
 
-
 let app = document.getElementById('app');
 let gameScreen = document.getElementById('gameScreen');
 
 let worldBackground;
 let battleBackground;
 
-let adventureText = "Choose a class for your adventure!";
+let adventureText;
 let onHoverText = "";
 
 //Player stats
@@ -20,9 +19,6 @@ let playerMaxEnergy;
 let playerDamage;
 let playerMinDamage;
 let playerMaxDamage;
-let playerCritRate;
-let playerCritDamage;
-let playerCrit = false;
 let playerXP = 0;
 let playerNextLevelXP = 27;
 let excessXP;
@@ -68,6 +64,7 @@ let playerAlive = true;
 
 let areaHasWorldItem;
 let worldItem;
+let currentDialogue = 0;
 
 let areaHasRandomEncounters = false;
 let encounterChance;
@@ -499,8 +496,6 @@ function setClass(selectedClass) {
 
         playerMinDamage = 15;
         playerMaxDamage = 25;
-        playerCritRate = 0.07;
-        playerCritDamage = 0.07;
 
     }
     else if (selectedClass == "warrior") {  
@@ -514,8 +509,6 @@ function setClass(selectedClass) {
 
         playerMinDamage = 20;
         playerMaxDamage = 30;
-        playerCritRate = 0.07;
-        playerCritDamage = 0.10;
 
     }
     else if (selectedClass == "rogue") {  
@@ -529,8 +522,6 @@ function setClass(selectedClass) {
 
         playerMinDamage = 30;
         playerMaxDamage = 40;
-        playerCritRate = 0.15;
-        playerCritDamage = 0.20;
   
     }
     else if (selectedClass == "mage") {    
@@ -544,8 +535,6 @@ function setClass(selectedClass) {
 
         playerMinDamage = 25;
         playerMaxDamage = 45;
-        playerCritRate = 0;
-        playerCritDamage = 0;
 
     }
     adventureText = "Start game with the " + (playerClass ?? " Adventurer") + " class?"
@@ -787,26 +776,26 @@ function levelUp() {
         if (playerClass == 'Adventurer') {
             playerMaxHealth += 5;
             playerMaxEnergy += 5;
-            playerMinDamage += 5;
+            playerMinDamage += 4;
             playerMaxDamage += 5;
         }
         if (playerClass == 'Warrior') {
             playerMaxHealth += 10;
             playerMaxEnergy += 5;
             playerMinDamage += 2;
-            playerMaxDamage += 7;
+            playerMaxDamage += 8;
         }
         if (playerClass == 'Rogue') {
-            playerMaxHealth += 5;
-            playerMaxEnergy += 5;
-            playerMinDamage += 3;
+            playerMaxHealth += 7;
+            playerMaxEnergy += 7;
+            playerMinDamage += 4;
             playerMaxDamage += 7;
         }
         if (playerClass == 'Mage') {
             playerMaxHealth += 5;
             playerMaxEnergy += 10;
-            playerMinDamage += 2;
-            playerMaxDamage += 13;
+            playerMinDamage += 5;
+            playerMaxDamage += 9;
         }
 
     }
@@ -834,27 +823,82 @@ function flee() {
 
 function talkToNPC(NPC){
 
+
     if(NPC == "shopEastNPC"){
-        if(!hasCopperKey){  
-            adventureText = "Shopkeeper: I saw something sparkly in the lake up in the dark forest once but the goblins chased me away before I could get a closer look..."
-        }else if(hasCopperKey){
-            adventureText = "Shopkeeper: Did you ever find the thing in the lake?"
+        let eastShopKeeperDialogue;
+
+        if(!hasCopperKey && !hasFishingRod)
+        {  
+            eastShopKeeperDialogue = [
+
+                "Shopkeeper: I saw something sparkly in the lake up in the dark forest once but the goblins chased me away before I could get a closer look... ▾",
+                "Shopkeeper: You'll need a fishing rod if you want to have a go at pulling whatever it is out of the lake yourself!",
+                "..."
+            ]
+            adventureText = currentDialogue;
         }
-            
+        else if(!hasCopperKey && hasFishingRod)
+        {
+            eastShopKeeperDialogue = [
+                "Shopkeeper: You won't regret buying that fishing rod! ▾",
+                "Shopkeeper: ... or maybe you will, there's a reason I wanted to get rid of it after all.. ▾",
+                "Shopkeeper: There has not been any fish in these waters for decades.. all dead! ▾",
+                "Shopkeeper: But.. you might use the rod to fish out the splarkling object I saw in the dark forest if you can make it past the goblins lurking in there..",
+                "..."
+            ]
+        }
+        else if(hasCopperKey){
+            eastShopKeeperDialogue = [
+                "Shopkeeper: That key! It is the key to the copper mines southeast from here! ▾",
+                "Shopkeeper: The mines have been shut down ever since cave trolls started taking shelter from the sunlight in there.. ▾",
+                "Shopkeeper: I don't know why you'd want to venture into the mines, but if you go, make sure to stock up on supplies first!",
+                "..."
+            ]
+        }
+        adventureText = eastShopKeeperDialogue[currentDialogue];
+        currentDialogue++;
+        if(currentDialogue == eastShopKeeperDialogue.length){
+            currentDialogue = 0;
+        } 
     }
     if(NPC == "shopWestNPC"){
+        let westShopKeeperDialogue;
+
         if(!hasSilverKey && !hasDesertRose)
         {
-            adventureText = "Shopkeeper: If you can find me a very rare and hard to find rose that only grows in the desert, I'll trade you this silver key for it!"
-        }else if(!hasSilverKey && hasDesertRose)
-        {
-            adventureText = "Shopkeeper: That rose you have! Would you please trade it with me for this silver key?"
-        }else if(hasSilverKey && !hasDesertRose)
-        {
-            adventureText = "Shopkeeper: Thanks for the trade we did! I'd cherish this rose more if not for the horrible smell!"
+            westShopKeeperDialogue = [
+                "Shopkeeper: I've heard rumours of a hidden oasis somewhere in the desert... ▾",
+                "Shopkeeper: Some even claim that if you keep going southwest in the desert you will eventually find the oasis.. ▾",
+                "Shopkeeper: An oasis like that is sure to hold the very rare and hard to find desert rose! ▾",
+                "Shopkeeper: If you can find me the desert rose, I'll trade you this silver key for it! ▾",
+                "Shopkeeper: It is dangerous and easy to get lost out there, so make sure you stock up on supplies if you plan on exploring anywhere!",
+                "..."
+            ]
         }
-        updateView();
+        else if(!hasSilverKey && hasDesertRose)
+        {
+            westShopKeeperDialogue = [
+                "Shopkeeper: That's the desert rose you have there! Would you please trade it with me for this silver key? ▾",
+                "Shopkeeper: PLEASEEEE!!!!!",
+                "..."
+            ]
+        }
+        else if(hasSilverKey && !hasDesertRose)
+        {
+            westShopKeeperDialogue = [
+                "Shopkeeper: Thanks you so much for trading with me! ▾",
+                "Shopkeeper: I have no idea what that key is for, by the way...",
+                "Shopkeeper: I'd cherish this rose more if not for the horrible smell!",
+                "..."
+            ]
+        }
+        adventureText = westShopKeeperDialogue[currentDialogue];
+        currentDialogue++;
+        if(currentDialogue == westShopKeeperDialogue.length){
+            currentDialogue = 0;
+        }
     }
+    updateView();
 }
 
 function buyItem(item) {
@@ -928,6 +972,7 @@ function buyItem(item) {
             adventureText = "You don't have the desert rose! There is a rumour it can be found if you keep heading south-east in the desert...."
         }
     }
+    currentDialogue = 0;
     updateView();
 }
 
@@ -1071,6 +1116,7 @@ function useItem(item) {
     else if (item == 'silverKey' && hasSilverKey && !inFrontOfSilverDoor || item == 'silverKey' && silverKeyUsed) {
         adventureText = "There are no compatible locks for this key in the area..."
     }
+    currentDialogue = 0;
 
     updateView();
 }
@@ -1981,6 +2027,7 @@ function setUpArea() {
         canGoRight = false;
 
         inShopEast = true;
+        currentDialogue = 0;
 
         if (!hasFishingRod) {
             areaHasWorldItem = true;
@@ -2173,6 +2220,7 @@ function setUpArea() {
         canGoRight = false;
 
         inShopWest = true;
+        currentDialogue = 0;
 
         playMusic('grasslands_area')
     }
