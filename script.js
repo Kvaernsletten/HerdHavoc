@@ -22,6 +22,7 @@ let playerMinDamage;
 let playerMaxDamage;
 let playerCritRate;
 let playerCritDamage;
+let playerCrit = false;
 let playerXP = 0;
 let playerNextLevelXP = 27;
 let excessXP;
@@ -677,7 +678,7 @@ function setUpEnemy() {
         enemyHealth = 65;
         enemyMinDamage = 5;
         enemyMaxDamage = 15;
-        yieldXP = 10;
+        yieldXP = 11;
 
     }
     if (inForest) {
@@ -689,7 +690,7 @@ function setUpEnemy() {
         enemyHealth = 85;
         enemyMinDamage = 10;
         enemyMaxDamage = 20;
-        yieldXP = 15;
+        yieldXP = 17;
     }
     if (inDesert) {
         enemyName = "skeleton warrior"
@@ -700,7 +701,7 @@ function setUpEnemy() {
         enemyHealth = 105;
         enemyMinDamage = 10;
         enemyMaxDamage = 25;
-        yieldXP = 20;
+        yieldXP = 23;
     }
     if (inCave) {
         enemyName = "cave troll"
@@ -711,7 +712,7 @@ function setUpEnemy() {
         enemyHealth = 125;
         enemyMinDamage = 20;
         enemyMaxDamage = 35;
-        yieldXP = 30;
+        yieldXP = 35;
     }
 }
 
@@ -844,10 +845,10 @@ function talkToNPC(NPC){
     if(NPC == "shopWestNPC"){
         if(!hasSilverKey && !hasDesertRose)
         {
-            adventureText = "Shopkeeper: If you can find me a very rare rose that only grows in the desert, I'll trade you this silver key for it!"
+            adventureText = "Shopkeeper: If you can find me a very rare and hard to find rose that only grows in the desert, I'll trade you this silver key for it!"
         }else if(!hasSilverKey && hasDesertRose)
         {
-            adventureText = "Shopkeeper: You've found the rose! Please will you trade with me for this silver key?"
+            adventureText = "Shopkeeper: That rose you have! Would you please trade it with me for this silver key?"
         }else if(hasSilverKey && !hasDesertRose)
         {
             adventureText = "Shopkeeper: Thanks for the trade we did! I'd cherish this rose more if not for the horrible smell!"
