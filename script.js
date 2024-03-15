@@ -1569,8 +1569,8 @@ function onHoverTooltip(button) {
         onHoverText = "Raise your shield to take less damage from the next attack and recover energy based on the reduced damage. (Cost: " + guard.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'shieldSlam' && onHoverText != "Slam your target with your shield to stun them and deal a small amount of damage (Cost: " + shieldSlam.requiredEnergy + " energy)") {
-        onHoverText = "Slam your target with your shield to stun them and deal a small amount of damage (Cost: " + shieldSlam.requiredEnergy + " energy)"
+    if (button == 'shieldSlam' && onHoverText != "Slam your target with your shield to stun them for 2 turns and deal a small amount of damage (Cost: " + shieldSlam.requiredEnergy + " energy)") {
+        onHoverText = "Slam your target with your shield to stun them for 2 turns and deal a small amount of damage (Cost: " + shieldSlam.requiredEnergy + " energy)"
         updateView();
     }
     if (button == 'mendWounds' && onHoverText != "Take a moment to clean any wounds sustained in combat (Cost: " + mendWounds.requiredEnergy + " energy)") {
@@ -1582,21 +1582,21 @@ function onHoverTooltip(button) {
         onHoverText = "Attempt to steal gold from your target (Cost: " + steal.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'stabbyStab' && onHoverText != "Exploit your target's weak point with your daggers to deal double the damage of your regular attack (Cost: " + stabbyStab.requiredEnergy + " energy)") {
-        onHoverText = "Exploit your target's weak point with your daggers to deal double the damage of your regular attack (Cost: " + stabbyStab.requiredEnergy + " energy)"
+    if (button == 'stabbyStab' && onHoverText != "Stun your target for 2 turns by exploiting their weak point. (Cost: " + stabbyStab.requiredEnergy + " energy)") {
+        onHoverText = "Stun your target for 2 turns by exploiting their weak point. (Cost: " + stabbyStab.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'vanish' && onHoverText != "Step into the shadows and hide from your enemy to retreat from the battle (Cost: " + vanish.requiredEnergy + " energy)") {
-        onHoverText = "Step into the shadows and hide from your enemy to retreat from the battle (Cost: " + vanish.requiredEnergy + " energy)"
+    if (button == 'vanish' && onHoverText != "Step into the shadows and hide from your enemy to retreat from the battle. (Cost: " + vanish.requiredEnergy + " energy)") {
+        onHoverText = "Step into the shadows and hide from your enemy to retreat from the battle. (Cost: " + vanish.requiredEnergy + " energy)"
         updateView();
     }
     //mage
-    if (button == 'chill' && onHoverText != "Deals a small amount of damage and freezes your enemy for 2 turns (Cost: " + chill.requiredEnergy + " energy)") {
-        onHoverText = "Deals a small amount of damage and freezes your enemy for 2 turns (Cost: " + chill.requiredEnergy + " energy)"
+    if (button == 'chill' && onHoverText != "Deals a small amount of damage and freezes your enemy for 2 turns. (Cost: " + chill.requiredEnergy + " energy)") {
+        onHoverText = "Deals a small amount of damage and freezes your enemy for 2 turns. (Cost: " + chill.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'fireball' && onHoverText != "Deals a moderate amount of fire damage to enemy (Cost: " + fireball.requiredEnergy + " energy)") {
-        onHoverText = "Deals a moderate amount of fire damage to enemy (Cost: " + fireball.requiredEnergy + " energy)"
+    if (button == 'fireball' && onHoverText != "Deals a large amount of fire damage to enemy. (Cost: " + fireball.requiredEnergy + " energy)") {
+        onHoverText = "Deals a large amount of fire damage to enemy. (Cost: " + fireball.requiredEnergy + " energy)"
         updateView();
     }
     if (button == 'soothingWinds' && onHoverText != "Call on soothing winds to restore a large amount of your own health (Cost: " + soothingWinds.requiredEnergy + " energy)") {
