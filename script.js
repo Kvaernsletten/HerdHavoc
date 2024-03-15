@@ -147,11 +147,11 @@ let vanish = {
     requiredLevel: 5,
 }
 let chill = {
-    requiredEnergy: 5,
+    requiredEnergy: 10,
     requiredLevel: 1,
 }
 let fireball = {
-    requiredEnergy: 10,
+    requiredEnergy: 20,
     requiredLevel: 3,
 }
 let soothingWinds = {
@@ -936,15 +936,15 @@ function useAbility(ability) {
     }
     if (ability == 'patchUp') {
         playerEnergy -= patchUp.requiredEnergy;
-        adventureText = "You quickly patch up recent wounds during combat and recover " + Math.floor(playerMaxHealth / 4) + " health!"
-        heal(Math.floor(playerMaxHealth / 4))
+        adventureText = "You quickly patch up recent wounds during combat and recover " + Math.floor(playerMaxHealth / 4.3) + " health!"
+        heal(Math.floor(playerMaxHealth / 4.3))
         setTimeout(enemyTurn, 1500);
     }
 
     //warrior
     if (ability == 'guard') {
         playerEnergy -= guard.requiredEnergy;
-
+        adventureText = "You raise your shield for a moment's respite and recover some energy!";
         psychedUp = true;
         setTimeout(enemyTurn, 1500);
     }
@@ -959,8 +959,8 @@ function useAbility(ability) {
     }
     if (ability == 'mendWounds') {
         playerEnergy -= mendWounds.requiredEnergy;
-        adventureText = "You carefully tend to your wounds during battle and " + Math.floor(playerMaxHealth / 3) + " health!"
-        heal(Math.floor(playerMaxHealth / 3))
+        adventureText = "You carefully tend to your wounds during battle and " + Math.floor(playerMaxHealth / 3.2) + " health!"
+        heal(Math.floor(playerMaxHealth / 3.2))
         setTimeout(enemyTurn, 1500);
     }
 
