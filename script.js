@@ -147,11 +147,11 @@ let vanish = {
     requiredLevel: 5,
 }
 let chill = {
-    requiredEnergy: 10,
+    requiredEnergy: 8,
     requiredLevel: 1,
 }
 let fireball = {
-    requiredEnergy: 20,
+    requiredEnergy: 16,
     requiredLevel: 3,
 }
 let soothingWinds = {
@@ -1552,55 +1552,55 @@ function onHoverTooltip(button) {
 
     //abilities
     //adventurer
-    if (button == 'searchBackpack' && onHoverText != "Desperately rummage through your backpack for any object, sharp or blunt, to throw at your enemy! (Cost: " + searchBackpack.requiredEnergy + " energy)") {
-        onHoverText = "Desperately rummage through your backpack for any object, sharp or blunt, to throw at your enemy! (Cost: " + searchBackpack.requiredEnergy + " energy)"
+    if (button == 'searchBackpack' && onHoverText != "Desperately rummage through your backpack for any object, sharp or blunt, to throw at your enemy! <br><br>(Cost: " + searchBackpack.requiredEnergy + " energy)") {
+        onHoverText = "Desperately rummage through your backpack for any object, sharp or blunt, to throw at your enemy! <br><br>(Cost: " + searchBackpack.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'runAway' && onHoverText != "Attempt to run away! (Cost: " + runAway.requiredEnergy + " energy)") {
-        onHoverText = "Attempt to run away! (Cost: " + runAway.requiredEnergy + " energy)"
+    if (button == 'runAway' && onHoverText != "Attempt to run away! <br><br>(Cost: " + runAway.requiredEnergy + " energy)") {
+        onHoverText = "Attempt to run away! <br><br>(Cost: " + runAway.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'patchUp' && onHoverText != "Take a moment to patch yourself up! (Cost: " + patchUp.requiredEnergy + " energy)") {
-        onHoverText = "Take a moment to patch yourself up! (Cost: " + patchUp.requiredEnergy + " energy)"
+    if (button == 'patchUp' && onHoverText != "Take a moment to patch yourself up! <br><br>(Cost: " + patchUp.requiredEnergy + " energy)") {
+        onHoverText = "Take a moment to patch yourself up! <br><br>(Cost: " + patchUp.requiredEnergy + " energy)"
         updateView();
     }
     //warrior
-    if (button == 'guard' && onHoverText != "Raise your shield to take less damage from the next attack and recover energy based on the reduced damage. (Cost: " + guard.requiredEnergy + " energy)") {
-        onHoverText = "Raise your shield to take less damage from the next attack and recover energy based on the reduced damage. (Cost: " + guard.requiredEnergy + " energy)"
+    if (button == 'guard' && onHoverText != "Raise your shield to take less damage from the next attack and recover energy based on the reduced damage. <br><br>(Cost: " + guard.requiredEnergy + " energy)") {
+        onHoverText = "Raise your shield to take less damage from the next attack and recover energy based on the reduced damage. <br><br>(Cost: " + guard.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'shieldSlam' && onHoverText != "Slam your target with your shield to stun them for 2 turns and deal a small amount of damage (Cost: " + shieldSlam.requiredEnergy + " energy)") {
-        onHoverText = "Slam your target with your shield to stun them for 2 turns and deal a small amount of damage (Cost: " + shieldSlam.requiredEnergy + " energy)"
+    if (button == 'shieldSlam' && onHoverText != "Slam your target with your shield to stun them for 2 turns and deal a small amount of damage <br><br>(Cost: " + shieldSlam.requiredEnergy + " energy)") {
+        onHoverText = "Slam your target with your shield to stun them for 2 turns and deal a small amount of damage <br><br>(Cost: " + shieldSlam.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'mendWounds' && onHoverText != "Take a moment to clean any wounds sustained in combat (Cost: " + mendWounds.requiredEnergy + " energy)") {
-        onHoverText = "Take a moment to clean any wounds sustained in combat (Cost: " + mendWounds.requiredEnergy + " energy)"
+    if (button == 'mendWounds' && onHoverText != "Take a moment to clean any wounds sustained in combat <br><br>(Cost: " + mendWounds.requiredEnergy + " energy)") {
+        onHoverText = "Take a moment to clean any wounds sustained in combat <br><br>(Cost: " + mendWounds.requiredEnergy + " energy)"
         updateView();
     }
     //rogue
-    if (button == 'steal' && onHoverText != "Attempt to steal gold from your target (Cost: " + steal.requiredEnergy + " energy)") {
-        onHoverText = "Attempt to steal gold from your target (Cost: " + steal.requiredEnergy + " energy)"
+    if (button == 'steal' && onHoverText != "Attempt to steal gold from your target <br><br>(Cost: " + steal.requiredEnergy + " energy)") {
+        onHoverText = "Attempt to steal gold from your target <br><br>(Cost: " + steal.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'stabbyStab' && onHoverText != "Stun your target for 2 turns by exploiting their weak point. (Cost: " + stabbyStab.requiredEnergy + " energy)") {
-        onHoverText = "Stun your target for 2 turns by exploiting their weak point. (Cost: " + stabbyStab.requiredEnergy + " energy)"
+    if (button == 'stabbyStab' && onHoverText != "Stun your target for 2 turns by exploiting their weak point. <br><br>(Cost: " + stabbyStab.requiredEnergy + " energy)") {
+        onHoverText = "Stun your target for 2 turns by exploiting their weak point. <br><br>(Cost: " + stabbyStab.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'vanish' && onHoverText != "Step into the shadows and hide from your enemy to retreat from the battle. (Cost: " + vanish.requiredEnergy + " energy)") {
-        onHoverText = "Step into the shadows and hide from your enemy to retreat from the battle. (Cost: " + vanish.requiredEnergy + " energy)"
+    if (button == 'vanish' && onHoverText != "Step into the shadows and hide from your enemy to retreat from the battle. <br><br>(Cost: " + vanish.requiredEnergy + " energy)") {
+        onHoverText = "Step into the shadows and hide from your enemy to retreat from the battle. <br><br>(Cost: " + vanish.requiredEnergy + " energy)"
         updateView();
     }
     //mage
-    if (button == 'chill' && onHoverText != "Deals a small amount of damage and freezes your enemy for 2 turns. (Cost: " + chill.requiredEnergy + " energy)") {
-        onHoverText = "Deals a small amount of damage and freezes your enemy for 2 turns. (Cost: " + chill.requiredEnergy + " energy)"
+    if (button == 'chill' && onHoverText != "Deals a small amount of damage and freezes your enemy for 2 turns. <br><br>(Cost: " + chill.requiredEnergy + " energy)") {
+        onHoverText = "Deals a small amount of damage and freezes your enemy for 2 turns. <br><br>(Cost: " + chill.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'fireball' && onHoverText != "Deals a large amount of fire damage to enemy. (Cost: " + fireball.requiredEnergy + " energy)") {
-        onHoverText = "Deals a large amount of fire damage to enemy. (Cost: " + fireball.requiredEnergy + " energy)"
+    if (button == 'fireball' && onHoverText != "Deals a large amount of fire damage to enemy. <br><br>(Cost: " + fireball.requiredEnergy + " energy)") {
+        onHoverText = "Deals a large amount of fire damage to enemy. <br><br>(Cost: " + fireball.requiredEnergy + " energy)"
         updateView();
     }
-    if (button == 'soothingWinds' && onHoverText != "Call on soothing winds to restore a large amount of your own health (Cost: " + soothingWinds.requiredEnergy + " energy)") {
-        onHoverText = "Call on soothing winds to restore a large amount of your own health (Cost: " + soothingWinds.requiredEnergy + " energy)"
+    if (button == 'soothingWinds' && onHoverText != "Call on soothing winds to restore a large amount of your own health <br><br>(Cost: " + soothingWinds.requiredEnergy + " energy)") {
+        onHoverText = "Call on soothing winds to restore a large amount of your own health <br><br>(Cost: " + soothingWinds.requiredEnergy + " energy)"
         updateView();
     }
     if (button == 'levelTooLow' && onHoverText != "Your level is too low to use this ability!") {
