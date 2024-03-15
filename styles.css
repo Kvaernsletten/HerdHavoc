@@ -133,6 +133,41 @@ html{
     background-color: rgb(227, 216, 231);
     color: rgb(211, 134, 45);
 }
+.battleActions{
+    display: flex;
+    flex-direction: column;
+}
+.battleActions > button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 85px;
+    height: 45px;
+    padding: 5%;
+    font-weight: 600;
+    border: 5px solid rgb(30, 20, 34);
+    background-color: rgb(106, 81, 117);
+    color: rgb(211, 134, 45);
+}
+.abilityButtons{
+    height: 25%;
+}
+.battleActions > button:focus{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 85px;
+    height: 45px;
+    font-weight: 600;
+    border: 5px solid rgb(30, 20, 34);
+    background-color: rgb(227, 216, 231);
+    color: rgb(211, 134, 45);
+}
+.battleActionsContainer{
+    width: 50%;
+    display: flex;
+    flex-direction: row;
+}
 .adventureText{
     display: flex;
     justify-content: center;
@@ -234,6 +269,19 @@ button:hover{
     align-items: end;
     height: 33.3%;
     color: white;
+}
+
+.statusBarsBackground{
+    position: relative; 
+    width: 100px; 
+    height: 10px; 
+    background-color: black;
+}
+.statusBarsFront{
+    position: absolute;
+    height: 100%;
+    top: 0;
+    left: 0;
 }
 
 

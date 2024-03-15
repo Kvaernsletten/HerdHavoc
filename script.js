@@ -22,11 +22,13 @@ let playerMaxDamage;
 let playerXP = 0;
 let playerNextLevelXP = 27;
 let excessXP;
+let playerAbilities = "";
 
 //Enemy stats
 let enemyName;
 let enemyLevel = 1;
 let enemyHealth;
+let enemyMaxHealth;
 let enemyDamage;
 let enemyMinDamage;
 let enemyMaxDamage;
@@ -60,6 +62,7 @@ let returnedGoat3 = false;
 // Game states
 let isGameRunning = false;
 let inBattle = false;
+let abilityWindow = false;
 let playerAlive = true;
 
 let areaHasWorldItem;
@@ -97,7 +100,64 @@ let inFrontOfSilverDoor = false;
 let doorUnlocked = false;
 
 // Combat states
-let actionMenu = false;
+let actionMenuCooldown = false;
+let enemyStunned = false;
+let stunCounter;
+let searchBackpackAttempt;
+let runAwayAttempt;
+let psychedUp = false;
+let stealChance;
+let hasStolen = false;
+
+//Required energy for ability
+let searchBackpack = {
+    requiredEnergy: 5,
+    requiredLevel: 1,
+}
+let runAway = {
+    requiredEnergy: 5,
+    requiredLevel: 3,
+}
+let patchUp = {
+    requiredEnergy: 5,
+    requiredLevel: 5,
+}
+let guard = {
+    requiredEnergy: 0,
+    requiredLevel: 1,
+}
+let shieldSlam = {
+    requiredEnergy: 10,
+    requiredLevel: 3,
+}
+let mendWounds = {
+    requiredEnergy: 15,
+    requiredLevel: 5,
+}
+let steal = {
+    requiredEnergy: 0,
+    requiredLevel: 1,
+}
+let stabbyStab = {
+    requiredEnergy: 10,
+    requiredLevel: 3,
+}
+let vanish = {
+    requiredEnergy: 5,
+    requiredLevel: 5,
+}
+let chill = {
+    requiredEnergy: 5,
+    requiredLevel: 1,
+}
+let fireball = {
+    requiredEnergy: 10,
+    requiredLevel: 3,
+}
+let soothingWinds = {
+    requiredEnergy: 20,
+    requiredLevel: 5,
+}
 
 // Player states
 let playerMale = true;
@@ -116,6 +176,7 @@ let nextStepOasis = false;
 let buttonDisabled = false;
 let healthBarColor = "lightgreen";
 let energyBarColor = "lightgreen";
+let enemyHealthBarColor = "lightgreen";
 
 let adventurerSelected = true;
 let warriorSelected = false;
@@ -170,36 +231,57 @@ function updateView() {
         <div class="worldInfo_container">
             <div class="playerInfo">${playerName ?? "Dio"}
                 <div>${playerClass ?? "Adventurer"} (Lv. ${playerLevel})</div>
-                    <div style="color: rgb(85, 189, 175)">XP: ${playerXP + " / " + playerNextLevelXP}</div>
-                    <div style="color:${healthBarColor}">Health: ${playerHealth + " / " + playerMaxHealth}</div>
-                    <div style="color:${energyBarColor}">Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
-            </div>            
-            <div class="worldActions">
-                ${playerAlive ? /*HTML*/ `${actionMenu ? /*HTML*/ ``
-                : /*HTML*/ `<button class="attackButton" 
+                <div style="color:${healthBarColor}">Health: ${playerHealth + " / " + playerMaxHealth}</div>
+                <div class="statusBarsBackground">
+                <div class="statusBarsFront" style="width: ${(playerHealth / playerMaxHealth) * 100}%; background-color: ${healthBarColor};"></div>
+                </div>
+                <div style="color:${energyBarColor}">Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
+                <div class="statusBarsBackground">
+                <div class="statusBarsFront" style="width: ${(playerEnergy / playerMaxEnergy) * 100}%; background-color: ${energyBarColor};"></div>
+                </div>
+                <div style="color: rgb(85, 189, 175)">XP: ${playerXP + " / " + playerNextLevelXP}</div>
+                <div class="statusBarsBackground">
+                <div class="statusBarsFront" style="width: ${(playerXP / playerNextLevelXP) * 100}%; background-color: rgb(85, 189, 175);"></div>
+                </div>
+            </div>
+            <div class="battleActionsContainer">            
+            
+                ${playerAlive ? /*HTML*/ `${actionMenuCooldown ? /*HTML*/ ``
+                : /*HTML*/ `
+                <div class="battleActions">
+                <button class="attackButton" 
                 onmouseenter="onHoverTooltip('attack')"
                 onmouseleave="clearTooltip()" 
-                ${inBattle ? 'onclick="attack(), onHoverTooltip(\'enemyTurn\'), updateView()"' : 'disabled, style="opacity: 0"'}>Attack</button>
-                <button class="magicButton"
-                onmouseenter="onHoverTooltip('magic')"
+                ${!abilityWindow ? 'onclick="attack()"' : 'disabled, style="pointer-events: none; opacity: 0.5"'}>Attack</button>
+                <button class="abilityButton"
+                onmouseenter="onHoverTooltip('ability')"
                 onmouseleave="clearTooltip()"
-                ${inBattle ? 'onclick="magic()"' : 'disabled, style="opacity: 0"'}>Magic</button>
+                ${inBattle ? 'onclick="ability()"' : 'disabled, style="opacity: 0"'}>${!abilityWindow ? 'Ability' : '<<'}</button>
                 <button class="fleeButton" 
                 onmouseenter="onHoverTooltip('flee')" 
                 onmouseleave="clearTooltip()" 
-                ${inBattle ? 'onclick="flee()"' : 'disabled, style="opacity: 0"'}>Flee</button>
-                `}` 
-                : /*HTML*/ `<button class="fleeButton" 
+                ${!abilityWindow ? 'onclick="flee()"' : 'disabled, style="pointer-events: none; opacity: 0.5"'}>Flee</button>
+                </div>
+                <div class="battleActions">
+                ${abilityWindow ? playerAbilities : ''}
+                </div>
+            
+                `}`
+                : /*HTML*/ `<div class="battleActions">
+                <button class="fleeButton"
                 onmouseenter="onHoverTooltip('restart')" 
                 onmouseleave="clearTooltip()" 
-                ${!playerAlive ? 'onclick="restartGame()"' : 'disabled, style="opacity: 0"'}>Restart</button>`}
+                ${!playerAlive ? 'onclick="restartGame()"' : 'disabled, style="opacity: 0"'}>Restart</button></div>`}
                 
             </div>
         <div class="onHoverText">${onHoverText}</div>
 
         <div class="enemyInfo">${enemyName.charAt(0).toUpperCase() + enemyName.slice(1) ?? "???"}
-        <div>Enemy (Lv. ${enemyLevel})</div>  
-        <div>Health: ${enemyHealth ?? " "}</div>                
+        <div style="${playerLevel < enemyLevel ? 'color: red' : 'color: lightgreen'}">Enemy (Lv. ${enemyLevel})</div>  
+        <div style="color:${enemyHealthBarColor}">Health: ${enemyHealth + " / " + enemyMaxHealth}</div>
+        <div class="statusBarsBackground">
+        <div class="statusBarsFront" style="width: ${(enemyHealth / enemyMaxHealth) * 100}%; background-color: ${enemyHealthBarColor};"></div>
+        </div>               
     </div>
     </div>
     <button class="leftButton" onclick="muteAudio(), updateView()">Mute</button>
@@ -231,9 +313,18 @@ function updateView() {
     <div class="worldInfo_container">
         <div class="playerInfo">${playerName ?? "Dio"}
             <div>${playerClass ?? "Adventurer"} (Lv. ${playerLevel})</div>
-            <div style="color: rgb(85, 189, 175)">XP: ${playerXP + " / " + playerNextLevelXP}</div>
             <div style="color:${healthBarColor}">Health: ${playerHealth + " / " + playerMaxHealth}</div>
+            <div class="statusBarsBackground">
+            <div class="statusBarsFront" style="width: ${(playerHealth / playerMaxHealth) * 100}%; background-color: ${healthBarColor};"></div>
+            </div>
             <div style="color:${energyBarColor}">Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
+            <div class="statusBarsBackground">
+            <div class="statusBarsFront" style="width: ${(playerEnergy / playerMaxEnergy) * 100}%; background-color: ${energyBarColor};"></div>
+            </div>
+            <div style="color: rgb(85, 189, 175)">XP: ${playerXP + " / " + playerNextLevelXP}</div>
+            <div class="statusBarsBackground">
+            <div class="statusBarsFront" style="width: ${(playerXP / playerNextLevelXP) * 100}%; background-color: rgb(85, 189, 175);"></div>
+            </div>
         </div>   
             <div class="worldActions">
                 
@@ -458,6 +549,7 @@ function updateView() {
             <div>Your class: ${playerClass ?? "Adventurer"}</div>
                     <div>Health: ${playerHealth + " / " + playerMaxHealth}</div>
                     <div>Energy: ${playerEnergy + " / " + playerMaxEnergy}</div>
+
         </div>   
             <div class="worldActions">
                 <button
@@ -475,7 +567,7 @@ function setName() {
     updateView();
 }
 
-function classSelectButtons(){
+function classSelectButtons() {
     adventurerSelected = false;
     warriorSelected = false;
     rogueSelected = false;
@@ -498,7 +590,7 @@ function setClass(selectedClass) {
         playerMaxDamage = 25;
 
     }
-    else if (selectedClass == "warrior") {  
+    else if (selectedClass == "warrior") {
         playerClass = "Warrior"
 
         playerHealth = 150;
@@ -511,7 +603,7 @@ function setClass(selectedClass) {
         playerMaxDamage = 30;
 
     }
-    else if (selectedClass == "rogue") {  
+    else if (selectedClass == "rogue") {
         playerClass = "Rogue"
 
         playerHealth = 85;
@@ -522,19 +614,19 @@ function setClass(selectedClass) {
 
         playerMinDamage = 30;
         playerMaxDamage = 40;
-  
+
     }
-    else if (selectedClass == "mage") {    
+    else if (selectedClass == "mage") {
         playerClass = "Mage"
 
         playerHealth = 70;
         playerMaxHealth = 70;
 
-        playerEnergy = 150;
-        playerMaxEnergy = 150;
+        playerEnergy = 200;
+        playerMaxEnergy = 200;
 
-        playerMinDamage = 25;
-        playerMaxDamage = 45;
+        playerMinDamage = 9;
+        playerMaxDamage = 12;
 
     }
     adventureText = "Start game with the " + (playerClass ?? " Adventurer") + " class?"
@@ -542,17 +634,17 @@ function setClass(selectedClass) {
     updateView();
 }
 
-function setUpCharacter(){
-    if(playerClass == "Adventurer"){
+function setUpCharacter() {
+    if (playerClass == "Adventurer") {
         playerCombatSprite = playerMale ? "imgs/Character_Male_inCombat.png" : "imgs/Character_Female_inCombat.png";
     }
-    else if(playerClass == "Warrior"){
+    else if (playerClass == "Warrior") {
         playerCombatSprite = playerMale ? "imgs/Character_Male_Warrior_inCombat.png" : "imgs/Character_Female_Warrior_inCombat.png";
     }
-    else if(playerClass == "Rogue"){
+    else if (playerClass == "Rogue") {
         playerCombatSprite = playerMale ? "imgs/Character_Male_Rogue_inCombat.png" : "imgs/Character_Female_Rogue_inCombat.png";
     }
-    else if(playerClass == "Mage"){
+    else if (playerClass == "Mage") {
         playerCombatSprite = playerMale ? "imgs/Character_Male_Mage_inCombat.png" : "imgs/Character_Female_Mage_inCombat.png";
     }
     updateView();
@@ -595,48 +687,52 @@ function rest() {
 }
 
 function passOut() {
-  
-    stolenGoldAmount = Math.floor(playerGold * 0.17);
-    
-    passedOut = true;
-    areaHasWorldItem = false;
-    nextStepOasis = false;
-    inShopEast = false;
-    inShopWest = false;
-    inFrontOfCopperDoor = false;
-    inFrontOfSilverDoor = false;
-    doorUnlocked = false;
-    lostInDesertNorth = false;
-    lostInDesertSouth = false;
-    lostInDesertEast = false;
-    lostInDesertWest = false;
-    inOasis = false;
-    inGoatArea1 = false;
-    inGoatArea2 = false;
-    inGoatArea3 = false;
-    inFishableArea = false;
-    inGrasslands = false;
-    inForest = false;
-    inDesert = false;
-    inCave = false;
 
-    if (playerGold > stolenGoldAmount && stolenGoldAmount != 0) {
-        adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to ' + stolenGoldAmount + ' gold from your gold pouch..'
-        playerGold -= stolenGoldAmount;
-    } else if (playerGold <= stolenGoldAmount) {
-        adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!'
-        playerGold = 0;
-    } else if (stolenGoldAmount == 0) {
-        adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite..'
+    if(playerEnergy <= 0){
+        playerEnergy = 0;
+        mapLocationY = 10;
+        mapLocationX = 5;
+
+        stolenGoldAmount = Math.floor(playerGold * 0.17);
+
+        passedOut = true;
+        areaHasWorldItem = false;
+        nextStepOasis = false;
+        inShopEast = false;
+        inShopWest = false;
+        inFrontOfCopperDoor = false;
+        inFrontOfSilverDoor = false;
+        doorUnlocked = false;
+        lostInDesertNorth = false;
+        lostInDesertSouth = false;
+        lostInDesertEast = false;
+        lostInDesertWest = false;
+        inOasis = false;
+        inGoatArea1 = false;
+        inGoatArea2 = false;
+        inGoatArea3 = false;
+        inFishableArea = false;
+        inGrasslands = false;
+        inForest = false;
+        inDesert = false;
+        inCave = false;
+
+        if (playerGold > stolenGoldAmount && stolenGoldAmount != 0) {
+            adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also helped himself to ' + stolenGoldAmount + ' gold from your gold pouch..'
+            playerGold -= stolenGoldAmount;
+        } else if (playerGold <= stolenGoldAmount) {
+            adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite.. and also ran off with your entire gold pouch!'
+            playerGold = 0;
+        } else if (stolenGoldAmount == 0) {
+            adventureText = 'A stranger found you passed out in the dirt and helped you back to your campsite..'
+        }
     }
-
     updateView();
 }
 
-function enterCombat() {
-
+function enterBattle() {
     setUpEnemy();
-
+    enemyHealthBarColor = "lightgreen"
     adventureText = "A " + enemyName + " ambushed you!"
 
     if (inGrasslands) {
@@ -651,8 +747,11 @@ function enterCombat() {
     else if (inCave) {
         battleBackground = `style="background-image: url(imgs/Arenas/caveArena.png"`;
     }
-
+    psychedUp = false;
+    enemyStunned = false;
+    stunCounter = 0;
     inBattle = true;
+    actionMenuCooldown = false;
     updateView();
 }
 
@@ -665,6 +764,7 @@ function setUpEnemy() {
         enemyGold = Math.floor(Math.random() * 21) + 5;
         enemyLevel = 1;
         enemyHealth = 65;
+        enemyMaxHealth = 65;
         enemyMinDamage = 5;
         enemyMaxDamage = 15;
         yieldXP = 11;
@@ -677,6 +777,7 @@ function setUpEnemy() {
         enemyGold = Math.floor(Math.random() * 27) + 7;
         enemyLevel = 3;
         enemyHealth = 85;
+        enemyMaxHealth = 85;
         enemyMinDamage = 10;
         enemyMaxDamage = 20;
         yieldXP = 17;
@@ -688,6 +789,7 @@ function setUpEnemy() {
         enemyGold = Math.floor(Math.random() * 30) + 12;
         enemyLevel = 6;
         enemyHealth = 105;
+        enemyMaxHealth = 105;
         enemyMinDamage = 10;
         enemyMaxDamage = 25;
         yieldXP = 23;
@@ -699,48 +801,290 @@ function setUpEnemy() {
         enemyGold = Math.floor(Math.random() * 45) + 15;
         enemyLevel = 10;
         enemyHealth = 125;
+        enemyMaxHealth = 125;
         enemyMinDamage = 20;
         enemyMaxDamage = 35;
         yieldXP = 35;
     }
 }
 
+function ability() {
+
+    abilityWindow = !abilityWindow;
+
+    if (playerClass == "Adventurer") {
+        playerAbilities = abilityWindow ? /*HTML*/`
+        <button class="abilityButton" 
+        onmouseenter="onHoverTooltip(playerLevel >= searchBackpack.requiredLevel ? (playerEnergy >= searchBackpack.requiredEnergy ? 'searchBackpack' : 'notEnoughEnergy') : 'levelTooLow')" 
+        onmouseleave="clearTooltip()" 
+        ${playerLevel >= searchBackpack.requiredLevel && playerEnergy >= searchBackpack.requiredEnergy ? 'onclick="useAbility(\'searchBackpack\')"' : 'disabled, style="opacity: 0.5"'}>Search backpack</button>
+        <button class="abilityButton" 
+        onmouseenter="onHoverTooltip(playerLevel >= runAway.requiredLevel ? (playerEnergy >= runAway.requiredEnergy ? 'runAway' : 'notEnoughEnergy') : 'levelTooLow')"  
+        onmouseleave="clearTooltip()" 
+        ${playerLevel >= runAway.requiredLevel && playerEnergy >= runAway.requiredEnergy ? 'onclick="useAbility(\'runAway\')"' : 'disabled, style="opacity: 0.5"'}>Run away!</button>
+        <button class="abilityButton"
+        onmouseenter="onHoverTooltip(playerLevel >= patchUp.requiredLevel ? (playerEnergy >= patchUp.requiredEnergy ? 'patchUp' : 'notEnoughEnergy') : 'levelTooLow')" 
+        onmouseleave="clearTooltip()"
+        ${playerLevel >= patchUp.requiredLevel && playerEnergy >= patchUp.requiredEnergy ? 'onclick="useAbility(\'patchUp\')"' : 'disabled, style="opacity: 0.5"'}>Patch up</button>
+        `
+            : /*HTML*/``
+    }
+    else if (playerClass == "Warrior") {
+        playerAbilities = abilityWindow ? /*HTML*/`
+        <button class="abilityButton" 
+        onmouseenter="onHoverTooltip(playerLevel >= guard.requiredLevel ? (playerEnergy >= guard.requiredEnergy ? 'guard' : 'notEnoughEnergy') : 'levelTooLow')" 
+        onmouseleave="clearTooltip()" 
+        ${playerLevel >= guard.requiredLevel && playerEnergy >= guard.requiredEnergy ? 'onclick="useAbility(\'guard\')"' : 'disabled, style="opacity: 0.5"'}>Psych up</button>
+        <button class="abilityButton"
+        onmouseenter="onHoverTooltip(playerLevel >= shieldSlam.requiredLevel ? (playerEnergy >= shieldSlam.requiredEnergy ? 'shieldSlam' : 'notEnoughEnergy') : 'levelTooLow')" 
+        onmouseleave="clearTooltip()"
+        ${playerLevel >= shieldSlam.requiredLevel && playerEnergy >= shieldSlam.requiredEnergy ? 'onclick="useAbility(\'shieldSlam\')"' : 'disabled, style="opacity: 0.5"'}>Shield slam</button>
+        <button class="abilityButton" 
+        onmouseenter="onHoverTooltip(playerLevel >= mendWounds.requiredLevel ? (playerEnergy >= mendWounds.requiredEnergy ? 'mendWounds' : 'notEnoughEnergy') : 'levelTooLow')"  
+        onmouseleave="clearTooltip()" 
+        ${playerLevel >= mendWounds.requiredLevel && playerEnergy >= mendWounds.requiredEnergy ? 'onclick="useAbility(\'mendWounds\')"' : 'disabled, style="opacity: 0.5"'}>Mend wounds</button>
+        `
+            : /*HTML*/``
+    }
+    else if (playerClass == "Rogue") {
+        playerAbilities = abilityWindow ? /*HTML*/`
+        <button class="abilityButton"
+        onmouseenter="onHoverTooltip(playerLevel >= steal.requiredLevel ? 'steal' : 'levelTooLow')" 
+        onmouseleave="clearTooltip()"
+        ${playerLevel >= steal.requiredLevel && playerEnergy >= steal.requiredEnergy ? 'onclick="useAbility(\'steal\')"' : 'disabled, style="opacity: 0.5"'}>Steal</button>
+        <button class="abilityButton" 
+        onmouseenter="onHoverTooltip(playerLevel >= stabbyStab.requiredLevel ? 'stabbyStab' : 'levelTooLow')" 
+        onmouseleave="clearTooltip()" 
+        ${playerLevel >= stabbyStab.requiredLevel && playerEnergy >= stabbyStab.requiredEnergy ? 'onclick="useAbility(\'stabbyStab\')"' : 'disabled, style="opacity: 0.5"'}>Stabby stab</button>
+        <button class="abilityButton" 
+        onmouseenter="onHoverTooltip(playerLevel >= vanish.requiredLevel ? 'vanish' : 'levelTooLow')" 
+        onmouseleave="clearTooltip()" 
+        ${playerLevel >= vanish.requiredLevel && playerEnergy >= vanish.requiredEnergy ? 'onclick="useAbility(\'vanish\')"' : 'disabled, style="opacity: 0.5"'}>Vanish</button>
+        `
+            : /*HTML*/``
+    }
+    else if (playerClass == "Mage") {
+        playerAbilities = abilityWindow ? /*HTML*/`
+        <button class="abilityButton" 
+        onmouseenter="onHoverTooltip(playerLevel >= chill.requiredLevel ? 'chill' : 'levelTooLow')" 
+        onmouseleave="clearTooltip()" 
+        ${playerLevel >= chill.requiredLevel && playerEnergy >= chill.requiredEnergy ? 'onclick="useAbility(\'chill\')"' : 'disabled, style="opacity: 0.5"'}>Chill</button>
+        <button class="abilityButton"
+        onmouseenter="onHoverTooltip(playerLevel >= fireball.requiredLevel ? 'fireball' : 'levelTooLow')" 
+        onmouseleave="clearTooltip()"
+        ${playerLevel >= fireball.requiredLevel && playerEnergy >= fireball.requiredEnergy ? 'onclick="useAbility(\'fireball\')"' : 'disabled, style="opacity: 0.5"'}>Fireball</button>
+        <button class="abilityButton" 
+        onmouseenter="onHoverTooltip(playerLevel >= soothingWinds.requiredLevel ? 'soothingWinds' : 'levelTooLow')" 
+        onmouseleave="clearTooltip()" 
+        ${playerLevel >= soothingWinds.requiredLevel && playerEnergy >= soothingWinds.requiredEnergy ? 'onclick="useAbility(\'soothingWinds\')"' : 'disabled, style="opacity: 0.5"'}>Soothing winds</button>
+        `
+            : /*HTML*/``
+    }
+    updateView();
+}
+
 function attack() {
 
-    actionMenu = true;
+    actionMenuCooldown = true;
     playerDamage = Math.floor(Math.random() * (playerMaxDamage - playerMinDamage + 1)) + playerMinDamage;
+    adventureText = "You deal " + playerDamage + " damage to the " + enemyName + "!";
+    dealDamage(playerDamage);
+    updateView();
+}
+
+function useAbility(ability) {
+
+    abilityWindow = !abilityWindow;
+    //adventurer
+    if (ability == 'searchBackpack') {
+        playerEnergy -= searchBackpack.requiredEnergy;
+
+        searchBackpackAttempt = Math.floor(Math.random() * 3) + 1;
+
+        if(searchBackpackAttempt == 1){
+            stunCounter = 3;
+            enemyStunned = true;
+            playerDamage = Math.floor(Math.random() * (playerMaxDamage - playerMinDamage + 1)) + playerMinDamage;
+            modifiedPlayerDamage = Math.floor(playerDamage / 2.5);
+            adventureText = "You pull out a frying pan and throw it at the " + enemyName + " and deal " + modifiedPlayerDamage + " damage and the " + enemyName + " is stunned!";
+            dealDamage(modifiedPlayerDamage);
+        }
+        else if(searchBackpackAttempt == 2){
+            playerDamage = Math.floor(Math.random() * (playerMaxDamage - playerMinDamage + 1)) + playerMinDamage;
+            modifiedPlayerDamage = Math.floor(playerDamage / 3);
+            adventureText = "You pull out a loaf of stale bread and throw it at the " + enemyName + " and deal " + modifiedPlayerDamage + " damage!";
+            dealDamage(modifiedPlayerDamage);
+        }
+        else if(searchBackpackAttempt == 3){
+            playerDamage = Math.floor(Math.random() * (playerMaxDamage - playerMinDamage + 1)) + playerMinDamage;
+            modifiedPlayerDamage = Math.floor(playerDamage * 1.5);
+            adventureText = "You pull out a dagger and throw it at the " + enemyName + " and deal " + modifiedPlayerDamage + " damage!";
+            dealDamage(modifiedPlayerDamage);
+        }
+    }
+    if (ability == 'runAway') {
+        playerEnergy -= runAway.requiredEnergy;
+        runAwayAttempt = Math.floor(Math.random() * 2) + 1;
+
+            if(runAwayAttempt == 1){
+                adventureText = "You ran away successfully!"
+                leaveBattle();
+            }else if(runAwayAttempt != 1){
+                adventureText = "You attempt to run away but the " + enemyName + " gives chase!"
+                setTimeout(enemyTurn, 1500);
+            }
+    }
+    if (ability == 'patchUp') {
+        playerEnergy -= patchUp.requiredEnergy;
+        adventureText = "You quickly patch up recent wounds during combat and recover " + Math.floor(playerMaxHealth / 4) + " health!"
+        heal(Math.floor(playerMaxHealth / 4))
+        setTimeout(enemyTurn, 1500);
+    }
+
+    //warrior
+    if (ability == 'guard') {
+        playerEnergy -= guard.requiredEnergy;
+
+        psychedUp = true;
+        setTimeout(enemyTurn, 1500);
+    }
+    if (ability == 'shieldSlam') {
+        playerEnergy -= shieldSlam.requiredEnergy;
+        stunCounter = 3;
+        enemyStunned = true;
+        playerDamage = Math.floor(Math.random() * (playerMaxDamage - playerMinDamage + 1)) + playerMinDamage;
+        modifiedPlayerDamage = Math.floor(playerDamage / 3);
+        adventureText = "You shield slam the " + enemyName + " for " + modifiedPlayerDamage + " damage and the " + enemyName + " is stunned!";
+        dealDamage(modifiedPlayerDamage);
+    }
+    if (ability == 'mendWounds') {
+        playerEnergy -= mendWounds.requiredEnergy;
+        adventureText = "You carefully tend to your wounds during battle and " + Math.floor(playerMaxHealth / 3) + " health!"
+        heal(Math.floor(playerMaxHealth / 3))
+        setTimeout(enemyTurn, 1500);
+    }
+
+    //rogue
+    if (ability == 'steal') {
+        playerEnergy -= steal.requiredEnergy;
+
+        stealChance = Math.floor(Math.random() * 2) + 1;
+        
+        if (!hasStolen && stealChance == 1) {
+            
+            playerGold += (Math.floor(enemyGold * 1.7));
+            adventureText = "You steal " + (Math.floor(enemyGold * 1.7)) + " gold from the " + enemyName + "!"
+            hasStolen = true;
+        }
+        else if (!hasStolen && stealChance != 1) {
+            adventureText = "Your attempt to steal from the " + enemyName + " failed!"
+        }
+        else if (hasStolen) {
+            adventureText = "There is nothing more to steal from this " + enemyName + ".."
+        }
+        setTimeout(enemyTurn, 1500);
+    }
+    if (ability == 'stabbyStab') {
+        playerEnergy -= stabbyStab.requiredEnergy;
+        stunCounter = 3;
+        enemyStunned = true;
+        playerDamage = Math.floor(Math.random() * (playerMaxDamage - playerMinDamage + 1)) + playerMinDamage;
+        modifiedPlayerDamage = Math.floor(playerDamage * 0.5);
+        adventureText = "You exploit the " + enemyName + "'s weakness and deal " + modifiedPlayerDamage + " damage and the " + enemyName + " is stunned!";
+        dealDamage(modifiedPlayerDamage);
+    }
+    if (ability == 'vanish') {
+        playerEnergy -= vanish.requiredEnergy;
+        adventureText = "You vanish into the shadows and escape.."
+        leaveBattle();
+    }
+
+    //mage
+    if (ability == 'chill') {
+        playerEnergy -= chill.requiredEnergy;
+        stunCounter = 3;
+        enemyStunned = true;
+        playerDamage = Math.floor(Math.random() * (playerMaxDamage - playerMinDamage + 1)) + playerMinDamage;
+        modifiedPlayerDamage = Math.floor(playerDamage * 1.5);
+        adventureText = "You cast a cold spell on the " + enemyName + " and deal " + modifiedPlayerDamage + " damage and the " + enemyName + " is frozen!";
+        dealDamage(modifiedPlayerDamage);
+    }
+    if (ability == 'fireball') {
+        playerEnergy -= fireball.requiredEnergy;
+        playerDamage = Math.floor(Math.random() * (playerMaxDamage - playerMinDamage + 1)) + playerMinDamage;
+        modifiedPlayerDamage = Math.floor(playerDamage * 3);
+        adventureText = "You cast a fireball and deal " + modifiedPlayerDamage + " damage to the " + enemyName + "!";
+        dealDamage(modifiedPlayerDamage);
+    }
+    if (ability == 'soothingWinds') {
+        playerEnergy -= soothingWinds.requiredEnergy;
+        adventureText = "You cast a soothing wind spell and recover " + Math.floor(playerMaxHealth / 1.5) + " health!"
+        heal(Math.floor(playerMaxHealth / 1.5))
+        setTimeout(enemyTurn, 1500);
+    }
+    actionMenuCooldown = true;
+    clearTooltip();
+    updateView();
+}
+
+function dealDamage(playerDamage) {
+
     enemyHealth -= playerDamage;
-    adventureText = "You deal " + playerDamage + " damage!"
+    statusBars();
 
     if (enemyHealth <= 0) {
         enemyHealth = 0;
-        //adventureText =   YOU DEAL amoutOfDamage AND =            FIX THIS.
-        //set timeout with delay!!
-        adventureText = "You deal " + playerDamage + " damage, and the " + enemyName + " dies."
+        adventureText = "You deal " + playerDamage + " damage to the " + enemyName + ", and the " + enemyName + " dies!"
         setTimeout(winBattle, 2000);
     }
     else {
-        setTimeout(takeDamage, 1500);
+        setTimeout(enemyTurn, 1500);
     }
-    updateView();
-
 }
 
-function magic() {
-    updateView();
-}
+function enemyTurn() {
 
-function takeDamage() {
-
-    enemyDamage = Math.floor(Math.random() * (enemyMaxDamage - enemyMinDamage + 1)) + enemyMinDamage;
-    playerHealth -= enemyDamage;
-    adventureText = "The " + enemyName + " attacks you for " + enemyDamage + " damage!";
-    actionMenu = false;
-    if (playerHealth <= 0) {
-        die();
+    stunCheck();
+    if (enemyStunned) {
+        adventureText = "The " + enemyName + " is stunned and cannot move."
     }
+    else if (!enemyStunned) {
+
+        if(psychedUp){
+
+        enemyDamage = Math.floor(Math.random() * ((enemyMaxDamage - enemyMinDamage) / 2 + 1)) + enemyMinDamage;
+        playerHealth -= enemyDamage;
+        adventureText = "The " + enemyName + " attacks " + playerName + " for " + enemyDamage + " damage!";
+            playerEnergy += enemyDamage;
+            if(playerEnergy >= playerMaxEnergy){
+                playerEnergy = playerMaxEnergy;
+            }
+            psychedUp = false;
+        }
+        else if(!psychedUp){
+
+        enemyDamage = Math.floor(Math.random() * (enemyMaxDamage - enemyMinDamage + 1)) + enemyMinDamage;
+        playerHealth -= enemyDamage;
+        adventureText = "The " + enemyName + " attacks " + playerName + " for " + enemyDamage + " damage!";
+
+        }
+
+        if (playerHealth <= 0) {
+            die();
+        }
+    }
+    actionMenuCooldown = false;
     statusBars();
     updateView();
+}
+
+function stunCheck() {
+    if (enemyStunned) {
+        stunCounter--;
+        if (stunCounter == 0) {
+            enemyStunned = false;
+        }
+    }
 }
 
 function die() {
@@ -749,63 +1093,69 @@ function die() {
     playerAlive = false;
 }
 
-function restartGame(){
+function restartGame() {
     location.reload();
 }
 
 function winBattle() {
-    worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
-    inBattle = false;
-    actionMenu = false;
-    adventureText = "You emerge victorious and looted " + enemyGold + " gold from the corpse... ";
+    adventureText = "You emerge victorious, gained " + yieldXP + " experience and looted " + enemyGold + " gold from the corpse... ";
     clearTooltip();
     playerGold += enemyGold;
     playerXP += yieldXP;
-    levelUp();
+
+    if (playerXP >= playerNextLevelXP) {
+        levelUp();
+        adventureText = "LEVEL UP! You emerge victorious, gained " + yieldXP + " experience and looted " + enemyGold + " gold from the corpse... ";
+    }
+    leaveBattle();
     updateView();
 }
 
+function leaveBattle() {
+    worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
+    inBattle = false;
+    hasStolen = false;
+    actionMenuCooldown = false;
+    clearTooltip();
+}
+
 function levelUp() {
-    if (playerXP >= playerNextLevelXP) {
-        playerLevel++;
-        excessXP = playerXP - playerNextLevelXP;
-        playerXP = 0;
-        playerXP += excessXP;
-        playerNextLevelXP = playerLevel * 27;
+    playerLevel++;
+    excessXP = playerXP - playerNextLevelXP;
+    playerXP = 0;
+    playerXP += excessXP;
+    playerNextLevelXP = playerLevel * 27;
 
-        if (playerClass == 'Adventurer') {
-            playerMaxHealth += 5;
-            playerMaxEnergy += 5;
-            playerMinDamage += 4;
-            playerMaxDamage += 5;
-        }
-        if (playerClass == 'Warrior') {
-            playerMaxHealth += 10;
-            playerMaxEnergy += 5;
-            playerMinDamage += 2;
-            playerMaxDamage += 8;
-        }
-        if (playerClass == 'Rogue') {
-            playerMaxHealth += 7;
-            playerMaxEnergy += 7;
-            playerMinDamage += 4;
-            playerMaxDamage += 7;
-        }
-        if (playerClass == 'Mage') {
-            playerMaxHealth += 5;
-            playerMaxEnergy += 10;
-            playerMinDamage += 5;
-            playerMaxDamage += 9;
-        }
-
+    if (playerClass == 'Adventurer') {
+        playerMaxHealth += 5;
+        playerMaxEnergy += 5;
+        playerMinDamage += 3;
+        playerMaxDamage += 5;
     }
+    if (playerClass == 'Warrior') {
+        playerMaxHealth += 10;
+        playerMaxEnergy += 5;
+        playerMinDamage += 2;
+        playerMaxDamage += 6;
+    }
+    if (playerClass == 'Rogue') {
+        playerMaxHealth += 7;
+        playerMaxEnergy += 7;
+        playerMinDamage += 2;
+        playerMaxDamage += 7;
+    }
+    if (playerClass == 'Mage') {
+        playerMaxHealth += 5;
+        playerMaxEnergy += 10;
+        playerMinDamage += 2;
+        playerMaxDamage += 5;
+    }
+
 }
 
 function flee() {
-    worldBackground = `style="background-image: url(imgs/TB_Map/${mapLocationY}-${mapLocationX}.png)"`
-    inBattle = false;
-    actionMenu = false;
-        droppedGold = Math.floor(playerGold * 0.12);
+
+    droppedGold = Math.floor(playerGold * 0.12);
 
     if (playerGold > droppedGold && droppedGold != 0) {
         adventureText = 'You grab a handful of gold coins and toss it at your enemy as a distraction to escape... You lose ' + droppedGold + ' gold!'
@@ -816,19 +1166,18 @@ function flee() {
     } else if (droppedGold == 0) {
         adventureText = 'You escaped!'
     }
-
+    leaveBattle();
     clearTooltip();
     updateView();
 }
 
-function talkToNPC(NPC){
+function talkToNPC(NPC) {
 
 
-    if(NPC == "shopEastNPC"){
+    if (NPC == "shopEastNPC") {
         let eastShopKeeperDialogue;
 
-        if(!hasCopperKey && !hasFishingRod)
-        {  
+        if (!hasCopperKey && !hasFishingRod) {
             eastShopKeeperDialogue = [
 
                 "Shopkeeper: I saw something sparkly in the lake up in the dark forest once but the goblins chased me away before I could get a closer look... ▾",
@@ -837,8 +1186,7 @@ function talkToNPC(NPC){
             ]
             adventureText = currentDialogue;
         }
-        else if(!hasCopperKey && hasFishingRod)
-        {
+        else if (!hasCopperKey && hasFishingRod) {
             eastShopKeeperDialogue = [
                 "Shopkeeper: You won't regret buying that fishing rod! ▾",
                 "Shopkeeper: ... or maybe you will, there's a reason I wanted to get rid of it after all.. ▾",
@@ -847,7 +1195,7 @@ function talkToNPC(NPC){
                 "..."
             ]
         }
-        else if(hasCopperKey){
+        else if (hasCopperKey) {
             eastShopKeeperDialogue = [
                 "Shopkeeper: That key! It is the key to the copper mines southeast from here! ▾",
                 "Shopkeeper: The mines have been shut down ever since cave trolls started taking shelter from the sunlight in there.. ▾",
@@ -857,15 +1205,14 @@ function talkToNPC(NPC){
         }
         adventureText = eastShopKeeperDialogue[currentDialogue];
         currentDialogue++;
-        if(currentDialogue == eastShopKeeperDialogue.length){
+        if (currentDialogue == eastShopKeeperDialogue.length) {
             currentDialogue = 0;
-        } 
+        }
     }
-    if(NPC == "shopWestNPC"){
+    if (NPC == "shopWestNPC") {
         let westShopKeeperDialogue;
 
-        if(!hasSilverKey && !hasDesertRose)
-        {
+        if (!hasSilverKey && !hasDesertRose) {
             westShopKeeperDialogue = [
                 "Shopkeeper: I've heard rumours of a hidden oasis somewhere in the desert... ▾",
                 "Shopkeeper: Some even claim that if you keep going southwest in the desert you will eventually find the oasis.. ▾",
@@ -875,16 +1222,14 @@ function talkToNPC(NPC){
                 "..."
             ]
         }
-        else if(!hasSilverKey && hasDesertRose)
-        {
+        else if (!hasSilverKey && hasDesertRose) {
             westShopKeeperDialogue = [
                 "Shopkeeper: That's the desert rose you have there! Would you please trade it with me for this silver key? ▾",
                 "Shopkeeper: PLEASEEEE!!!!!",
                 "..."
             ]
         }
-        else if(hasSilverKey && !hasDesertRose)
-        {
+        else if (hasSilverKey && !hasDesertRose) {
             westShopKeeperDialogue = [
                 "Shopkeeper: Thanks you so much for trading with me! ▾",
                 "Shopkeeper: I have no idea what that key is for, by the way...",
@@ -894,7 +1239,7 @@ function talkToNPC(NPC){
         }
         adventureText = westShopKeeperDialogue[currentDialogue];
         currentDialogue++;
-        if(currentDialogue == westShopKeeperDialogue.length){
+        if (currentDialogue == westShopKeeperDialogue.length) {
             currentDialogue = 0;
         }
     }
@@ -1087,12 +1432,12 @@ function useItem(item) {
 
     if (item == 'desertRose' && hasDesertRose && !inShopWest) {
         adventureText = "The rose has a vile stench! You did not expect that!"
-    }else if(item == 'desertRose' && hasDesertRose && inShopWest){
-                hasSilverKey = true;
-                hasDesertRose = false;
-                adventureText = "You traded the rose for a silver key!"
-                pickUpAudio.play();
-            }
+    } else if (item == 'desertRose' && hasDesertRose && inShopWest) {
+        hasSilverKey = true;
+        hasDesertRose = false;
+        adventureText = "You traded the rose for a silver key!"
+        pickUpAudio.play();
+    }
 
 
     if (item == 'copperKey' && hasCopperKey && inFrontOfCopperDoor && !copperKeyUsed) {
@@ -1124,25 +1469,17 @@ function useItem(item) {
 function eatApple() {
     if (hasApple1 && !hasApple2 && !hasApple3) {
         hasApple1 = false;
-        adventureText = "You eat an apple.. +25 health!"
-        eatAudio.play();
-        heal(25);
-        clearTooltip();
     }
     if (hasApple1 && hasApple2 && !hasApple3) {
         hasApple2 = false;
-        adventureText = "You eat an apple.. +25 health!"
-        eatAudio.play();
-        heal(25);
-        clearTooltip();
     }
     if (hasApple1 && hasApple2 && hasApple3) {
         hasApple3 = false;
-        adventureText = "You eat an apple.. +25 health!"
-        eatAudio.play();
-        heal(25);
-        clearTooltip();
     }
+    adventureText = "You eat an apple.. +25 health!"
+    eatAudio.play();
+    heal(25);
+    clearTooltip();
     updateView();
 }
 
@@ -1176,20 +1513,20 @@ function onHoverTooltip(button) {
     }
 
     //interact buttons
-    if (button == 'talk' && onHoverText != "Talk with shopkeeper?"){
+    if (button == 'talk' && onHoverText != "Talk with shopkeeper?") {
         onHoverText = "Talk with shopkeeper?"
         updateView();
     }
-    if (button == 'attack' && onHoverText != "Attack your enemy!") {
-        onHoverText = "Attack your enemy!";
+    if (button == 'attack' && onHoverText != "Basic physical attack") {
+        onHoverText = "Basic physical attack";
         updateView();
     }
-    if (button == 'magic' && onHoverText != "Cast a spell (NOT IMPLEMENTED)") {
-        onHoverText = "Cast a spell (NOT IMPLEMENTED)";
+    if (button == 'ability' && onHoverText != "Use a class ability") {
+        onHoverText = "Use a class ability";
         updateView();
     }
-    if (button == 'flee' && onHoverText != "Toss a handful of your gold as a distraction and run away") {
-        onHoverText = "Toss a handful of your gold as a distraction and run away";
+    if (button == 'flee' && onHoverText != "Toss a handful of your gold coins as a distraction and run away") {
+        onHoverText = "Toss a handful of your gold coins as a distraction and run away";
         updateView();
     }
     if (button == 'rest' && onHoverText != "Rest in your tent?") {
@@ -1208,8 +1545,70 @@ function onHoverTooltip(button) {
         onHoverText = "Buy fishing rod? (150 gold)"
         updateView();
     }
-    if (button == 'restart' && onHoverText != "Restart game?"){
+    if (button == 'restart' && onHoverText != "Restart game?") {
         onHoverText = "Restart game?"
+        updateView();
+    }
+
+    //abilities
+    //adventurer
+    if (button == 'searchBackpack' && onHoverText != "Desperately rummage through your backpack for any object, sharp or blunt, to throw at your enemy! (Cost: " + searchBackpack.requiredEnergy + " energy)") {
+        onHoverText = "Desperately rummage through your backpack for any object, sharp or blunt, to throw at your enemy! (Cost: " + searchBackpack.requiredEnergy + " energy)"
+        updateView();
+    }
+    if (button == 'runAway' && onHoverText != "Attempt to run away! (Cost: " + runAway.requiredEnergy + " energy)") {
+        onHoverText = "Attempt to run away! (Cost: " + runAway.requiredEnergy + " energy)"
+        updateView();
+    }
+    if (button == 'patchUp' && onHoverText != "Take a moment to patch yourself up! (Cost: " + patchUp.requiredEnergy + " energy)") {
+        onHoverText = "Take a moment to patch yourself up! (Cost: " + patchUp.requiredEnergy + " energy)"
+        updateView();
+    }
+    //warrior
+    if (button == 'guard' && onHoverText != "Raise your shield to take less damage from the next attack and recover energy based on the reduced damage. (Cost: " + guard.requiredEnergy + " energy)") {
+        onHoverText = "Raise your shield to take less damage from the next attack and recover energy based on the reduced damage. (Cost: " + guard.requiredEnergy + " energy)"
+        updateView();
+    }
+    if (button == 'shieldSlam' && onHoverText != "Slam your target with your shield to stun them and deal a small amount of damage (Cost: " + shieldSlam.requiredEnergy + " energy)") {
+        onHoverText = "Slam your target with your shield to stun them and deal a small amount of damage (Cost: " + shieldSlam.requiredEnergy + " energy)"
+        updateView();
+    }
+    if (button == 'mendWounds' && onHoverText != "Take a moment to clean any wounds sustained in combat (Cost: " + mendWounds.requiredEnergy + " energy)") {
+        onHoverText = "Take a moment to clean any wounds sustained in combat (Cost: " + mendWounds.requiredEnergy + " energy)"
+        updateView();
+    }
+    //rogue
+    if (button == 'steal' && onHoverText != "Attempt to steal gold from your target (Cost: " + steal.requiredEnergy + " energy)") {
+        onHoverText = "Attempt to steal gold from your target (Cost: " + steal.requiredEnergy + " energy)"
+        updateView();
+    }
+    if (button == 'stabbyStab' && onHoverText != "Exploit your target's weak point with your daggers to deal double the damage of your regular attack (Cost: " + stabbyStab.requiredEnergy + " energy)") {
+        onHoverText = "Exploit your target's weak point with your daggers to deal double the damage of your regular attack (Cost: " + stabbyStab.requiredEnergy + " energy)"
+        updateView();
+    }
+    if (button == 'vanish' && onHoverText != "Step into the shadows and hide from your enemy to retreat from the battle (Cost: " + vanish.requiredEnergy + " energy)") {
+        onHoverText = "Step into the shadows and hide from your enemy to retreat from the battle (Cost: " + vanish.requiredEnergy + " energy)"
+        updateView();
+    }
+    //mage
+    if (button == 'chill' && onHoverText != "Deals a small amount of damage and freezes your enemy for 2 turns (Cost: " + chill.requiredEnergy + " energy)") {
+        onHoverText = "Deals a small amount of damage and freezes your enemy for 2 turns (Cost: " + chill.requiredEnergy + " energy)"
+        updateView();
+    }
+    if (button == 'fireball' && onHoverText != "Deals a moderate amount of fire damage to enemy (Cost: " + fireball.requiredEnergy + " energy)") {
+        onHoverText = "Deals a moderate amount of fire damage to enemy (Cost: " + fireball.requiredEnergy + " energy)"
+        updateView();
+    }
+    if (button == 'soothingWinds' && onHoverText != "Call on soothing winds to restore a large amount of your own health (Cost: " + soothingWinds.requiredEnergy + " energy)") {
+        onHoverText = "Call on soothing winds to restore a large amount of your own health (Cost: " + soothingWinds.requiredEnergy + " energy)"
+        updateView();
+    }
+    if (button == 'levelTooLow' && onHoverText != "Your level is too low to use this ability!") {
+        onHoverText = "Your level is too low to use this ability!"
+        updateView();
+    }
+    if (button == 'notEnoughEnergy' && onHoverText != "You don't have enough energy to use this ability!"){
+        onHoverText = "You don't have enough energy to use this ability!"
         updateView();
     }
 
@@ -1254,8 +1653,8 @@ function onHoverTooltip(button) {
         onHoverText = "Use silver key?"
         updateView();
     }
-    if (button == 'inventory_goat' && (hasGoat1 || hasGoat2 || hasGoat3) && onHoverText != "Leave the goat?") {
-        onHoverText = "Leave the goat?"
+    if (button == 'inventory_goat' && (hasGoat1 || hasGoat2 || hasGoat3) && onHoverText != "Leave the goat here?") {
+        onHoverText = "Leave the goat here?"
         updateView();
     }
 
@@ -1297,11 +1696,6 @@ function moveCharacter(direction) {
             mapLocationY = 1;
             mapLocationX = 3;
         }
-        if (playerEnergy == 0) {
-            mapLocationY = 10;
-            mapLocationX = 5;
-            passOut();
-        }
         else if (canGoUp && !lostInDesertNorth && !nextStepOasis && playerEnergy > 0) {
             mapLocationY++;
             adventureText = "You walk north...";
@@ -1322,11 +1716,6 @@ function moveCharacter(direction) {
         if (canGoRight && mapLocationY == 10 && mapLocationX == 0) {
             mapLocationY = 3;
             mapLocationX = 3;
-        }
-        if (playerEnergy == 0) {
-            mapLocationY = 10;
-            mapLocationX = 5;
-            passOut();
         }
         else if (canGoDown && !lostInDesertSouth && !nextStepOasis && playerEnergy > 0) {
             mapLocationY--;
@@ -1352,11 +1741,6 @@ function moveCharacter(direction) {
             mapLocationY = 2;
             mapLocationX = 2;
         }
-        if (playerEnergy == 0) {
-            mapLocationY = 10;
-            mapLocationX = 5;
-            passOut();
-        }
         else if (canGoRight && !lostInDesertEast && !nextStepOasis && playerEnergy > 0) {
             mapLocationX++;
             adventureText = "You walk east...";
@@ -1381,11 +1765,6 @@ function moveCharacter(direction) {
             mapLocationY = 2;
             mapLocationX = 4;
         }
-        if (playerEnergy == 0) {
-            mapLocationY = 10;
-            mapLocationX = 5;
-            passOut();
-        }
         else if (canGoLeft && !lostInDesertWest && !nextStepOasis && playerEnergy > 0) {
             mapLocationX--;
             adventureText = "You walk west...";
@@ -1401,6 +1780,7 @@ function moveCharacter(direction) {
             mapLocationX = 0;
         }
     }
+    passOut();
     statusBars();
     setUpArea();
     updateView();
@@ -1465,7 +1845,7 @@ function setUpArea() {
         canGoLeft = false;
         canGoRight = true;
         playMusic('grasslands_area')
-        
+
     }
     if (mapLocationY == 0 && mapLocationX == 8) {
         canGoUp = true;
@@ -1555,7 +1935,7 @@ function setUpArea() {
         canGoDown = true;
         canGoLeft = true;
         canGoRight = true;
-        
+
         doorUnlocked = false;
         inFrontOfCopperDoor = false;
         areaHasRandomEncounters = true;
@@ -1956,7 +2336,7 @@ function setUpArea() {
         if (hasGoat1 || returnedGoat1) {
             areaHasWorldItem = false;
         }
-        
+
         playMusic('grasslands_area')
     }
     // if(mapLocationY == 5 && mapLocationX == 1){
@@ -2157,7 +2537,7 @@ function setUpArea() {
         inGoatArea2 = false;
         areaHasWorldItem = false;
         areaHasRandomEncounters = true;
-        
+
         playMusic('forest_area')
     }
     if (mapLocationY == 6 && mapLocationX == 8) {
@@ -2253,7 +2633,7 @@ function setUpArea() {
 
         currentMusic = bgm_forest;
         playMusic('forest_area')
-        
+
     }
     if (mapLocationY == 7 && mapLocationX == 7) {
         canGoUp = true;
@@ -2549,7 +2929,7 @@ function setUpArea() {
     if (areaHasRandomEncounters) {
         encounterChance = Math.floor(Math.random() * (10 - 1) + 1);
         if (encounterChance == 5) {
-            enterCombat();
+            enterBattle();
         }
     }
 }
@@ -2584,6 +2964,16 @@ function statusBars() {
     if (playerEnergy <= (0.25 * playerMaxEnergy)) {
         energyBarColor = 'red'
     }
+
+    if (enemyHealth > (0.5 * enemyMaxHealth)) {
+        enemyHealthBarColor = 'lightgreen'
+    }
+    if (enemyHealth > (0.25 * enemyMaxHealth) && enemyHealth <= (0.5 * enemyMaxHealth)) {
+        enemyHealthBarColor = 'yellow'
+    }
+    if (enemyHealth <= (0.25 * enemyMaxHealth)) {
+        enemyHealthBarColor = 'red'
+    }
 }
 
 
@@ -2591,85 +2981,85 @@ function BGM(area) {
     clearInterval(fadeInInterval);
     clearInterval(fadeOutInterval);
 
-    if(muted){
+    if (muted) {
         return;
     }
 
-    else if(!muted){
+    else if (!muted) {
 
         if (area == 'grasslands') {
-        if (!bgm_grasslands.paused) {
-            bgm_grasslands.pause();
-            bgm_grasslands.currentTime = 0;
+            if (!bgm_grasslands.paused) {
+                bgm_grasslands.pause();
+                bgm_grasslands.currentTime = 0;
+            }
+            bgm_grasslands.loop = true;
+            bgm_grasslands.play();
+            fadeInInterval = setInterval(function () { audioFadeIn('grasslands') }, 200);
+            if (bgm_forest.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('forest') }, 200);
+            }
+            if (bgm_desert.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('desert') }, 200);
+            }
+            if (bgm_cave.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('cave') }, 200);
+            }
+
         }
-        bgm_grasslands.loop = true;
-        bgm_grasslands.play();
-        fadeInInterval = setInterval(function() { audioFadeIn('grasslands') }, 200);
-        if (bgm_forest.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 200);
+        else if (area == 'forest') {
+            if (!bgm_forest.paused) {
+                bgm_forest.pause();
+                bgm_forest.currentTime = 0;
+            }
+            bgm_forest.loop = true;
+            bgm_forest.play();
+            fadeInInterval = setInterval(function () { audioFadeIn('forest') }, 200);
+            if (bgm_grasslands.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('grasslands') }, 200);
+            }
+            if (bgm_desert.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('desert') }, 200);
+            }
+            if (bgm_cave.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('cave') }, 200);
+            }
         }
-        if (bgm_desert.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 200);
+        else if (area == 'desert') {
+            if (!bgm_desert.paused) {
+                bgm_desert.pause();
+                bgm_desert.currentTime = 0;
+            }
+            bgm_desert.loop = true;
+            bgm_desert.play();
+            fadeInInterval = setInterval(function () { audioFadeIn('desert') }, 200);
+            if (bgm_grasslands.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('grasslands') }, 200);
+            }
+            if (bgm_forest.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('forest') }, 200);
+            }
+            if (bgm_cave.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('cave') }, 200);
+            }
         }
-        if (bgm_cave.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 200);
+        else if (area == 'cave') {
+            if (!bgm_cave.paused) {
+                bgm_cave.pause();
+                bgm_cave.currentTime = 0;
+            }
+            bgm_cave.loop = true;
+            bgm_cave.play();
+            fadeInInterval = setInterval(function () { audioFadeIn('cave') }, 200);
+            if (bgm_grasslands.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('grasslands') }, 200);
+            }
+            if (bgm_desert.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('desert') }, 200);
+            }
+            if (bgm_forest.volume > 0.1) {
+                fadeOutInterval = setInterval(function () { audioFadeOut('forest') }, 200);
+            }
         }
-        
-    } 
-    else if (area == 'forest') {
-        if (!bgm_forest.paused) {
-            bgm_forest.pause();
-            bgm_forest.currentTime = 0;
-        }
-        bgm_forest.loop = true;
-        bgm_forest.play();
-        fadeInInterval = setInterval(function() { audioFadeIn('forest') }, 200);
-        if (bgm_grasslands.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 200);
-        }
-        if (bgm_desert.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 200);
-        }
-        if (bgm_cave.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 200);
-        }
-    } 
-    else if (area == 'desert'){
-        if (!bgm_desert.paused) {
-            bgm_desert.pause();
-            bgm_desert.currentTime = 0;
-        }
-        bgm_desert.loop = true;
-        bgm_desert.play();
-        fadeInInterval = setInterval(function() { audioFadeIn('desert') }, 200);
-        if (bgm_grasslands.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 200);
-        }
-        if (bgm_forest.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 200);
-        }
-        if (bgm_cave.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('cave') }, 200);
-        }
-    }
-    else if (area == 'cave'){
-        if (!bgm_cave.paused) {
-            bgm_cave.pause();
-            bgm_cave.currentTime = 0;
-        }
-        bgm_cave.loop = true;
-        bgm_cave.play();
-        fadeInInterval = setInterval(function() { audioFadeIn('cave') }, 200);
-        if (bgm_grasslands.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('grasslands') }, 200);
-        }
-        if (bgm_desert.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('desert') }, 200);
-        }
-        if (bgm_forest.volume > 0.1){
-            fadeOutInterval = setInterval(function() { audioFadeOut('forest') }, 200);
-        }
-    } 
     }
 
 
@@ -2711,7 +3101,7 @@ function audioFadeIn(area) {
 }
 
 function audioFadeOut(area) {
-    if (area == 'grasslands' || area == 'campsite')  {
+    if (area == 'grasslands' || area == 'campsite') {
         if (bgm_grasslands.volume > 0.1) {
             bgm_grasslands.volume -= 0.05;
         }
@@ -2721,7 +3111,7 @@ function audioFadeOut(area) {
             bgm_grasslands.pause();
             bgm_grasslands.currentTime = 0;
         }
-    } 
+    }
     if (area == 'forest') {
         if (bgm_forest.volume > 0.1) {
             bgm_forest.volume -= 0.05;
@@ -2758,9 +3148,9 @@ function audioFadeOut(area) {
 
 }
 
-function muteAudio(){
-        muted = !muted;
-    if(muted){
+function muteAudio() {
+    muted = !muted;
+    if (muted) {
         bgm_grasslands.volume = 0;
         bgm_forest.volume = 0;
         bgm_desert.volume = 0;
@@ -2774,7 +3164,7 @@ function muteAudio(){
         pickUpAudio.volume = 0;
         fishingAudio.volume = 0;
     }
-    else if(!muted){
+    else if (!muted) {
         bgm_grasslands.volume = 0.0001;
         bgm_forest.volume = 0.0001;
         bgm_desert.volume = 0.0001;
@@ -2794,34 +3184,26 @@ function muteAudio(){
     }
 }
 
-function playMusic(music){
+function playMusic(music) {
 
-    if(music == 'grasslands_area' && bgm_grasslands.volume <= 0.050){
+    if (music == 'grasslands_area' && bgm_grasslands.volume <= 0.050) {
         clearInterval(fadeInInterval)
         clearInterval(fadeOutInterval)
-        BGM('grasslands'); 
+        BGM('grasslands');
     }
-    else if(music == 'forest_area' && bgm_forest.volume <= 0.050){
+    else if (music == 'forest_area' && bgm_forest.volume <= 0.050) {
         clearInterval(fadeInInterval)
         clearInterval(fadeOutInterval)
-        BGM('forest'); 
+        BGM('forest');
     }
-    else if(music == 'desert_area' && bgm_desert.volume <= 0.050){
+    else if (music == 'desert_area' && bgm_desert.volume <= 0.050) {
         clearInterval(fadeInInterval)
         clearInterval(fadeOutInterval)
-        BGM('desert'); 
+        BGM('desert');
     }
-    else if(music == 'cave_area' && bgm_cave.volume <= 0.050){
+    else if (music == 'cave_area' && bgm_cave.volume <= 0.050) {
         clearInterval(fadeInInterval)
         clearInterval(fadeOutInterval)
-        BGM('cave'); 
+        BGM('cave');
     }
-
-
 }
-
-
-
-
-
-
