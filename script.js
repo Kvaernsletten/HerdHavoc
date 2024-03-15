@@ -1667,24 +1667,66 @@ function clearTooltip() {
 
 
 function playerStates() {
-    if (goingLeft) {
+    if (goingLeft && playerMale) {
 
-        if (playerMale) {
-            return "imgs/Character_L.png"
+        if (playerClass == 'Adventurer') {
+            return "imgs/Character_Male_L.png"
         }
-        else if (!playerMale) {
-            return "imgs/Character_Female_L.png"
+        else if (playerClass == 'Warrior') {
+            return "imgs/Character_Male_Warrior_L.png"
+        }
+        else if (playerClass == 'Rogue') {
+            return "imgs/Character_Male_Rogue_L.png"
+        }
+        else if (playerClass == 'Mage') {
+            return "imgs/Character_Male_Mage_L.png"
         }
     }
-    else {
+    else if(!goingLeft && playerMale) {
 
-        if (playerMale) {
-            return "imgs/Character_R.png"
+        if (playerClass == 'Adventurer')  {
+            return "imgs/Character_Male_R.png"
         }
-        else if (!playerMale) {
+        else if (playerClass == 'Warrior') {
+            return "imgs/Character_Male_Warrior_R.png"
+        }
+        else if (playerClass == 'Rogue') {
+            return "imgs/Character_Male_Rogue_R.png"
+        }
+        else if (playerClass == 'Mage') {
+            return "imgs/Character_Male_Mage_R.png"
+        }
+    }
+
+    if(goingLeft && !playerMale){
+
+        if (playerClass == 'Adventurer')  {
+            return "imgs/Character_Female_L.png"
+        }
+        else if (playerClass == 'Warrior') {
+            return "imgs/Character_Female_Warrior_L.png"
+        }
+        else if (playerClass == 'Rogue') {
+            return "imgs/Character_Female_Rogue_L.png"
+        }
+        else if (playerClass == 'Mage') {
+            return "imgs/Character_Female_Mage_L.png"
+        }
+    }
+    else if(!goingLeft && !playerMale){
+
+        if (playerClass == 'Adventurer')  {
             return "imgs/Character_Female_R.png"
         }
-
+        else if (playerClass == 'Warrior') {
+            return "imgs/Character_Female_Warrior_R.png"
+        }
+        else if (playerClass == 'Rogue') {
+            return "imgs/Character_Female_Rogue_R.png"
+        }
+        else if (playerClass == 'Mage') {
+            return "imgs/Character_Female_Mage_R.png"
+        }
     }
     // return "imgs/worlditemstest.png"
 }
@@ -1958,7 +2000,6 @@ function setUpArea() {
         canGoDown = false;
         canGoLeft = true;
         canGoRight = true;
-
 
         inGrasslands = true;
         inCave = false;
