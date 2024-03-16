@@ -1,6 +1,2 @@
-change combat flow
-
-rework damage calculations for player and enemies *** IN PROGRESS ***
 
 
-// abilityWindow = false; /////////////////////////////////////////////////////////

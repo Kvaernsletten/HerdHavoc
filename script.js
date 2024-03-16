@@ -108,7 +108,7 @@ let enemyStunned = false;
 let stunCounter;
 let searchBackpackAttempt;
 let runAwayAttempt;
-let psychedUp = false;
+let guardUsed = false;
 let stealChance;
 let hasStolen = false;
 
@@ -761,7 +761,7 @@ function enterBattle() {
     else if (inCave) {
         battleBackground = `style="background-image: url(imgs/Arenas/caveArena.png"`;
     }
-    psychedUp = false;
+    guardUsed = false;
     enemyStunned = false;
     stunCounter = 0;
     inBattle = true;
@@ -848,7 +848,7 @@ function ability() {
         <button class="abilityButton" 
         onmouseenter="onHoverTooltip(playerLevel >= guard.requiredLevel ? (playerEnergy >= guard.requiredEnergy ? 'guard' : 'notEnoughEnergy') : 'levelTooLow')" 
         onmouseleave="clearTooltip()" 
-        ${playerLevel >= guard.requiredLevel && playerEnergy >= guard.requiredEnergy ? 'onclick="useAbility(\'guard\')"' : 'disabled, style="opacity: 0.5"'}>Psych up</button>
+        ${playerLevel >= guard.requiredLevel && playerEnergy >= guard.requiredEnergy ? 'onclick="useAbility(\'guard\')"' : 'disabled, style="opacity: 0.5"'}>Guard</button>
         <button class="abilityButton"
         onmouseenter="onHoverTooltip(playerLevel >= shieldSlam.requiredLevel ? (playerEnergy >= shieldSlam.requiredEnergy ? 'shieldSlam' : 'notEnoughEnergy') : 'levelTooLow')" 
         onmouseleave="clearTooltip()"
@@ -971,7 +971,7 @@ function useAbility(ability) {
     if (ability == 'guard') {
         playerEnergy -= guard.requiredEnergy;
         adventureText = "You raise your shield for a moment's respite and recover some energy!";
-        psychedUp = true;
+        guardUsed = true;
         setTimeout(enemyTurn, 1500);
     }
     if (ability == 'shieldSlam') {
@@ -1076,7 +1076,7 @@ function enemyTurn() {
     }
     else if (!enemyStunned) {
 
-        if(psychedUp){
+        if(guardUsed){
 
         enemyDamage = Math.floor(Math.random() * ((enemyMaxDamage - enemyMinDamage) / 2 + 1)) + enemyMinDamage;
         playerHealth -= enemyDamage;
@@ -1085,9 +1085,9 @@ function enemyTurn() {
             if(playerEnergy >= playerMaxEnergy){
                 playerEnergy = playerMaxEnergy;
             }
-            psychedUp = false;
+            guardUsed = false;
         }
-        else if(!psychedUp){
+        else if(!guardUsed){
 
         enemyDamage = Math.floor(Math.random() * (enemyMaxDamage - enemyMinDamage + 1)) + enemyMinDamage;
         playerHealth -= enemyDamage;
