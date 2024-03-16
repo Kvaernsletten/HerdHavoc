@@ -101,6 +101,9 @@ let doorUnlocked = false;
 
 // Combat states
 let actionMenuCooldown = false;
+let criticalHit;
+let criticalRate;
+let criticalDamage;
 let enemyStunned = false;
 let stunCounter;
 let searchBackpackAttempt;
@@ -589,6 +592,8 @@ function setClass(selectedClass) {
         playerMinDamage = 15;
         playerMaxDamage = 25;
 
+        criticalRate = 0.09;
+        criticalDamage = 1.1;
     }
     else if (selectedClass == "warrior") {
         playerClass = "Warrior"
@@ -602,6 +607,9 @@ function setClass(selectedClass) {
         playerMinDamage = 20;
         playerMaxDamage = 30;
 
+        criticalRate = 0.12;
+        criticalDamage = 1.2;
+
     }
     else if (selectedClass == "rogue") {
         playerClass = "Rogue"
@@ -612,8 +620,11 @@ function setClass(selectedClass) {
         playerEnergy = 125;
         playerMaxEnergy = 125;
 
-        playerMinDamage = 30;
-        playerMaxDamage = 40;
+        playerMinDamage = 25;
+        playerMaxDamage = 35;
+
+        criticalRate = 0.18;
+        criticalDamage = 1.3;
 
     }
     else if (selectedClass == "mage") {
@@ -627,6 +638,9 @@ function setClass(selectedClass) {
 
         playerMinDamage = 9;
         playerMaxDamage = 12;
+
+        criticalRate = 0.05;
+        criticalDamage = 1.5;
 
     }
     adventureText = "Start game with the " + (playerClass ?? " Adventurer") + " class?"
@@ -886,9 +900,21 @@ function ability() {
 function attack() {
 
     actionMenuCooldown = true;
-    playerDamage = Math.floor(Math.random() * (playerMaxDamage - playerMinDamage + 1)) + playerMinDamage;
-    adventureText = "You deal " + playerDamage + " damage to the " + enemyName + "!";
-    dealDamage(playerDamage);
+    criticalHit = Math.random();
+
+    if(criticalHit > criticalRate){
+        playerDamage = Math.floor(Math.random() * (playerMaxDamage - playerMinDamage + 1)) + playerMinDamage;
+        adventureText = "You deal " + playerDamage + " damage to the " + enemyName + "!";
+        dealDamage(playerDamage);
+    }
+    else if(criticalHit < criticalRate){
+        playerDamage = Math.floor(Math.random() * (playerMaxDamage - playerMinDamage + 1)) + playerMinDamage;
+        modifiedPlayerDamage = Math.floor(playerDamage * criticalDamage);
+        adventureText = "CRITICAL HIT! You deal " + playerDamage + " damage and " + (modifiedPlayerDamage - playerDamage) + " critical damage to the " + enemyName + "!";
+        dealDamage(modifiedPlayerDamage);
+    }
+
+
     updateView();
 }
 
@@ -1136,13 +1162,13 @@ function levelUp() {
         playerMaxHealth += 10;
         playerMaxEnergy += 5;
         playerMinDamage += 2;
-        playerMaxDamage += 6;
+        playerMaxDamage += 3;
     }
     if (playerClass == 'Rogue') {
         playerMaxHealth += 7;
         playerMaxEnergy += 7;
         playerMinDamage += 2;
-        playerMaxDamage += 7;
+        playerMaxDamage += 4;
     }
     if (playerClass == 'Mage') {
         playerMaxHealth += 5;
@@ -1495,16 +1521,16 @@ function heal(healAmount) {
 function onHoverTooltip(button) {
 
     //class selection
-    if (button == 'adventurer' && onHoverText != "The adventurer is a balanced class.") {
-        onHoverText = "The adventurer is a balanced class.";
+    if (button == 'adventurer' && onHoverText != "The adventurer is not really a figther but does their best with what they have.") {
+        onHoverText = "The adventurer is not really a figther but does their best with what they have.";
         updateView();
     }
     if (button == 'warrior' && onHoverText != "The warrior can take a beating but tires easily from wearing heavy armour.") {
         onHoverText = "The warrior can take a beating but tires easily from wearing heavy armour."
         updateView();
     }
-    if (button == 'rogue' && onHoverText != "Rogue flavour-text idk lol") {
-        onHoverText = "Rogue flavour-text idk lol"
+    if (button == 'rogue' && onHoverText != "Hiding in the shadows to avoid combat, the rogue is a dagger-wielding pickpocket that will fight only when they have to.") {
+        onHoverText = "Hiding in the shadows to avoid combat, the rogue is a dagger-wielding pickpocket that will fight only when they have to."
         updateView();
     }
     if (button == 'mage' && onHoverText != "While fragile in combat, the mage is the most powerful class and light armor lets them move around with ease.") {
