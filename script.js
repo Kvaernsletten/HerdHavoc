@@ -3372,9 +3372,11 @@ function winGame(){
         ${sillyBanditsKilled} silly bandits,<br>
         ${forestGoblinsKilled} forest goblins,<br>
         ${skeletonWarriorsKilled} skeleton warriors,<br>
-        and ${caveTrollsKilled} cave trolls!
-        
+        and ${caveTrollsKilled} cave trolls!<br><br>
+        Thanks for playing!<br>
         You can now continue exploring or try playing the game with a different class!`
+        
+        infoScreenEndMessage = ""
     }
     updateView();
 }
