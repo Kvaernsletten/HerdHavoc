@@ -7,6 +7,10 @@ let battleBackground;
 
 let adventureText;
 let onHoverText = "";
+let infoScreenTitle ="";
+let infoScreenText = "";
+let infoScreenEndMessage = "";
+let firstBattleTutorial = true;
 
 //Player stats
 let playerClass;
@@ -23,6 +27,19 @@ let playerXP = 0;
 let playerNextLevelXP = 27;
 let excessXP;
 let playerAbilities = "";
+let criticalHit;
+let criticalRate;
+let criticalDamage;
+
+let healthIncreaseOnLevelUp;
+let energyIncreaseOnLevelUp;
+let minDamageOnLevelUp;
+let maxDamageOnLevelUp;
+
+let sillyBanditsKilled = 0;
+let forestGoblinsKilled = 0;
+let skeletonWarriorsKilled = 0;
+let caveTrollsKilled = 0;
 
 //Enemy stats
 let enemyName;
@@ -62,6 +79,7 @@ let returnedGoat3 = false;
 // Game states
 let isGameRunning = false;
 let inBattle = false;
+let infoScreen = false;
 let abilityWindow = false;
 let playerAlive = true;
 
@@ -101,9 +119,6 @@ let doorUnlocked = false;
 
 // Combat states
 let actionMenuCooldown = false;
-let criticalHit;
-let criticalRate;
-let criticalDamage;
 let enemyStunned = false;
 let stunCounter;
 let searchBackpackAttempt;
@@ -118,7 +133,7 @@ let searchBackpack = {
     requiredLevel: 1,
 }
 let runAway = {
-    requiredEnergy: 5,
+    requiredEnergy: 0,
     requiredLevel: 3,
 }
 let patchUp = {
@@ -224,6 +239,15 @@ function updateView() {
         <div class="topBattleDiv">
         </div>
         <div class="middleBattleDiv">
+        ${infoScreen ? /*HTML*/` 
+        <div class="infoScreen">
+        <div class="infoScreenTitle">${infoScreenTitle}</div>
+        <div class="infoScreenDiv">${infoScreenText}</div>
+        <div class="endMessageAndButtonDiv">
+        <div class="infoScreenEndMessage">${infoScreenEndMessage}</div>
+        <button class="classButtons" onclick="infoScreen = false, updateView();">Confirm</button>
+        </div>           
+        </div>` : /*HTML*/``}
             <img class="playerInCombat" src=${playerAlive ? playerCombatSprite : (playerMale ? "imgs/Character_Male_dead.png" : "imgs/Character_Female_dead.png")}>
             <img class="enemyInCombat" src=${enemySprite}>
         </div>
@@ -287,7 +311,8 @@ function updateView() {
         </div>               
     </div>
     </div>
-    <button class="leftButton" onclick="muteAudio(), updateView()">Mute</button>
+    <button class="leftButton" onclick="muteAudio()">Mute</button>
+    <button class="leftButton" onclick="combatHelp()">Help</button>
     `
 
             // NOT IN BATTLE:
@@ -299,6 +324,16 @@ function updateView() {
         <div class="LeftRightDiv">
             <button class="leftButton" ${canGoLeft ? 'onclick="moveCharacter(\'west\')"' : 'disabled'} style="${canGoLeft ? '' : 'pointer-events: none; opacity: 0;'}">🡸</button>
             <div class="playerContainer">
+            ${infoScreen ? /*HTML*/` 
+            <div class="infoScreen">
+            <div class="infoScreenTitle">${infoScreenTitle}</div>
+            <div class="infoScreenDiv">${infoScreenText}</div>
+            <div class="endMessageAndButtonDiv">
+            <div class="infoScreenEndMessage">${infoScreenEndMessage}</div>
+            <button class="classButtons" onclick="infoScreen = false, updateView();">Confirm</button>
+            </div>            
+            </div>` : /*HTML*/``}
+
                 <img class="player" src="${passedOut ? (playerMale ? "imgs/Character_Sleep.png" : "imgs/Character_Sleep_Female.png") : playerStates()}">
                 ${areaHasWorldItem ? /*HTML*/`<img class="worldItem" src="${worldItem}">` : ``}
                 ${inShopWest || inShopEast ? /*HTML*/`<img class="worldItem" src="imgs/world_items/NPC.png">` : ``}
@@ -497,7 +532,8 @@ function updateView() {
         </div>
         </div>
     </div>
-    <button class="leftButton" onclick="muteAudio(), updateView()">Mute</button>
+    <button class="leftButton" onclick="muteAudio()">Mute</button>
+    <button class="leftButton" onclick="help()">Help</button>
     `
         }
     `
@@ -515,12 +551,12 @@ function updateView() {
             </div>
            
         <div class="LeftRightDiv">
-            <button class="leftButton" onclick="playerMale = !playerMale, setUpCharacter(), updateView();">🡸</button>
+            <button class="leftButton" onclick="playerMale = !playerMale, setUpCharacter()">🡸</button>
             <div class="gameInfo">
                 Select character
             </div>
             <img class="characterSelect" src=${playerMale ? playerCombatSprite ?? "imgs/Character_Male_inCombat.png" : playerCombatSprite ?? "imgs/Character_Female_inCombat.png"}>
-            <button class="rightButton" onclick="playerMale = !playerMale, setUpCharacter(), updateView();">🡺</button>
+            <button class="rightButton" onclick="playerMale = !playerMale, setUpCharacter()">🡺</button>
         </div>
         <div class="DownDiv">
             <button class="classButtons"
@@ -561,7 +597,6 @@ function updateView() {
             <div class="onHoverText">${onHoverText}</div>
         <div class="inventoryGrid"></div>
         </div>
-        <button class="leftButton" onclick="muteAudio(), updateView()">Mute</button>
         `
 }
 
@@ -585,12 +620,16 @@ function setClass(selectedClass) {
 
         playerHealth = 100;
         playerMaxHealth = 100;
+        healthIncreaseOnLevelUp = 5;
 
         playerEnergy = 150;
         playerMaxEnergy = 150;
+        energyIncreaseOnLevelUp = 5;
 
         playerMinDamage = 15;
         playerMaxDamage = 25;
+        minDamageOnLevelUp = 3;
+        maxDamageOnLevelUp = 5;
 
         criticalRate = 0.09;
         criticalDamage = 1.1;
@@ -600,12 +639,16 @@ function setClass(selectedClass) {
 
         playerHealth = 150;
         playerMaxHealth = 150;
+        healthIncreaseOnLevelUp = 10;
 
-        playerEnergy = 70;
-        playerMaxEnergy = 70;
+        playerEnergy = 85;
+        playerMaxEnergy = 85;
+        energyIncreaseOnLevelUp = 5
 
         playerMinDamage = 20;
         playerMaxDamage = 30;
+        minDamageOnLevelUp = 2;
+        maxDamageOnLevelUp = 3;
 
         criticalRate = 0.12;
         criticalDamage = 1.2;
@@ -616,12 +659,16 @@ function setClass(selectedClass) {
 
         playerHealth = 85;
         playerMaxHealth = 85;
+        healthIncreaseOnLevelUp = 7;
 
         playerEnergy = 125;
         playerMaxEnergy = 125;
+        energyIncreaseOnLevelUp = 7;
 
         playerMinDamage = 25;
         playerMaxDamage = 35;
+        minDamageOnLevelUp = 2;
+        maxDamageOnLevelUp = 4;
 
         criticalRate = 0.18;
         criticalDamage = 1.3;
@@ -632,12 +679,16 @@ function setClass(selectedClass) {
 
         playerHealth = 70;
         playerMaxHealth = 70;
+        healthIncreaseOnLevelUp = 5;
 
         playerEnergy = 200;
         playerMaxEnergy = 200;
+        energyIncreaseOnLevelUp = 10;
 
         playerMinDamage = 9;
         playerMaxDamage = 12;
+        minDamageOnLevelUp = 3;
+        maxDamageOnLevelUp = 6;
 
         criticalRate = 0.05;
         criticalDamage = 1.5;
@@ -678,6 +729,7 @@ function startGame() {
     mapLocationX = 5;
     isGameRunning = true;
     inventoryGoat = "imgs/inventory_items/Empty_Slot.png"
+    help();
     setUpCharacter();
     setUpArea();
     updateView();
@@ -766,6 +818,12 @@ function enterBattle() {
     stunCounter = 0;
     inBattle = true;
     actionMenuCooldown = false;
+
+    if(firstBattleTutorial){
+        infoScreen = false;
+        combatHelp();
+        firstBattleTutorial = false;
+    }
     updateView();
 }
 
@@ -1131,7 +1189,18 @@ function winBattle() {
 
     if (playerXP >= playerNextLevelXP) {
         levelUp();
-        adventureText = "LEVEL UP! You emerge victorious, gained " + yieldXP + " experience and looted " + enemyGold + " gold from the corpse... ";
+    }
+    if(enemyName == "silly bandit"){
+        sillyBanditsKilled++;
+    }
+    if(enemyName == "forest goblin"){
+        forestGoblinsKilled++;
+    }
+    if(enemyName == "skeleton warrior"){
+        skeletonWarriorsKilled++;
+    }
+    if(enemyName == "cave troll"){
+        caveTrollsKilled++;
     }
     leaveBattle();
     updateView();
@@ -1152,31 +1221,12 @@ function levelUp() {
     playerXP += excessXP;
     playerNextLevelXP = playerLevel * 27;
 
-    if (playerClass == 'Adventurer') {
-        playerMaxHealth += 5;
-        playerMaxEnergy += 5;
-        playerMinDamage += 3;
-        playerMaxDamage += 5;
-    }
-    if (playerClass == 'Warrior') {
-        playerMaxHealth += 10;
-        playerMaxEnergy += 5;
-        playerMinDamage += 2;
-        playerMaxDamage += 3;
-    }
-    if (playerClass == 'Rogue') {
-        playerMaxHealth += 7;
-        playerMaxEnergy += 7;
-        playerMinDamage += 2;
-        playerMaxDamage += 4;
-    }
-    if (playerClass == 'Mage') {
-        playerMaxHealth += 5;
-        playerMaxEnergy += 10;
-        playerMinDamage += 2;
-        playerMaxDamage += 5;
-    }
+    playerMaxHealth += healthIncreaseOnLevelUp;
+    playerMaxEnergy += energyIncreaseOnLevelUp;
+    playerMinDamage += minDamageOnLevelUp;
+    playerMaxDamage += maxDamageOnLevelUp;
 
+    levelUpInfo();
 }
 
 function flee() {
@@ -1332,17 +1382,6 @@ function buyItem(item) {
         }
 
     }
-
-    if (item == "silverKey") {
-        if (hasDesertRose) {
-            hasSilverKey = true;
-            hasDesertRose = false;
-            adventureText = "You traded the rose for a silver key!"
-            pickUpAudio.play();
-        } else if (!hasDesertRose) {
-            adventureText = "You don't have the desert rose! There is a rumour it can be found if you keep heading south-east in the desert...."
-        }
-    }
     currentDialogue = 0;
     updateView();
 }
@@ -1424,18 +1463,21 @@ function useItem(item) {
         hasGoat1 = false;
         adventureText = "You return the goat to your campsite!"
         goatAudio.play();
+        winGame();
     }
     if (item == 'goat' && inMainCampsite && hasGoat2) {
         returnedGoat2 = true;
         hasGoat2 = false;
         adventureText = "You return the goat to your campsite!"
         goatAudio.play();
+        winGame();
     }
     if (item == 'goat' && inMainCampsite && hasGoat3) {
         returnedGoat3 = true;
         hasGoat3 = false;
         adventureText = "You return the goat to your campsite!"
         goatAudio.play();
+        winGame();
     }
     else if (item == 'goat' && !inMainCampsite && (hasGoat1 || hasGoat2 || hasGoat3)) {
         adventureText = "You should bring the goat back to your main campsite first!"
@@ -1461,6 +1503,7 @@ function useItem(item) {
     } else if (item == 'desertRose' && hasDesertRose && inShopWest) {
         hasSilverKey = true;
         hasDesertRose = false;
+        areaHasWorldItem = false;
         adventureText = "You traded the rose for a silver key!"
         pickUpAudio.play();
     }
@@ -2548,6 +2591,7 @@ function setUpArea() {
         canGoRight = true;
 
         inShopWest = false;
+        areaHasWorldItem = false;
         areaHasRandomEncounters = false;
 
         playMusic('grasslands_area')
@@ -2668,6 +2712,14 @@ function setUpArea() {
 
         inShopWest = true;
         currentDialogue = 0;
+
+        if (!hasSilverKey) {
+            areaHasWorldItem = true;
+            worldItem = 'imgs/world_items/SilverKey_WorldItem.png'
+        }
+        if (hasSilverKey) {
+            areaHasWorldItem = false;
+        }
 
         playMusic('grasslands_area')
     }
@@ -3249,6 +3301,7 @@ function muteAudio() {
         currentMusic.volume = 0.3;
         currentMusic.play();
     }
+    updateView();
 }
 
 function playMusic(music) {
@@ -3273,4 +3326,55 @@ function playMusic(music) {
         clearInterval(fadeOutInterval)
         BGM('cave');
     }
+}
+
+function levelUpInfo(){
+    infoScreen = true;
+    infoScreenTitle = "You have gained a level!"
+    infoScreenText = /*HTML*/`<br><br><br><br>
+    Level ${playerLevel - 1} ⟼ ${playerLevel}<br><br><br>
+    Health: ${playerMaxHealth - healthIncreaseOnLevelUp} ⟼ ${playerMaxHealth}<br><br>
+    Energy: ${playerMaxEnergy - energyIncreaseOnLevelUp} ⟼ ${playerMaxEnergy}<br><br>
+    Damage: ${playerMinDamage - minDamageOnLevelUp}-${playerMaxDamage - maxDamageOnLevelUp} ⟼ ${playerMinDamage}-${playerMaxDamage}<br>`
+    infoScreenEndMessage = "";
+    updateView();
+}
+
+function help(){
+    infoScreen = !infoScreen;
+    infoScreenTitle = "Game information"
+    infoScreenText = /*HTML*/`<br>Your goal is the find and return your three lost goats back to your campsite where the game started.<br><br>
+    Try to memorize where you have been as well as important landmarks such as other campsites and locations of shops to navigate your way through the world.<br><br>
+    You can stock up on consumables in shops that will allow you to recover health and energy, and you can also rest in campsites to recover energy.<br><br>
+    Every step you take and certain combat abilities consume energy and running out of energy results in your character fainting, but running out of health results in death and the game ends.<br>`
+    infoScreenEndMessage = 'You can view this message again by clicking "help" in the lower left while outside of battles.'
+    updateView();
+}
+function combatHelp(){
+    infoScreen = !infoScreen;
+    infoScreenTitle = "How to do battle"
+    infoScreenText = /*HTML*/`<br>You have encountered an enemy!<br><br>
+    In this turn-based combat system, your goal is to defeat your enemy by lowering their health to 0 before they can do the same to you.<br><br>
+    Try to survive using a combination of regular attacks and special class abilities and if successful, combat ends and you gain experience points to level up your character.<br><br>
+    When you level up, you sometimes learn new class abilities to use in combat.<br>
+    Running out of health results in death and the game ends.<br>`
+    infoScreenEndMessage = 'You can view this message again by clicking "help" in the lower left during battles.'
+    updateView();
+}
+
+function winGame(){
+    if(returnedGoat1 && returnedGoat2 && returnedGoat3){
+        infoScreen = true;
+        infoScreenTitle = "Congratulations, " + playerName + "!"
+        infoScreenText = /*HTML*/`<br>You have successfully returned all the goats to your campsite. <br><br>
+        You finished the game as a level ${playerLevel} ${playerClass}!<br><br>
+        On your journey you defeated:<br>
+        ${sillyBanditsKilled} silly bandits,<br>
+        ${forestGoblinsKilled} forest goblins,<br>
+        ${skeletonWarriorsKilled} skeleton warriors,<br>
+        and ${caveTrollsKilled} cave trolls!
+        
+        You can now continue exploring or try playing the game with a different class!`
+    }
+    updateView();
 }

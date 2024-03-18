@@ -18,6 +18,53 @@ html{
     image-rendering: pixelated;
     position: absolute;
 }
+.infoScreen{
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    width: 600px;
+    height: 400px;
+    padding: 1%;
+    margin-left: 60px;
+    margin-top: 20px;
+    font-size: 150%;
+    border: 5px solid rgb(30, 20, 34);
+    background-color: rgba(106, 81, 117, 0.884);
+    color: rgb(211, 134, 45);
+    font-weight: 600;
+}
+.infoScreenTitle{
+    display: flex;
+    justify-content: center;
+    font-size: 110%;
+}
+.infoScreenDiv{
+    display: flex;
+    justify-content: center;
+    font-size: 70%;
+}
+.endMessageAndButtonDiv{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+    width: 600px;
+    height: 500px;
+}
+.infoScreenEndMessage{
+    display: flex;
+    align-items: end;
+    width: 400px;
+    font-size: 65%;
+}
+.endMessageAndButtonDiv > button{
+    height: 50px;
+    width: 120px;
+    justify-self: flex-end;
+    align-self: flex-end;
+}
 .worldItem{
     width: 768px;
     height: 466px;
