@@ -152,16 +152,16 @@ let mendWounds = {
     requiredEnergy: 15,
     requiredLevel: 5,
 }
+let vanish = {
+    requiredEnergy: 5,
+    requiredLevel: 1,
+}
 let steal = {
     requiredEnergy: 0,
-    requiredLevel: 1,
+    requiredLevel: 3,
 }
 let stabbyStab = {
     requiredEnergy: 10,
-    requiredLevel: 3,
-}
-let vanish = {
-    requiredEnergy: 5,
     requiredLevel: 5,
 }
 let chill = {
@@ -920,6 +920,10 @@ function ability() {
     }
     else if (playerClass == "Rogue") {
         playerAbilities = abilityWindow ? /*HTML*/`
+        <button class="abilityButton" 
+        onmouseenter="onHoverTooltip(playerLevel >= vanish.requiredLevel ? 'vanish' : 'levelTooLow')" 
+        onmouseleave="clearTooltip()" 
+        ${playerLevel >= vanish.requiredLevel && playerEnergy >= vanish.requiredEnergy ? 'onclick="useAbility(\'vanish\')"' : 'disabled, style="opacity: 0.5"'}>Vanish</button>
         <button class="abilityButton"
         onmouseenter="onHoverTooltip(playerLevel >= steal.requiredLevel ? 'steal' : 'levelTooLow')" 
         onmouseleave="clearTooltip()"
@@ -928,10 +932,6 @@ function ability() {
         onmouseenter="onHoverTooltip(playerLevel >= stabbyStab.requiredLevel ? 'stabbyStab' : 'levelTooLow')" 
         onmouseleave="clearTooltip()" 
         ${playerLevel >= stabbyStab.requiredLevel && playerEnergy >= stabbyStab.requiredEnergy ? 'onclick="useAbility(\'stabbyStab\')"' : 'disabled, style="opacity: 0.5"'}>Stabby stab</button>
-        <button class="abilityButton" 
-        onmouseenter="onHoverTooltip(playerLevel >= vanish.requiredLevel ? 'vanish' : 'levelTooLow')" 
-        onmouseleave="clearTooltip()" 
-        ${playerLevel >= vanish.requiredLevel && playerEnergy >= vanish.requiredEnergy ? 'onclick="useAbility(\'vanish\')"' : 'disabled, style="opacity: 0.5"'}>Vanish</button>
         `
             : /*HTML*/``
     }
@@ -1049,6 +1049,11 @@ function useAbility(ability) {
     }
 
     //rogue
+    if (ability == 'vanish') {
+        playerEnergy -= vanish.requiredEnergy;
+        adventureText = "You vanish into the shadows and escape.."
+        leaveBattle();
+    }
     if (ability == 'steal') {
         playerEnergy -= steal.requiredEnergy;
 
@@ -1076,11 +1081,6 @@ function useAbility(ability) {
         modifiedPlayerDamage = Math.floor(playerDamage * 0.5);
         adventureText = "You exploit the " + enemyName + "'s weakness and deal " + modifiedPlayerDamage + " damage and the " + enemyName + " is stunned!";
         dealDamage(modifiedPlayerDamage);
-    }
-    if (ability == 'vanish') {
-        playerEnergy -= vanish.requiredEnergy;
-        adventureText = "You vanish into the shadows and escape.."
-        leaveBattle();
     }
 
     //mage
@@ -1267,7 +1267,7 @@ function talkToNPC(NPC) {
                 "Shopkeeper: You won't regret buying that fishing rod! ▾",
                 "Shopkeeper: ... or maybe you will, there's a reason I wanted to get rid of it after all.. ▾",
                 "Shopkeeper: There has not been any fish in these waters for decades.. all dead! ▾",
-                "Shopkeeper: But.. you might use the rod to fish out the splarkling object I saw in the dark forest if you can make it past the goblins lurking in there..",
+                "Shopkeeper: But.. you might use the rod to fish out the sparkling object I saw in the dark forest if you can make it past the goblins lurking in there..",
                 "..."
             ]
         }
@@ -1307,7 +1307,7 @@ function talkToNPC(NPC) {
         }
         else if (hasSilverKey && !hasDesertRose) {
             westShopKeeperDialogue = [
-                "Shopkeeper: Thanks you so much for trading with me! ▾",
+                "Shopkeeper: Thank you so much for trading with me! ▾",
                 "Shopkeeper: I have no idea what that key is for, by the way...",
                 "Shopkeeper: I'd cherish this rose more if not for the horrible smell!",
                 "..."
@@ -1647,16 +1647,16 @@ function onHoverTooltip(button) {
         updateView();
     }
     //rogue
+    if (button == 'vanish' && onHoverText != "Step into the shadows and hide from your enemy to retreat from the battle. <br><br>(Cost: " + vanish.requiredEnergy + " energy)") {
+        onHoverText = "Step into the shadows and hide from your enemy to retreat from the battle. <br><br>(Cost: " + vanish.requiredEnergy + " energy)"
+        updateView();
+    }
     if (button == 'steal' && onHoverText != "Attempt to steal gold from your target <br><br>(Cost: " + steal.requiredEnergy + " energy)") {
         onHoverText = "Attempt to steal gold from your target <br><br>(Cost: " + steal.requiredEnergy + " energy)"
         updateView();
     }
     if (button == 'stabbyStab' && onHoverText != "Stun your target for 2 turns by exploiting their weak point. <br><br>(Cost: " + stabbyStab.requiredEnergy + " energy)") {
         onHoverText = "Stun your target for 2 turns by exploiting their weak point. <br><br>(Cost: " + stabbyStab.requiredEnergy + " energy)"
-        updateView();
-    }
-    if (button == 'vanish' && onHoverText != "Step into the shadows and hide from your enemy to retreat from the battle. <br><br>(Cost: " + vanish.requiredEnergy + " energy)") {
-        onHoverText = "Step into the shadows and hide from your enemy to retreat from the battle. <br><br>(Cost: " + vanish.requiredEnergy + " energy)"
         updateView();
     }
     //mage
@@ -3346,7 +3346,7 @@ function help(){
     infoScreenText = /*HTML*/`<br>Your goal is the find and return your three lost goats back to your campsite where the game started.<br><br>
     Try to memorize where you have been as well as important landmarks such as other campsites and locations of shops to navigate your way through the world.<br><br>
     You can stock up on consumables in shops that will allow you to recover health and energy, and you can also rest in campsites to recover energy.<br><br>
-    Every step you take and certain combat abilities consume energy and running out of energy results in your character fainting, but running out of health results in death and the game ends.<br>`
+    Every step you take, as well as certain combat abilities consume energy and running out of energy will result in your character fainting, but running out of health results in death and the game ends.<br>`
     infoScreenEndMessage = 'You can view this message again by clicking "help" in the lower left while outside of battles.'
     updateView();
 }
