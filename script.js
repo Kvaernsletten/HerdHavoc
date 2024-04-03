@@ -1803,30 +1803,34 @@ function playerStates() {
 document.addEventListener('keydown', function(event) {
     
     if(!inBattle){
-            switch(event.key) {
-        case 'w', 'ArrowUp':
-            if(canGoUp){
-                moveCharacter('north');
-            }
-            break;
-        case 'a', 'ArrowLeft':
-            if(canGoLeft){
-                moveCharacter('west');
-            }
-            break;
-        case 's', 'ArrowDown':
-            if(canGoDown){
-                moveCharacter('south');
-            }
-            break;
-        case 'd', 'ArrowRight':
-            if(canGoRight){
-                moveCharacter('east');
-            }
-            break;
-        default:
-
-            break;
+        switch(event.key) {
+            case 'w':
+            case 'ArrowUp':
+                if (canGoUp) {
+                    moveCharacter('north');
+                }
+                break;
+            case 'a':
+            case 'ArrowLeft':
+                if (canGoLeft) {
+                    moveCharacter('west');
+                }
+                break;
+            case 's':
+            case 'ArrowDown':
+                if (canGoDown) {
+                    moveCharacter('south');
+                }
+                break;
+            case 'd':
+            case 'ArrowRight':
+                if (canGoRight) {
+                    moveCharacter('east');
+                }
+                break;
+            default:
+                // Ignore other key presses
+                break;
     }
     }
 
