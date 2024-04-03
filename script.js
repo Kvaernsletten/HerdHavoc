@@ -419,7 +419,7 @@ function updateView() {
                 ` :
                     /*HTML*/``}
 
-                ${inOasis ?
+                ${inOasis && !hasDesertRose ?
                         /*HTML*/`<button
                 ${inOasis && !hasDesertRose && !hasSilverKey ? 'onclick="pickUpItem(\'desertRose\')"' : 'disabled="disabled"'}
                 onmouseenter="{onHoverTooltip('pickUpDesertRose')}"
@@ -1800,11 +1800,43 @@ function playerStates() {
     // return "imgs/worlditemstest.png"
 }
 
+document.addEventListener('keydown', function(event) {
+    
+    if(!inBattle){
+            switch(event.key) {
+        case 'w', 'ArrowUp':
+            if(canGoUp){
+                moveCharacter('north');
+            }
+            break;
+        case 'a', 'ArrowLeft':
+            if(canGoLeft){
+                moveCharacter('west');
+            }
+            break;
+        case 's', 'ArrowDown':
+            if(canGoDown){
+                moveCharacter('south');
+            }
+            break;
+        case 'd', 'ArrowRight':
+            if(canGoRight){
+                moveCharacter('east');
+            }
+            break;
+        default:
+
+            break;
+    }
+    }
+
+});
+
 function moveCharacter(direction) {
 
     if (direction == 'north') {
-        if (canGoRight && mapLocationY == 10 && mapLocationX == 0) {
-            mapLocationY = 1;
+        if (mapLocationY == 10 && mapLocationX == 0) {
+            mapLocationY = 2;
             mapLocationX = 3;
         }
         else if (canGoUp && !lostInDesertNorth && !nextStepOasis && playerEnergy > 0) {
@@ -1824,8 +1856,8 @@ function moveCharacter(direction) {
     }
 
     if (direction == 'south') {
-        if (canGoRight && mapLocationY == 10 && mapLocationX == 0) {
-            mapLocationY = 3;
+        if (mapLocationY == 10 && mapLocationX == 0) {
+            mapLocationY = 2;
             mapLocationX = 3;
         }
         else if (canGoDown && !lostInDesertSouth && !nextStepOasis && playerEnergy > 0) {
@@ -1848,9 +1880,9 @@ function moveCharacter(direction) {
 
         goingLeft = false;
 
-        if (canGoRight && mapLocationY == 10 && mapLocationX == 0) {
+        if (mapLocationY == 10 && mapLocationX == 0) {
             mapLocationY = 2;
-            mapLocationX = 2;
+            mapLocationX = 3;
         }
         else if (canGoRight && !lostInDesertEast && !nextStepOasis && playerEnergy > 0) {
             mapLocationX++;
@@ -1872,9 +1904,9 @@ function moveCharacter(direction) {
 
         goingLeft = true;
 
-        if (canGoRight && mapLocationY == 10 && mapLocationX == 0) {
+        if (mapLocationY == 10 && mapLocationX == 0) {
             mapLocationY = 2;
-            mapLocationX = 4;
+            mapLocationX = 3;
         }
         else if (canGoLeft && !lostInDesertWest && !nextStepOasis && playerEnergy > 0) {
             mapLocationX--;
